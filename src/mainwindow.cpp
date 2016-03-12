@@ -232,3 +232,8 @@ void MainWindow::on_Gbackcolor_sliderMoved(int position) {
     ui->widget->_BackgroundColorB = (float) position / 99;
     ui->widget->updateGL();
 }
+
+void MainWindow::on_EnableLighting_clicked() {
+    ui->widget->_enableLighting = !ui->widget->_enableLighting;
+    ui->widget->updateGL();
+}

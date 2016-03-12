@@ -78,6 +78,8 @@ private slots:
 
     void on_Gbackcolor_sliderMoved(int position);
 
+    void on_EnableLighting_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

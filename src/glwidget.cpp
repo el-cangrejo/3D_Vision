@@ -19,6 +19,9 @@ void GLWidget::initializeGL() {
 }
 
 void GLWidget::paintGL() {
+    if (_enableLighting) glEnable(GL_LIGHTING);
+    else glDisable(GL_LIGHTING);
+
     glClearColor(_BackgroundColorR, _BackgroundColorG, _BackgroundColorB, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);

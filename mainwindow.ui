@@ -34,15 +34,15 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>172</width>
-         <height>315</height>
+         <width>160</width>
+         <height>320</height>
         </rect>
        </property>
        <attribute name="label">
@@ -79,6 +79,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="EnableLighting">
+            <property name="text">
+             <string>Lighting</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -103,7 +110,7 @@
           <item>
            <widget class="QCheckBox" name="EnableNormalsLighting">
             <property name="text">
-             <string>Enable Lighting</string>
+             <string>Normals Lighting</string>
             </property>
            </widget>
           </item>
