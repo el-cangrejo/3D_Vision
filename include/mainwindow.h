@@ -34,8 +34,6 @@ private slots:
 
     void on_Bbackcolor_sliderMoved(int position);
 
-    void on_horizontalSlider_2_sliderMoved(int position);
-
     void on_GridFilter_clicked();
 
     void on_StatOutFIlter_clicked();
@@ -77,6 +75,8 @@ private slots:
     void on_ShowAxis_clicked();
 
     void on_EnableNormalsLighting_clicked();
+
+    void on_Gbackcolor_sliderMoved(int position);
 
 private:
     Ui::MainWindow *ui;

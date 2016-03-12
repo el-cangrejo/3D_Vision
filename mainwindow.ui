@@ -34,7 +34,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
@@ -186,7 +186,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSlider" name="horizontalSlider_2">
+             <widget class="QSlider" name="Gbackcolor">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -243,14 +243,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QSlider" name="ModelColorBSlider">
+             <widget class="QSlider" name="ModelColorGSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSlider" name="ModelColorGSlider">
+             <widget class="QSlider" name="ModelColorBSlider">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
