@@ -113,10 +113,6 @@ void GLWidget::mousePressEvent(QMouseEvent *qevent) {
         mouseClickDown = true;
         mx0 = qevent->x();
         my0 = qevent->y();
-        ray_nds(0) = 2 * qevent->x() / _width - 1;
-        ray_nds(1) = 1 - 2 * qevent->y() / _height;
-        ray_nds(2) = 1;
-        updateGL();
     } else {
         mouseClickDown = false;
     }
