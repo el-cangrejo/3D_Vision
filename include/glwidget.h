@@ -41,6 +41,7 @@ public:
     bool _showSolid = true;
     bool _showTargetMesh = false;
     bool _showAxis = true;
+    bool _normalLighting = false;
 
     float _BackgroundColorR = 0.8;
     float _BackgroundColorG = 0.8;

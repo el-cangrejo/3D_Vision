@@ -216,3 +216,9 @@ void MainWindow::on_ShowAxis_clicked() {
     ui->widget->_showAxis = !ui->widget->_showAxis;
     ui->widget->updateGL();
 }
+
+void MainWindow::on_EnableNormalsLighting_clicked()
+{
+    ui->widget->_normalLighting = !ui->widget->_normalLighting;
+    ui->widget->updateGL();
+}

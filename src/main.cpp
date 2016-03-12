@@ -1,5 +1,5 @@
 #include "glwidget.h"
-#include <GL/glut.h>
+#include "GL/glut.h"
 #include "mainwindow.h"
 #include <QApplication>
 

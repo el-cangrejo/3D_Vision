@@ -34,7 +34,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
@@ -97,6 +97,13 @@
            <widget class="QSlider" name="NormalsLengthSlider">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="EnableNormalsLighting">
+            <property name="text">
+             <string>Enable Lighting</string>
             </property>
            </widget>
           </item>

@@ -76,6 +76,8 @@ private slots:
 
     void on_ShowAxis_clicked();
 
+    void on_EnableNormalsLighting_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
