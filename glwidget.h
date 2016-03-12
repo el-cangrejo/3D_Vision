@@ -31,9 +31,6 @@ public:
     void draw_grid(Mesh&);
     void draw_axis();
 
-    // Shit
-    bool inter_sphre();
-
     // Rendering options
     bool _showGrid = false;
     bool _showVerts = false;

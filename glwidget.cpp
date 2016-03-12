@@ -2,11 +2,6 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
-Eigen::Vector3f ray_nds(0, 0, 0);
-Eigen::Vector4f ray_clip;
-Eigen::Vector4f ray_eye;
-Eigen::Vector4f ray_wor;
-
 GLWidget::GLWidget(QWidget *parent) :
     QGLWidget(parent)
 {
