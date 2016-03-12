@@ -12,6 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
+    ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
+    ui->ShowAxis->setChecked(ui->widget->_showAxis);
+    ui->ModelColorBSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorB * 99.));
+    ui->ModelColorRSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorR * 99.));
+    ui->ModelColorGSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorG * 99.));
+    ui->Rbackcolor->setSliderPosition(ui->widget->_BackgroundColorR * 99.);
+    ui->Bbackcolor->setSliderPosition(ui->widget->_BackgroundColorB * 99.);
+    ui->Gbackcolor->setSliderPosition(ui->widget->_BackgroundColorG * 99.);
+    ui->RotFactorSlider->setSliderPosition(ui->widget->_rotFactor * 999.);
+    ui->ZoomFactSlider->setSliderPosition(ui->widget->_zoomStep * 99.);
 }
 
 MainWindow::~MainWindow()
@@ -74,11 +85,6 @@ void MainWindow::on_Rbackcolor_sliderMoved(int position) {
 
 void MainWindow::on_Bbackcolor_sliderMoved(int position) {
     ui->widget->_BackgroundColorG = (float) position / 99;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_horizontalSlider_2_sliderMoved(int position) {
-    ui->widget->_BackgroundColorB = (float) position / 99;
     ui->widget->updateGL();
 }
 
@@ -170,7 +176,6 @@ void MainWindow::on_action_Preprocess_Database_triggered() {
     }
 }
 
-
 void MainWindow::on_action_Load_Database_triggered() {
     QString directory_name = QFileDialog::getExistingDirectory(this);
     if (!directory_name.isEmpty()) {
@@ -220,5 +225,10 @@ void MainWindow::on_ShowAxis_clicked() {
 void MainWindow::on_EnableNormalsLighting_clicked()
 {
     ui->widget->_normalLighting = !ui->widget->_normalLighting;
+    ui->widget->updateGL();
+}
+
+void MainWindow::on_Gbackcolor_sliderMoved(int position) {
+    ui->widget->_BackgroundColorB = (float) position / 99;
     ui->widget->updateGL();
 }
