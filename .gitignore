@@ -34,3 +34,6 @@ install_manifest.txt
 *.exe
 *.out
 *.app
+
+# MyFiles
+*.dtr
