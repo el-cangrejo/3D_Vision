@@ -135,10 +135,19 @@ void GLWidget::mouseMoveEvent(QMouseEvent *qevent) {
 
       if ((altitudeAngle > 2 * PI) || (altitudeAngle < -2 * PI)) altitudeAngle = 0.0;
 
-      if (altitudeAngle > PI) up_vector.y = -1;
-      if (altitudeAngle < PI) up_vector.y = 1;
-      if (altitudeAngle < 0) up_vector.y = -1;
-      if (altitudeAngle < -PI) up_vector.y = 1;
+      if (altitudeAngle < -PI) {
+          up_vector.y = 1;
+      } else if (altitudeAngle < 0) {
+          up_vector.y = -1;
+      } else if (altitudeAngle < PI) {
+          up_vector.y = 1;
+      } else if (altitudeAngle > PI){
+          up_vector.y = -1;
+      }
+//      if (altitudeAngle > PI) up_vector.y = -1;
+//      if (altitudeAngle < PI) up_vector.y = 1;
+//      if (altitudeAngle < 0) up_vector.y = -1;
+//      if (altitudeAngle < -PI) up_vector.y = 1;
 
       // Keep mouse x,y for next call
       mx0 = qevent->x();
