@@ -15,8 +15,8 @@ CONFIG += c++11
 
 INCLUDEPATH += "/usr/include/pcl-1.7"\
                "/usr/include/eigen3"\
-               "/usr/include/boost"
-
+               "/usr/include/boost"\
+               "include"
 
 SOURCES += src/main.cpp\
            src/mainwindow.cpp \

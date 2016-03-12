@@ -1,6 +1,7 @@
 #include "glwidget.h"
-#include "GL/glut.h"
 #include "mainwindow.h"
+
+#include <GL/glut.h>
 #include <QApplication>
 
 int main(int argc, char *argv[]) {
