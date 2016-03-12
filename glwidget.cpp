@@ -33,47 +33,6 @@ void GLWidget::paintGL() {
               up_vector.y,
               up_vector.z);
 
-    //    {
-    //        ray_clip(0) = ray_nds(0);
-    //        ray_clip(1) = ray_nds(1);
-    //        ray_clip(2) = -1.0;
-    //        ray_clip(2) = 1.0;
-
-    //        Eigen::Matrix4f projection_matrix;
-    //        GLfloat proj_m[16];
-    //        glGetFloatv(GL_PROJECTION_MATRIX, proj_m);
-    //        for (int i = 0; i < 4; ++i) {
-    //            for (int j = 0; j < 4; ++j) {
-    //                //std::cout << "Proj mat : " << i << " " << j << "\n";
-    //                projection_matrix(i, j) = proj_m[i * 4 + j];
-    //            }
-    //        }
-    //        ray_eye = projection_matrix.inverse() * ray_clip;
-    //        ray_eye(0) = ray_eye(0);
-    //        ray_eye(1) = ray_eye(1);
-    //        ray_eye(2) = -1.0;
-    //        ray_eye(3) = 0.0;
-    //        //std::cout << "Ray eye \n";
-    //        Eigen::Matrix4f modelview_matrix;
-    //        GLfloat mod_m[16];
-    //        glGetFloatv(GL_MODELVIEW_MATRIX, mod_m);
-    //        for (int i = 0; i < 4; ++i) {
-    //            for (int j = 0; j < 4; ++j) {
-    //                modelview_matrix(i, j) = mod_m[i * 4 +j];
-    //            }
-    //        }
-    //        ray_wor = modelview_matrix.inverse() * ray_eye;
-    //        //sphere.x = ray_clip(0);
-    //        //sphere.y = ray_clip(1);
-    //        //sphere.z = ray_wor(2);
-    //        //std::cout << "Ray_wor : " << ray_wor << "\n";
-    //        if (inter_sphre()) {
-    //            sphere_color = 1.0;
-    //        } else {
-    //            sphere_color = 0.0;
-    //        }
-    //    }
-
     float scale_size(1 / 1.5);
 
     {
@@ -458,23 +417,4 @@ void GLWidget::draw_axis() {
         glTranslatef(0.0, 0.0, 0.5);
         glutSolidCone(0.05, 0.1, 10, 10);
     glPopMatrix();
-}
-
-bool GLWidget::inter_sphre() {
-    float a = pow(eyex - ray_wor(0), 2.0) +
-              pow(eyey - ray_wor(1), 2.0) +
-              pow(eyez - ray_wor(2), 2.0);
-    float b = 2 * ((ray_wor(0) - eyex) * (eyex - sphere.x) +
-                   (ray_wor(1) - eyey) * (eyey - sphere.y) +
-                   (ray_wor(2) - eyez) * (eyez - sphere.z));
-    float c = pow((eyex - sphere.x), 2.0) +
-              pow((eyey - sphere.y), 2.0) +
-              pow((eyez - sphere.z), 2.0) -
-              pow(sphere_r, 2.0);
-
-    float delta = pow(b, 2.0) - 4 * a * c;
-
-    if (delta <= 0) return false;
-
-    return true;
 }
