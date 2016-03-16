@@ -422,3 +422,67 @@ void GLWidget::draw_axis() {
         glutSolidCone(0.05, 0.1, 10, 10);
     glPopMatrix();
 }
+
+/*
+ * Color Setting Functions
+ * */
+
+void GLWidget::setModelColorR (float color) {
+    _ModelColorR = color;
+    updateGL();
+}
+
+void GLWidget::setModelColorB (float color) {
+    _ModelColorB = color;
+    updateGL();
+}
+
+void GLWidget::setModelColorG (float color) {
+    _ModelColorG = color;
+    updateGL();
+}
+
+void GLWidget::setBackgroundColorR (float color) {
+    _BackgroundColorR = color;
+    updateGL();
+}
+
+void GLWidget::setBackgroundColorG (float color) {
+    _BackgroundColorG = color;
+    updateGL();
+}
+
+void GLWidget::setBackgroundColorB (float color) {
+    _BackgroundColorB = color;
+    updateGL();
+}
+
+/*
+ * Rendering Options Setting Functions
+ * */
+
+void GLWidget::setShowVertices (bool show) {
+    _showVerts = show;
+    updateGL();
+}
+
+void GLWidget::setShowTriangles (bool show) {
+    _showTriangles = show;
+    updateGL();
+}
+
+void GLWidget::setShowWire (bool show) {
+    _showWire = show;
+    updateGL();
+}
+
+void GLWidget::setShowSolid (bool show) {
+    _showSolid = show;
+    updateGL();
+}
+
+void GLWidget::setShowAxis (bool show) {
+    _showAxis = show;
+    updateGL();
+}
+

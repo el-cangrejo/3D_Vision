@@ -14,15 +14,28 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
     ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
-    ui->ShowAxis->setChecked(ui->widget->_showAxis);
+    ui->ShowAxisCheckBox->setChecked(ui->widget->_showAxis);
     ui->ModelColorBSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorB * 99.));
     ui->ModelColorRSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorR * 99.));
     ui->ModelColorGSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorG * 99.));
-    ui->Rbackcolor->setSliderPosition(ui->widget->_BackgroundColorR * 99.);
-    ui->Bbackcolor->setSliderPosition(ui->widget->_BackgroundColorB * 99.);
-    ui->Gbackcolor->setSliderPosition(ui->widget->_BackgroundColorG * 99.);
+    ui->BackgroundColorRSlider->setSliderPosition(ui->widget->_BackgroundColorR * 99.);
+    ui->BackgroundColorGSlider->setSliderPosition(ui->widget->_BackgroundColorB * 99.);
+    ui->BackgroundColorBSlider->setSliderPosition(ui->widget->_BackgroundColorG * 99.);
     ui->RotFactorSlider->setSliderPosition(ui->widget->_rotFactor * 999.);
     ui->ZoomFactSlider->setSliderPosition(ui->widget->_zoomStep * 99.);
+
+    connect(ui->ModelColorRSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorR (int)));
+    connect(ui->ModelColorGSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorG (int)));
+    connect(ui->ModelColorBSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorB (int)));
+
+    connect(ui->BackgroundColorRSlider, SIGNAL(valueChanged (int)), this, SLOT(setBackgroundColorR (int)));
+    connect(ui->BackgroundColorGSlider, SIGNAL(valueChanged (int)), this, SLOT(setBackgroundColorG (int)));
+    connect(ui->BackgroundColorBSlider, SIGNAL(valueChanged (int)), this, SLOT(setBackgroundColorB (int)));
+
+    connect(ui->ShowVerticesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowVertices (bool)));
+    connect(ui->ShowTrianglesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTriangles (bool)));
+    connect(ui->ShowWireCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowWire (bool)));
+    connect(ui->ShowAxisCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowAxis (bool)));
 }
 
 MainWindow::~MainWindow()
@@ -30,30 +43,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::on_actionShow_Vertices_triggered() {
-    ui->widget->_showVerts = !ui->widget->_showVerts;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_action_Show_Triangles_triggered() {
-    ui->widget->_showTriangles = !ui->widget->_showTriangles;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_actionShow_Normals_triggered() {
-    ui->widget->_showNormals = !ui->widget->_showNormals;
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_action_Quit_triggered() {
     std::cout << "User evoked exiting..\nGoodbye!\n";
     exit(0);
-}
-
-void MainWindow::on_action_Show_Grid_triggered() {
-    ui->widget->_showGrid = !ui->widget->_showGrid;
-    ui->widget->updateGL();
 }
 
 void MainWindow::on_action_Open_triggered() {
@@ -70,21 +62,6 @@ void MainWindow::on_action_Open_triggered() {
         ui->widget->primary_mesh.fittoUnitSphere();
         ui->widget->primary_mesh.computeNormals();
     }
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_actionShow_Filtered_Mesh_triggered() {
-    ui->widget->_showFilteredMesh = !ui->widget->_showFilteredMesh;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_Rbackcolor_sliderMoved(int position) {
-    ui->widget->_BackgroundColorR = (float) position / 99;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_Bbackcolor_sliderMoved(int position) {
-    ui->widget->_BackgroundColorG = (float) position / 99;
     ui->widget->updateGL();
 }
 
@@ -114,21 +91,6 @@ void MainWindow::on_ShowGridFilter_clicked() {
     ui->widget->updateGL();
 }
 
-void MainWindow::on_ShowWireCheckBox_clicked() {
-    ui->widget->_showWire =! ui->widget->_showWire;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_ShowVerticesCheckBox_clicked() {
-    ui->widget->_showVerts = !ui->widget->_showVerts;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_ShowTrianglesCheckBox_clicked() {
-    ui->widget->_showTriangles = !ui->widget->_showTriangles;
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_ShowNormalsCheckBox_clicked() {
     ui->widget->_showNormals = !ui->widget->_showNormals;
     ui->widget->updateGL();
@@ -145,21 +107,6 @@ void MainWindow::on_ZoomFactSlider_sliderMoved(int position) {
 
 void MainWindow::on_RotFactorSlider_sliderMoved(int position) {
     ui->widget->_rotFactor = position / 999.;
-}
-
-void MainWindow::on_ModelColorRSlider_sliderMoved(int position) {
-    ui->widget->_ModelColorR = position / 99.;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_ModelColorGSlider_sliderMoved(int position) {
-    ui->widget->_ModelColorG = position / 99.;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_ModelColorBSlider_sliderMoved(int position) {
-    ui->widget->_ModelColorB = position / 99.;
-    ui->widget->updateGL();
 }
 
 void MainWindow::on_ShowSolidCheckBox_clicked() {
@@ -217,23 +164,71 @@ void MainWindow::on_SearchinDBButton_clicked() {
     ui->widget->updateGL();
 }
 
-void MainWindow::on_ShowAxis_clicked() {
-    ui->widget->_showAxis = !ui->widget->_showAxis;
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_EnableNormalsLighting_clicked()
 {
     ui->widget->_normalLighting = !ui->widget->_normalLighting;
     ui->widget->updateGL();
 }
 
-void MainWindow::on_Gbackcolor_sliderMoved(int position) {
-    ui->widget->_BackgroundColorB = (float) position / 99;
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_EnableLighting_clicked() {
     ui->widget->_enableLighting = !ui->widget->_enableLighting;
     ui->widget->updateGL();
+}
+
+/*
+ * Color Setting Functions
+ * */
+
+void MainWindow::setModelColorR (int color) {
+    float RColor = color / 99.;
+    ui->widget->setModelColorR(RColor);
+}
+
+void MainWindow::setModelColorG (int color) {
+    float GColor = color / 99.;
+    ui->widget->setModelColorG(GColor);
+}
+
+void MainWindow::setModelColorB (int color) {
+    float BColor = color / 99.;
+    ui->widget->setModelColorB(BColor);
+}
+
+void MainWindow::setBackgroundColorR (int color) {
+    float RColor = color / 99.;
+    ui->widget->setBackgroundColorR(RColor);
+}
+
+void MainWindow::setBackgroundColorB (int color) {
+    float BColor = color / 99.;
+    ui->widget->setBackgroundColorB(BColor);
+}
+
+void MainWindow::setBackgroundColorG (int color) {
+    float GColor = color / 99.;
+    ui->widget->setBackgroundColorG(GColor);
+}
+
+/*
+ * Rendering Options Setting Functions
+ * */
+
+void MainWindow::setShowVertices (bool show) {
+    ui->widget->setShowVertices (show);
+}
+
+void MainWindow::setShowTriangles (bool show) {
+    ui->widget->setShowTriangles (show);
+}
+
+void MainWindow::setShowWire (bool show) {
+    ui->widget->setShowWire (show);
+}
+
+void MainWindow::setShowSolid (bool show) {
+    ui->widget->setShowSolid (show);
+}
+
+void MainWindow::setShowAxis (bool show) {
+    ui->widget->setShowAxis (show);
 }

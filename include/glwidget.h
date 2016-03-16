@@ -31,6 +31,22 @@ public:
     void draw_grid(Mesh&);
     void draw_axis();
 
+    // Color setting functions
+    void setModelColorR (float);
+    void setModelColorB (float);
+    void setModelColorG (float);
+
+    void setBackgroundColorR (float);
+    void setBackgroundColorB (float);
+    void setBackgroundColorG (float);
+
+    // Rendering options setting functions
+    void setShowVertices (bool);
+    void setShowTriangles (bool);
+    void setShowWire (bool);
+    void setShowSolid (bool);
+    void setShowAxis (bool);
+
     // Rendering options
     bool _showGrid = false;
     bool _showVerts = false;

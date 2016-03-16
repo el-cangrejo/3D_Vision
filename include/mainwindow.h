@@ -16,23 +16,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_actionShow_Vertices_triggered();
-
     void on_action_Quit_triggered();
 
-    void on_action_Show_Triangles_triggered();
-
     void on_action_Open_triggered();
-
-    void on_actionShow_Normals_triggered();
-
-    void on_action_Show_Grid_triggered();
-
-    void on_actionShow_Filtered_Mesh_triggered();
-
-    void on_Rbackcolor_sliderMoved(int position);
-
-    void on_Bbackcolor_sliderMoved(int position);
 
     void on_GridFilter_clicked();
 
@@ -44,12 +30,6 @@ private slots:
 
     void on_ShowGridFilter_clicked();
 
-    void on_ShowWireCheckBox_clicked();
-
-    void on_ShowVerticesCheckBox_clicked();
-
-    void on_ShowTrianglesCheckBox_clicked();
-
     void on_ShowNormalsCheckBox_clicked();
 
     void on_NormalsLengthSlider_valueChanged(int value);
@@ -57,12 +37,6 @@ private slots:
     void on_ZoomFactSlider_sliderMoved(int position);
 
     void on_RotFactorSlider_sliderMoved(int position);
-
-    void on_ModelColorRSlider_sliderMoved(int position);
-
-    void on_ModelColorGSlider_sliderMoved(int position);
-
-    void on_ModelColorBSlider_sliderMoved(int position);
 
     void on_ShowSolidCheckBox_clicked();
 
@@ -72,13 +46,31 @@ private slots:
 
     void on_SearchinDBButton_clicked();
 
-    void on_ShowAxis_clicked();
-
     void on_EnableNormalsLighting_clicked();
 
-    void on_Gbackcolor_sliderMoved(int position);
-
     void on_EnableLighting_clicked();
+
+    /*
+     * Color setting functions
+     * */
+
+    void setModelColorR (int);
+    void setModelColorG (int);
+    void setModelColorB (int);
+
+    void setBackgroundColorR (int);
+    void setBackgroundColorB (int);
+    void setBackgroundColorG (int);
+
+    /*
+     * Rendering Options Setting Functions
+     * */
+
+    void setShowVertices (bool);
+    void setShowTriangles (bool);
+    void setShowWire (bool);
+    void setShowSolid (bool);
+    void setShowAxis (bool);
 
 private:
     Ui::MainWindow *ui;

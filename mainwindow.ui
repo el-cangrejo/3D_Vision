@@ -34,7 +34,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
@@ -133,7 +133,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="ShowAxis">
+           <widget class="QCheckBox" name="ShowAxisCheckBox">
             <property name="text">
              <string>Axis</string>
             </property>
@@ -180,7 +180,7 @@
              <enum>QLayout::SetFixedSize</enum>
             </property>
             <item>
-             <widget class="QSlider" name="Rbackcolor">
+             <widget class="QSlider" name="BackgroundColorRSlider">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -193,7 +193,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSlider" name="Gbackcolor">
+             <widget class="QSlider" name="BackgroundColorGSlider">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -206,7 +206,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSlider" name="Bbackcolor">
+             <widget class="QSlider" name="BackgroundColorBSlider">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -549,16 +549,6 @@
     <addaction name="action_Open"/>
     <addaction name="action_Quit"/>
    </widget>
-   <widget class="QMenu" name="menu_Edit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-    <addaction name="actionShow_Vertices"/>
-    <addaction name="action_Show_Triangles"/>
-    <addaction name="action_Show_Grid"/>
-    <addaction name="actionShow_Normals"/>
-    <addaction name="actionShow_Filtered_Mesh"/>
-   </widget>
    <widget class="QMenu" name="menu_Database">
     <property name="title">
      <string>&amp;Database</string>
@@ -567,7 +557,6 @@
     <addaction name="action_Preprocess_Database"/>
    </widget>
    <addaction name="menu_File"/>
-   <addaction name="menu_Edit"/>
    <addaction name="menu_Database"/>
   </widget>
   <action name="actionShow_Vertices">
