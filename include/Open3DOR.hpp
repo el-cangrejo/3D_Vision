@@ -78,19 +78,20 @@ class Mesh {
 public:
     Mesh(void);
 
-    void computeDualVertices(void);
-    void computeDualEdges(void);
-    void computeAdjacency(void);
-    void computeDualAdjacency(void);
-    void findNeighbors(void);
-    std::vector<int> findNearestNeighbors(int, float);
-    void computeNormals(void);
-    void computeFPFH(void);
-    void fittoUnitSphere(void);
-    void movetoCenter(void);
-    bool empty(void);
-    Mesh gridFilter(void);
-    Mesh statoutFilter(void);
+    void computeDualVertices (void);
+    void computeDualEdges (void);
+    void computeAdjacency (void);
+    void computeDualAdjacency (void);
+    void findNeighbors (void);
+    std::vector<int> findNearestNeighbors (int, float);
+    void computeNormals (void);
+    void computeFPFH (void);
+    void fittoUnitSphere (void);
+    void movetoCenter (void);
+    bool empty (void);
+    void clear (void);
+    Mesh gridFilter (void);
+    Mesh statoutFilter (void);
 
     ~Mesh();
 

@@ -35,7 +35,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->ShowVerticesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowVertices (bool)));
     connect(ui->ShowTrianglesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTriangles (bool)));
     connect(ui->ShowWireCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowWire (bool)));
+    connect(ui->ShowNormalsCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowNormals (bool)));
+    connect(ui->ShowGridFilter, SIGNAL(clicked (bool)), this, SLOT(setShowGrid (bool)));
     connect(ui->ShowAxisCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowAxis (bool)));
+    connect(ui->ShowTargetMeshCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTargetMesh (bool)));
 }
 
 MainWindow::~MainWindow()
@@ -52,9 +55,9 @@ void MainWindow::on_action_Open_triggered() {
     QString file_name = QFileDialog::getOpenFileName(this);
     if (!file_name.isEmpty()) {
         if (!ui->widget->primary_mesh.vertices.empty()) {
-            Mesh new_mesh;
-            read_mesh(file_name.toStdString(), new_mesh);
-            ui->widget->primary_mesh = new_mesh;
+            ui->widget->filtered_mesh.clear();
+            ui->widget->primary_mesh.clear();
+            read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
         } else {
             read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
         }
@@ -86,16 +89,6 @@ void MainWindow::on_ShowFilteredMesh_clicked() {
     ui->widget->updateGL();
 }
 
-void MainWindow::on_ShowGridFilter_clicked() {
-    ui->widget->_showGrid =! ui->widget->_showGrid;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_ShowNormalsCheckBox_clicked() {
-    ui->widget->_showNormals = !ui->widget->_showNormals;
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_NormalsLengthSlider_valueChanged(int value) {
     ui->widget->_NormalsLength = value / 999.;
     ui->widget->updateGL();
@@ -107,11 +100,6 @@ void MainWindow::on_ZoomFactSlider_sliderMoved(int position) {
 
 void MainWindow::on_RotFactorSlider_sliderMoved(int position) {
     ui->widget->_rotFactor = position / 999.;
-}
-
-void MainWindow::on_ShowSolidCheckBox_clicked() {
-    ui->widget->_showSolid = !ui->widget->_showSolid;
-    ui->widget->updateGL();
 }
 
 void MainWindow::on_action_Preprocess_Database_triggered() {
@@ -139,16 +127,26 @@ void MainWindow::on_SearchinDBButton_clicked() {
         return;
     }
 
+    Mesh *query;
+
+    if (!ui->widget->filtered_mesh.empty()) {
+        ui->widget->filtered_mesh.computeFPFH();
+        std::cout << "Query mesh fpfh size : " << ui->widget->filtered_mesh.fpfhist.size() << "\n";
+        query = &ui->widget->filtered_mesh;
+    } else if (!ui->widget->primary_mesh.empty()){
+        ui->widget->primary_mesh.computeFPFH();
+        std::cout << "Query mesh fpfh size : " << ui->widget->primary_mesh.fpfhist.size() << "\n";
+        query = &ui->widget->primary_mesh;
+    } else {
+        std::cout << "No mesh to use as query!\n";
+        return;
+    }
+
     float dist(10000000.0);
     int idx(0);
 
-    std::cout << "Query mesh fpfh size : " << ui->widget->filtered_mesh.fpfhist.size() << "\n";
-    std::cout << "Descriptors size : " << ui->widget->db_descriptors.size() << "\n";
-
-    ui->widget->filtered_mesh.computeFPFH();
-
     for (size_t i = 0; i < ui->widget->db_descriptors.size(); ++i) {
-        float new_dist = local_distance(ui->widget->filtered_mesh, ui->widget->db_descriptors[i]);
+        float new_dist = local_distance(*query, ui->widget->db_descriptors[i]);
         if (new_dist < dist) {
             dist = new_dist;
             idx = i;
@@ -156,11 +154,12 @@ void MainWindow::on_SearchinDBButton_clicked() {
     }
     std::cout << "Target mesh : " << idx << "\n";
 
-    read_mesh(ui->widget->db_files[idx - 1], ui->widget->target_mesh);
+    read_mesh(ui->widget->db_files[idx], ui->widget->target_mesh);
+
     ui->widget->target_mesh.movetoCenter();
     ui->widget->target_mesh.fittoUnitSphere();
-    ui->widget->_showTargetMesh = true;
-    ui->widget->_showFilteredMesh = false;
+    ui->widget->target_mesh.computeNormals();
+
     ui->widget->updateGL();
 }
 
@@ -225,6 +224,14 @@ void MainWindow::setShowWire (bool show) {
     ui->widget->setShowWire (show);
 }
 
+void MainWindow::setShowNormals (bool show) {
+    ui->widget->setShowNormals (show);
+}
+
+void MainWindow::setShowGrid (bool show) {
+    ui->widget->setShowGrid(show);
+}
+
 void MainWindow::setShowSolid (bool show) {
     ui->widget->setShowSolid (show);
 }
@@ -232,3 +239,9 @@ void MainWindow::setShowSolid (bool show) {
 void MainWindow::setShowAxis (bool show) {
     ui->widget->setShowAxis (show);
 }
+
+void MainWindow::setShowTargetMesh (bool show) {
+    ui->widget->setShowTargetMesh (show);
+}
+
+

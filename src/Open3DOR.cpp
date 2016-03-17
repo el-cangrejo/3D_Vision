@@ -309,6 +309,18 @@ void Mesh::movetoCenter(void) {
 bool Mesh::empty(void) {
     return vertices.empty();
 }
+void Mesh::clear (void) {
+    vertices.clear();
+    vertices.shrink_to_fit();
+    triangles.clear();
+    triangles.shrink_to_fit();
+    normals.clear();
+    normals.shrink_to_fit();
+    fpfhist.clear();
+    fpfhist.shrink_to_fit();
+    voxel_grid.clear();
+    voxel_grid.shrink_to_fit();
+}
 Mesh Mesh::gridFilter(void) {
   std::cout << "Start grid filtering.." << std::endl;
 
@@ -463,6 +475,13 @@ void read_mesh(const std::string filepath, Mesh& mesh) {
   float maxdist(0.0);
 
   std::vector<Vertex> std_normals;
+
+  mesh.vertices.clear();
+  mesh.vertices.shrink_to_fit();
+  mesh.triangles.clear();
+  mesh.triangles.shrink_to_fit();
+  mesh.normals.clear();
+  mesh.normals.shrink_to_fit();
 
   // Reads .obj File
   objfile.open(filepath);
@@ -621,8 +640,8 @@ float local_distance(const Mesh &query_mesh, const Mesh &target_mesh){
 
   end = clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  std::cout << "Calculating local distance end : elapsed time: "
-            << elapsed_secs << "\n";
+  std::cout << "Calculating local distance end : " << dmw2
+            << "\nelapsed time: " << elapsed_secs << "\n";
 
   return dmw2;
 }

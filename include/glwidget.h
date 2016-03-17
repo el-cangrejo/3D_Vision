@@ -44,8 +44,13 @@ public:
     void setShowVertices (bool);
     void setShowTriangles (bool);
     void setShowWire (bool);
+    void setShowNormals (bool);
+    void setShowGrid (bool);
     void setShowSolid (bool);
     void setShowAxis (bool);
+    void setShowTargetMesh (bool);
+
+    void eraseDatabase ();
 
     // Rendering options
     bool _showGrid = false;
@@ -76,9 +81,11 @@ public:
     float _height;
 
     Vertex up_vector;
+
     Vertex sphere;
     float sphere_r = 0.05;
     float sphere_color = 0.0;
+
     Mesh primary_mesh;
     Mesh filtered_mesh;
     Mesh target_mesh;

@@ -42,8 +42,7 @@ void GLWidget::paintGL() {
           glScalef(scale_size, scale_size, scale_size);
       }
       draw_mesh(primary_mesh);
-      if (_showGrid)
-          draw_grid(primary_mesh);
+      if (_showGrid) draw_grid(primary_mesh);
     glPopMatrix();
     }
     if (_showFilteredMesh && !filtered_mesh.empty()) {
@@ -62,8 +61,7 @@ void GLWidget::paintGL() {
     }
     if (_showAxis) {
         glPushMatrix();
-        //glTranslatef(-0.5, -0.5, -0.5);
-        glTranslatef(sphere.x, sphere.y, sphere.z);
+        glTranslatef(-0.9, -0.9, -0.9);
         glScalef(scale_size, scale_size, scale_size);
         draw_axis();
         glPopMatrix();
@@ -170,6 +168,10 @@ void GLWidget::wheelEvent(QWheelEvent *qevent) {
     }
     updateGL();
 }
+
+/*
+ * Drawing Functions
+ * */
 
 void GLWidget::draw_mesh(Mesh& mesh) {
     glPushMatrix();
@@ -423,6 +425,7 @@ void GLWidget::draw_axis() {
     glPopMatrix();
 }
 
+
 /*
  * Color Setting Functions
  * */
@@ -476,6 +479,16 @@ void GLWidget::setShowWire (bool show) {
     updateGL();
 }
 
+void GLWidget::setShowNormals (bool show) {
+    _showNormals = show;
+    updateGL();
+}
+
+void GLWidget::setShowGrid (bool show) {
+    _showGrid = show;
+    updateGL();
+}
+
 void GLWidget::setShowSolid (bool show) {
     _showSolid = show;
     updateGL();
@@ -486,3 +499,24 @@ void GLWidget::setShowAxis (bool show) {
     updateGL();
 }
 
+void GLWidget::setShowTargetMesh (bool show) {
+    _showTargetMesh = show;
+    updateGL();
+}
+
+/*
+ * Database Handling Functions
+ * */
+
+void GLWidget::eraseDatabase () {
+    std::cout << "Erasing contents of the database.. \n";
+    db_descriptors.clear();
+    db_descriptors.shrink_to_fit();
+
+    db_files.clear();
+    db_files.shrink_to_fit();
+
+    database.clear();
+    database.shrink_to_fit();
+    std::cout << "Database is now empty!\n";
+}

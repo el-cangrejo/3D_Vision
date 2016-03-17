@@ -28,17 +28,11 @@ private slots:
 
     void on_ShowFilteredMesh_clicked();
 
-    void on_ShowGridFilter_clicked();
-
-    void on_ShowNormalsCheckBox_clicked();
-
     void on_NormalsLengthSlider_valueChanged(int value);
 
     void on_ZoomFactSlider_sliderMoved(int position);
 
     void on_RotFactorSlider_sliderMoved(int position);
-
-    void on_ShowSolidCheckBox_clicked();
 
     void on_action_Preprocess_Database_triggered();
 
@@ -69,8 +63,11 @@ private slots:
     void setShowVertices (bool);
     void setShowTriangles (bool);
     void setShowWire (bool);
+    void setShowNormals (bool);
+    void setShowGrid (bool);
     void setShowSolid (bool);
     void setShowAxis (bool);
+    void setShowTargetMesh (bool);
 
 private:
     Ui::MainWindow *ui;

@@ -34,7 +34,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
@@ -522,6 +522,20 @@
            <widget class="QPushButton" name="SearchinDBButton">
             <property name="text">
              <string>Search in Database</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ShowTargetMeshCheckBox">
+            <property name="text">
+             <string>Show Target Mesh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="EraseDatabseButton">
+            <property name="text">
+             <string>Erase Database</string>
             </property>
            </widget>
           </item>
