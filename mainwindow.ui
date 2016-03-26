@@ -567,27 +567,13 @@
     <property name="title">
      <string>&amp;Database</string>
     </property>
+    <addaction name="separator"/>
     <addaction name="action_Load_Database"/>
     <addaction name="action_Preprocess_Database"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Database"/>
   </widget>
-  <action name="actionShow_Vertices">
-   <property name="text">
-    <string>Show &amp;Vertices</string>
-   </property>
-  </action>
-  <action name="action_Show_Triangles">
-   <property name="text">
-    <string>Show &amp;Triangles</string>
-   </property>
-  </action>
-  <action name="action_Show_Grid">
-   <property name="text">
-    <string>Show &amp;Grid</string>
-   </property>
-  </action>
   <action name="action_Quit">
    <property name="checkable">
     <bool>false</bool>
@@ -599,16 +585,6 @@
   <action name="action_Open">
    <property name="text">
     <string>&amp;Open</string>
-   </property>
-  </action>
-  <action name="actionShow_Normals">
-   <property name="text">
-    <string>Show &amp;Normals</string>
-   </property>
-  </action>
-  <action name="actionShow_Filtered_Mesh">
-   <property name="text">
-    <string>Show &amp;Filtered Mesh</string>
    </property>
   </action>
   <action name="action_Load_Database">

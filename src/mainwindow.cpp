@@ -21,7 +21,12 @@ MainWindow::~MainWindow () {
     delete ui;
 }
 
+/*
+ *  Initialize Functions
+ * */
+
 void MainWindow::inititializeUI () {
+    // CheckBox Initializers
     ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
     ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
     ui->ShowAxisCheckBox->setChecked(ui->widget->_showAxis);
@@ -29,6 +34,7 @@ void MainWindow::inititializeUI () {
     ui->ShowNormalsCheckBox->setChecked(ui->widget->_showNormals);
     ui->ShowWireCheckBox->setChecked(ui->widget->_showWire);
 
+    // Sliders Initializers
     ui->ModelColorBSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorB * 99.));
     ui->ModelColorRSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorR * 99.));
     ui->ModelColorGSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorG * 99.));
@@ -43,6 +49,13 @@ void MainWindow::inititializeUI () {
 }
 
 void MainWindow::connectUI () {
+    // Connect Actions
+    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(onActionOpen()));
+    connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(onActionQuit()));
+    connect(ui->action_Load_Database, SIGNAL(triggered()), this, SLOT(onActionLoadDatabase()));
+    connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this, SLOT(onActionPreprocessDatabase()));
+
+    // Connect Sliders
     connect(ui->ModelColorRSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorR (int)));
     connect(ui->ModelColorGSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorG (int)));
     connect(ui->ModelColorBSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorB (int)));
@@ -51,6 +64,7 @@ void MainWindow::connectUI () {
     connect(ui->BackgroundColorGSlider, SIGNAL(valueChanged (int)), this, SLOT(setBackgroundColorG (int)));
     connect(ui->BackgroundColorBSlider, SIGNAL(valueChanged (int)), this, SLOT(setBackgroundColorB (int)));
 
+    // Connect CheckBoxes
     connect(ui->ShowVerticesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowVertices (bool)));
     connect(ui->ShowTrianglesCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTriangles (bool)));
     connect(ui->ShowWireCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowWire (bool)));
@@ -58,30 +72,12 @@ void MainWindow::connectUI () {
     connect(ui->ShowGridFilter, SIGNAL(clicked (bool)), this, SLOT(setShowGrid (bool)));
     connect(ui->ShowAxisCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowAxis (bool)));
     connect(ui->ShowTargetMeshCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTargetMesh (bool)));
+    connect(ui->ShowFilteredMesh, SIGNAL(clicked (bool)), this, SLOT(setShowFilteredMesh (bool)));
     connect(ui->ModelLightingCheckBox, SIGNAL(clicked (bool)), this, SLOT(setModelLighting (bool)));
     connect(ui->NormalsLightingCheckBox, SIGNAL(clicked (bool)), this, SLOT(setNormalsLighting (bool)));
-}
 
-void MainWindow::on_action_Quit_triggered() {
-    std::cout << "User evoked exiting..\nGoodbye!\n";
-    exit(0);
-}
-
-void MainWindow::on_action_Open_triggered() {
-    QString file_name = QFileDialog::getOpenFileName(this);
-    if (!file_name.isEmpty()) {
-        if (!ui->widget->primary_mesh.vertices.empty()) {
-            ui->widget->filtered_mesh.clear();
-            ui->widget->primary_mesh.clear();
-            read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
-        } else {
-            read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
-        }
-        ui->widget->primary_mesh.movetoCenter();
-        ui->widget->primary_mesh.fittoUnitSphere();
-        ui->widget->primary_mesh.computeNormals();
-    }
-    ui->widget->updateGL();
+    // Connect Buttons
+    connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -106,25 +102,6 @@ void MainWindow::on_ZoomFactSlider_sliderMoved(int position) {
 
 void MainWindow::on_RotFactorSlider_sliderMoved(int position) {
     ui->widget->_rotFactor = position / 999.;
-}
-
-void MainWindow::on_action_Preprocess_Database_triggered() {
-    QString directory_name = QFileDialog::getExistingDirectory(this);
-    if (!directory_name.isEmpty()) {
-        std::cout << "Given database to preprocess "
-                  << " : " << directory_name.toStdString() << "\n";
-        preprocess_database(directory_name.toStdString());
-    }
-}
-
-void MainWindow::on_action_Load_Database_triggered() {
-    QString directory_name = QFileDialog::getExistingDirectory(this);
-    if (!directory_name.isEmpty()) {
-        std::cout << "Given database to preprocess "
-                  << " : " << directory_name.toStdString() << "\n";
-        load_database(directory_name.toStdString(), ui->widget->db_descriptors, ui->widget->db_files);
-        ui->widget->database = directory_name.toStdString();
-    }
 }
 
 void MainWindow::on_SearchinDBButton_clicked() {
@@ -167,6 +144,51 @@ void MainWindow::on_SearchinDBButton_clicked() {
     ui->widget->target_mesh.computeNormals();
 
     ui->widget->updateGL();
+}
+
+/*
+ * Menu Actions
+ * */
+
+void MainWindow::onActionQuit () {
+    std::cout << "User evoked exiting.. \nGoodbye!";
+    exit(0);
+}
+
+void MainWindow::onActionOpen () {
+    QString file_name = QFileDialog::getOpenFileName(this);
+    if (!file_name.isEmpty()) {
+        if (!ui->widget->primary_mesh.vertices.empty()) {
+            ui->widget->filtered_mesh.clear();
+            ui->widget->primary_mesh.clear();
+            read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
+        } else {
+            read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
+        }
+        ui->widget->primary_mesh.movetoCenter();
+        ui->widget->primary_mesh.fittoUnitSphere();
+        ui->widget->primary_mesh.computeNormals();
+    }
+    ui->widget->updateGL();
+}
+
+void MainWindow::onActionLoadDatabase () {
+    QString directory_name = QFileDialog::getExistingDirectory(this);
+    if (!directory_name.isEmpty()) {
+        std::cout << "Given database to preprocess "
+                  << " : " << directory_name.toStdString() << "\n";
+        load_database(directory_name.toStdString(), ui->widget->db_descriptors, ui->widget->db_files);
+        ui->widget->database = directory_name.toStdString();
+    }
+}
+
+void MainWindow::onActionPreprocessDatabase () {
+    QString directory_name = QFileDialog::getExistingDirectory(this);
+    if (!directory_name.isEmpty()) {
+        std::cout << "Given database to preprocess "
+                  << " : " << directory_name.toStdString() << "\n";
+        preprocess_database(directory_name.toStdString());
+    }
 }
 
 /*
@@ -239,10 +261,22 @@ void MainWindow::setShowTargetMesh (bool show) {
     ui->widget->setShowTargetMesh (show);
 }
 
+void MainWindow::setShowFilteredMesh (bool show) {
+    ui->widget->setShowFilteredMesh(show);
+}
+
 void MainWindow::setModelLighting (bool light) {
     ui->widget->setModelLighting (light);
 }
 
 void MainWindow::setNormalsLighting (bool light) {
     ui->widget->setNormalsLighting (light);
+}
+
+/*
+ * Button Functions
+ * */
+
+void MainWindow::gridFilter () {
+    ui->widget->filtered_mesh = ui->widget->primary_mesh.gridFilter();
 }

@@ -16,10 +16,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_action_Quit_triggered();
-
-    void on_action_Open_triggered();
-
     void on_StatOutFIlter_clicked();
 
     void on_GridSize_valueChanged(double arg1);
@@ -30,14 +26,19 @@ private slots:
 
     void on_RotFactorSlider_sliderMoved(int position);
 
-    void on_action_Preprocess_Database_triggered();
-
-    void on_action_Load_Database_triggered();
-
     void on_SearchinDBButton_clicked();
 
     /*
-     * Color setting functions
+     * Menu Actions
+     * */
+
+    void onActionQuit ();
+    void onActionOpen ();
+    void onActionLoadDatabase ();
+    void onActionPreprocessDatabase ();
+
+    /*
+     * Color Setting Functions
      * */
 
     void setModelColorR (int);
@@ -59,9 +60,12 @@ private slots:
     void setShowGrid (bool);
     void setShowSolid (bool);
     void setShowAxis (bool);
+    void setShowFilteredMesh (bool);
     void setShowTargetMesh (bool);
     void setModelLighting (bool);
     void setNormalsLighting (bool);
+
+    void gridFilter ();
 
 private:
     Ui::MainWindow *ui;

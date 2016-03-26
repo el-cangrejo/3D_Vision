@@ -492,6 +492,11 @@ void GLWidget::setShowAxis (bool show) {
     updateGL ();
 }
 
+void GLWidget::setShowFilteredMesh (bool show) {
+    _showFilteredMesh = show;
+    updateGL ();
+}
+
 void GLWidget::setShowTargetMesh (bool show) {
     _showTargetMesh = show;
     updateGL ();

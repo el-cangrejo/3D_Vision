@@ -46,6 +46,7 @@ public:
     void setShowGrid (bool);
     void setShowSolid (bool);
     void setShowAxis (bool);
+    void setShowFilteredMesh (bool);
     void setShowTargetMesh (bool);
     void setModelLighting (bool);
     void setNormalsLighting (bool);
