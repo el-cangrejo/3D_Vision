@@ -19,7 +19,7 @@ void GLWidget::initializeGL() {
 }
 
 void GLWidget::paintGL() {
-    if (_enableLighting) glEnable(GL_LIGHTING);
+    if (_modelLighting) glEnable(GL_LIGHTING);
     else glDisable(GL_LIGHTING);
 
     glClearColor(_BackgroundColorR, _BackgroundColorG, _BackgroundColorB, 0.0);
@@ -432,32 +432,32 @@ void GLWidget::draw_axis() {
 
 void GLWidget::setModelColorR (float color) {
     _ModelColorR = color;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setModelColorB (float color) {
     _ModelColorB = color;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setModelColorG (float color) {
     _ModelColorG = color;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setBackgroundColorR (float color) {
     _BackgroundColorR = color;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setBackgroundColorG (float color) {
     _BackgroundColorG = color;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setBackgroundColorB (float color) {
     _BackgroundColorB = color;
-    updateGL();
+    updateGL ();
 }
 
 /*
@@ -466,42 +466,52 @@ void GLWidget::setBackgroundColorB (float color) {
 
 void GLWidget::setShowVertices (bool show) {
     _showVerts = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowTriangles (bool show) {
     _showTriangles = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowWire (bool show) {
     _showWire = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowNormals (bool show) {
     _showNormals = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowGrid (bool show) {
     _showGrid = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowSolid (bool show) {
     _showSolid = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowAxis (bool show) {
     _showAxis = show;
-    updateGL();
+    updateGL ();
 }
 
 void GLWidget::setShowTargetMesh (bool show) {
     _showTargetMesh = show;
-    updateGL();
+    updateGL ();
+}
+
+void GLWidget::setModelLighting (bool light) {
+    _modelLighting = light;
+    updateGL ();
+}
+
+void GLWidget::setNormalsLighting (bool light) {
+    _normalLighting = light;
+    updateGL ();
 }
 
 /*

@@ -16,22 +16,22 @@ class GLWidget : public QGLWidget
 public:
     explicit GLWidget(QWidget *parent = 0);
 
-    // GL functions
+    // GL Functions
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
 
-    // Event handlers
+    // Event Handlers
     void mousePressEvent(QMouseEvent *qevent);
     void mouseMoveEvent(QMouseEvent *qevent);
     void wheelEvent(QWheelEvent *);
 
-    // Rendering functions
+    // Rendering Functions
     void draw_mesh(Mesh&);
     void draw_grid(Mesh&);
     void draw_axis();
 
-    // Color setting functions
+    // Color Setting Functions
     void setModelColorR (float);
     void setModelColorB (float);
     void setModelColorG (float);
@@ -40,7 +40,7 @@ public:
     void setBackgroundColorB (float);
     void setBackgroundColorG (float);
 
-    // Rendering options setting functions
+    // Rendering Options Setting Functions
     void setShowVertices (bool);
     void setShowTriangles (bool);
     void setShowWire (bool);
@@ -49,21 +49,24 @@ public:
     void setShowSolid (bool);
     void setShowAxis (bool);
     void setShowTargetMesh (bool);
+    void setModelLighting (bool);
+    void setNormalsLighting (bool);
 
+    // Database Handling Functions
     void eraseDatabase ();
 
-    // Rendering options
-    bool _showGrid = false;
+    // Rendering Options
     bool _showVerts = false;
     bool _showTriangles = true;
     bool _showNormals = false;
     bool _showFilteredMesh = false;
     bool _showWire = false;
+    bool _showGrid = false;
     bool _showSolid = true;
     bool _showTargetMesh = false;
     bool _showAxis = true;
     bool _normalLighting = false;
-    bool _enableLighting = false;
+    bool _modelLighting = false;
 
     float _BackgroundColorR = 0.8;
     float _BackgroundColorG = 0.8;
@@ -94,7 +97,7 @@ public:
     std::vector<std::string> db_files;
     std::string database;
 private:
-    // Camera variables
+    // Camera Variables
     float cdist = 3.5;
     float eyex = 0.0;
     float eyey = 0.0;
@@ -102,7 +105,7 @@ private:
     float azimuthAngle = 0.0;
     float altitudeAngle = PI/2.;
 
-    // Event handle variables
+    // Event Handle Variables
     bool mouseClickDown = false;
     int mx0 = 0;
     int my0 = 0;

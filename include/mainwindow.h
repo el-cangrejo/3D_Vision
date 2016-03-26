@@ -20,13 +20,9 @@ private slots:
 
     void on_action_Open_triggered();
 
-    void on_GridFilter_clicked();
-
     void on_StatOutFIlter_clicked();
 
     void on_GridSize_valueChanged(double arg1);
-
-    void on_ShowFilteredMesh_clicked();
 
     void on_NormalsLengthSlider_valueChanged(int value);
 
@@ -39,10 +35,6 @@ private slots:
     void on_action_Load_Database_triggered();
 
     void on_SearchinDBButton_clicked();
-
-    void on_EnableNormalsLighting_clicked();
-
-    void on_EnableLighting_clicked();
 
     /*
      * Color setting functions
@@ -68,9 +60,14 @@ private slots:
     void setShowSolid (bool);
     void setShowAxis (bool);
     void setShowTargetMesh (bool);
+    void setModelLighting (bool);
+    void setNormalsLighting (bool);
 
 private:
     Ui::MainWindow *ui;
+
+    void inititializeUI ();
+    void connectUI ();
 };
 
 #endif // MAINWINDOW_H

@@ -12,18 +12,37 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    inititializeUI();
+    connectUI();
+}
+
+MainWindow::~MainWindow () {
+    delete ui;
+}
+
+void MainWindow::inititializeUI () {
     ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
     ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
     ui->ShowAxisCheckBox->setChecked(ui->widget->_showAxis);
+    ui->ShowVerticesCheckBox->setChecked(ui->widget->_showVerts);
+    ui->ShowNormalsCheckBox->setChecked(ui->widget->_showNormals);
+    ui->ShowWireCheckBox->setChecked(ui->widget->_showWire);
+
     ui->ModelColorBSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorB * 99.));
     ui->ModelColorRSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorR * 99.));
     ui->ModelColorGSlider->setSliderPosition((int)std::floor(ui->widget->_ModelColorG * 99.));
+
     ui->BackgroundColorRSlider->setSliderPosition(ui->widget->_BackgroundColorR * 99.);
     ui->BackgroundColorGSlider->setSliderPosition(ui->widget->_BackgroundColorB * 99.);
     ui->BackgroundColorBSlider->setSliderPosition(ui->widget->_BackgroundColorG * 99.);
+
     ui->RotFactorSlider->setSliderPosition(ui->widget->_rotFactor * 999.);
     ui->ZoomFactSlider->setSliderPosition(ui->widget->_zoomStep * 99.);
 
+}
+
+void MainWindow::connectUI () {
     connect(ui->ModelColorRSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorR (int)));
     connect(ui->ModelColorGSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorG (int)));
     connect(ui->ModelColorBSlider, SIGNAL(valueChanged (int)), this, SLOT(setModelColorB (int)));
@@ -39,11 +58,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->ShowGridFilter, SIGNAL(clicked (bool)), this, SLOT(setShowGrid (bool)));
     connect(ui->ShowAxisCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowAxis (bool)));
     connect(ui->ShowTargetMeshCheckBox, SIGNAL(clicked (bool)), this, SLOT(setShowTargetMesh (bool)));
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
+    connect(ui->ModelLightingCheckBox, SIGNAL(clicked (bool)), this, SLOT(setModelLighting (bool)));
+    connect(ui->NormalsLightingCheckBox, SIGNAL(clicked (bool)), this, SLOT(setNormalsLighting (bool)));
 }
 
 void MainWindow::on_action_Quit_triggered() {
@@ -68,11 +84,6 @@ void MainWindow::on_action_Open_triggered() {
     ui->widget->updateGL();
 }
 
-void MainWindow::on_GridFilter_clicked() {
-    ui->widget->filtered_mesh = ui->widget->primary_mesh.gridFilter();
-    ui->widget->updateGL();
-}
-
 void MainWindow::on_StatOutFIlter_clicked() {
     ui->widget->primary_mesh = ui->widget->primary_mesh.statoutFilter();
     preprocess_mesh(ui->widget->primary_mesh);
@@ -82,11 +93,6 @@ void MainWindow::on_StatOutFIlter_clicked() {
 void MainWindow::on_GridSize_valueChanged(double arg1) {
     ui->widget->primary_mesh.grid_size = arg1;
     std::cout << "Mesh's grid size set to " << arg1 << "\n";
-}
-
-void MainWindow::on_ShowFilteredMesh_clicked() {
-    ui->widget->_showFilteredMesh = !ui->widget->_showFilteredMesh;
-    ui->widget->updateGL();
 }
 
 void MainWindow::on_NormalsLengthSlider_valueChanged(int value) {
@@ -163,17 +169,6 @@ void MainWindow::on_SearchinDBButton_clicked() {
     ui->widget->updateGL();
 }
 
-void MainWindow::on_EnableNormalsLighting_clicked()
-{
-    ui->widget->_normalLighting = !ui->widget->_normalLighting;
-    ui->widget->updateGL();
-}
-
-void MainWindow::on_EnableLighting_clicked() {
-    ui->widget->_enableLighting = !ui->widget->_enableLighting;
-    ui->widget->updateGL();
-}
-
 /*
  * Color Setting Functions
  * */
@@ -244,4 +239,10 @@ void MainWindow::setShowTargetMesh (bool show) {
     ui->widget->setShowTargetMesh (show);
 }
 
+void MainWindow::setModelLighting (bool light) {
+    ui->widget->setModelLighting (light);
+}
 
+void MainWindow::setNormalsLighting (bool light) {
+    ui->widget->setNormalsLighting (light);
+}
