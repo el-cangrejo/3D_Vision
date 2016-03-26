@@ -142,10 +142,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent *qevent) {
       } else if (altitudeAngle > PI){
           up_vector.y = -1;
       }
-//      if (altitudeAngle > PI) up_vector.y = -1;
-//      if (altitudeAngle < PI) up_vector.y = 1;
-//      if (altitudeAngle < 0) up_vector.y = -1;
-//      if (altitudeAngle < -PI) up_vector.y = 1;
 
       // Keep mouse x,y for next call
       mx0 = qevent->x();
@@ -157,15 +153,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent *qevent) {
 void GLWidget::wheelEvent(QWheelEvent *qevent) {
     if (qevent->delta() > 0) {
         cdist -= _zoomStep;
-        eyex = cdist*sin(altitudeAngle)*sin(azimuthAngle);
-        eyey = cdist*cos(altitudeAngle);
-        eyez = cdist*sin(altitudeAngle)*cos(azimuthAngle);
     } else if (qevent->delta() < 0) {
         cdist += _zoomStep;
-        eyex = cdist*sin(altitudeAngle)*sin(azimuthAngle);
-        eyey = cdist*cos(altitudeAngle);
-        eyez = cdist*sin(altitudeAngle)*cos(azimuthAngle);
     }
+    eyex = cdist*sin(altitudeAngle)*sin(azimuthAngle);
+    eyey = cdist*cos(altitudeAngle);
+    eyez = cdist*sin(altitudeAngle)*cos(azimuthAngle);
     updateGL();
 }
 

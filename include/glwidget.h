@@ -3,8 +3,6 @@
 
 #include "Open3DOR.hpp"
 
-#include <Eigen/Dense>
-
 #include <QGLWidget>
 #include <QMouseEvent>
 
@@ -24,7 +22,7 @@ public:
     // Event Handlers
     void mousePressEvent(QMouseEvent *qevent);
     void mouseMoveEvent(QMouseEvent *qevent);
-    void wheelEvent(QWheelEvent *);
+    void wheelEvent(QWheelEvent *qevent);
 
     // Rendering Functions
     void draw_mesh(Mesh&);
