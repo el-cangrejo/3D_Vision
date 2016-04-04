@@ -16,6 +16,56 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
+     <layout class="QVBoxLayout" name="verticalLayout_14">
+      <item>
+       <widget class="QLabel" name="OrigDepthImgLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Original Depth Image</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CQtOpenCVViewerGl" name="OrigDepthWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>3</horstretch>
+          <verstretch>3</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="SegDepthImgLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Semgented Depth Image</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="SegDepthWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>3</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="GLWidget" name="widget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -34,14 +84,14 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>160</width>
+         <width>150</width>
          <height>320</height>
         </rect>
        </property>
@@ -148,8 +198,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>178</width>
-         <height>303</height>
+         <width>286</width>
+         <height>315</height>
         </rect>
        </property>
        <attribute name="label">
@@ -356,7 +406,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>172</width>
+         <width>141</width>
          <height>315</height>
         </rect>
        </property>
@@ -466,7 +516,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>172</width>
+         <width>157</width>
          <height>315</height>
         </rect>
        </property>
@@ -560,8 +610,9 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_Open"/>
+    <addaction name="action_OpenMesh"/>
     <addaction name="action_Quit"/>
+    <addaction name="action_OpenImg"/>
    </widget>
    <widget class="QMenu" name="menu_Database">
     <property name="title">
@@ -582,9 +633,9 @@
     <string>&amp;Quit</string>
    </property>
   </action>
-  <action name="action_Open">
+  <action name="action_OpenMesh">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Open Mesh</string>
    </property>
   </action>
   <action name="action_Load_Database">
@@ -597,6 +648,11 @@
     <string>&amp;Preprocess Database</string>
    </property>
   </action>
+  <action name="action_OpenImg">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -604,6 +660,12 @@
    <class>GLWidget</class>
    <extends>QWidget</extends>
    <header>glwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CQtOpenCVViewerGl</class>
+   <extends>QWidget</extends>
+   <header>cqtopencvviewergl.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

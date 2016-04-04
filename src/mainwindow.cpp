@@ -1,9 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "glwidget.h"
-#include <QFileDialog>
+//#include "cqtopencvviewergl/cqtopencvviewergl.h"
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 #include <boost/filesystem.hpp>
+#include <QFileDialog>
+
 
 extern Mesh filtered_mesh;
 
@@ -26,6 +31,8 @@ MainWindow::~MainWindow () {
  * */
 
 void MainWindow::inititializeUI () {
+    // Layouts
+    //ui->verticalLayout_14->setStretch(3, 2);
     // CheckBox Initializers
     ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
     ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
@@ -50,7 +57,8 @@ void MainWindow::inititializeUI () {
 
 void MainWindow::connectUI () {
     // Connect Actions
-    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(onActionOpen()));
+    connect(ui->action_OpenMesh, SIGNAL(triggered()), this, SLOT(onActionOpenMesh()));
+    connect(ui->action_OpenImg, SIGNAL(triggered()), this, SLOT(onActionOpenImage()));
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(onActionQuit()));
     connect(ui->action_Load_Database, SIGNAL(triggered()), this, SLOT(onActionLoadDatabase()));
     connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this, SLOT(onActionPreprocessDatabase()));
@@ -155,9 +163,9 @@ void MainWindow::onActionQuit () {
     exit(0);
 }
 
-void MainWindow::onActionOpen () {
+void MainWindow::onActionOpenMesh () {
     QString file_name = QFileDialog::getOpenFileName(this);
-    if (!file_name.isEmpty()) {
+    if (!file_name.isEmpty() && file_name.endsWith(".obj")) {
         if (!ui->widget->primary_mesh.vertices.empty()) {
             ui->widget->filtered_mesh.clear();
             ui->widget->primary_mesh.clear();
@@ -170,6 +178,15 @@ void MainWindow::onActionOpen () {
         ui->widget->primary_mesh.computeNormals();
     }
     ui->widget->updateGL();
+}
+
+void MainWindow::onActionOpenImage () {
+    QString file_name = QFileDialog::getOpenFileName(this);
+    cv::Mat image;
+    if (!file_name.isEmpty() && file_name.endsWith(".png")) {
+        image = cv::imread(file_name.toStdString());
+    }
+    ui->OrigDepthWidget->showImage(image);
 }
 
 void MainWindow::onActionLoadDatabase () {

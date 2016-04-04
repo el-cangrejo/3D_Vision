@@ -33,7 +33,8 @@ private slots:
      * */
 
     void onActionQuit ();
-    void onActionOpen ();
+    void onActionOpenMesh ();
+    void onActionOpenImage ();
     void onActionLoadDatabase ();
     void onActionPreprocessDatabase ();
 

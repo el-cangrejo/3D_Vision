@@ -1,4 +1,5 @@
 #include "glwidget.h"
+#include "cqtopencvviewergl/cqtopencvviewergl.h"
 #include "mainwindow.h"
 
 #include <GL/glut.h>
