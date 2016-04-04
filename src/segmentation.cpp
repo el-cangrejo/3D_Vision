@@ -15,37 +15,18 @@ int prepare_segmentation(int argc, char **argv) {
   }
 
   kernel_size = 3;
+  radius = 3;
+
   // Median Filter for Noise Reduction
   medianBlur(image, median_img, kernel_size);
 
   // Estimation of Surface Normals
   //*
-  begin = clock();
-  cout << "Estimation of Surface Normals begin \n";
-
-  radius = 3;
-  normals.reserve((median_img.rows - 2 * radius - 1) *
-                  (median_img.cols - 2 * radius - 1));
   estimate_normals(median_img, radius, normals);
-
-  end = clock();
-  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  cout << "Estimation of Surface Normals end \nElapsed time: " << elapsed_secs
-       << "\n";
   //*/
 
   // Prints Normal Vector at every pixel and Map xyz to RGB
   //*
-  begin = clock();
-  cout << "Printing of Surface Normals begin \n";
-
-  norm_img = median_img.clone();
-  norm_color_img = median_img.clone();
-
-  kernel_normals = 10;
-
-  cvtColor(image, norm_color_img,
-           CV_GRAY2RGB); // Make norm_color_img 3 channels
   Rect crop(radius, radius, norm_color_img.cols - 2 * radius,
             norm_color_img.rows - 2 * radius); // Crop image according to radius
 
@@ -54,37 +35,22 @@ int prepare_segmentation(int argc, char **argv) {
 
   print_normals(norm_img, norm_color_img, normals, radius, kernel_normals);
 
-  end = clock();
-  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  cout << "Printing of Surface Normals end \nElapsed time: " << elapsed_secs
-       << "\n";
+
   //*/
 
   // Detection of Surface Normal Edges
   //*
-  begin = clock();
-  cout << "Detection of Surface Normal Edges begin \n";
 
-  norm_edge_img = median_img.clone();
   kernel_normedge = 4;
   norm_edge_img = norm_edge_img(crop);
-  norm_bin_edge_img = norm_edge_img.clone();
-
   detect_normal_edges(norm_edge_img, norm_bin_edge_img, normals, radius,
                       kernel_normedge);
-
   crop = Rect(kernel_normedge, kernel_normedge,
               norm_edge_img.cols - 2 * kernel_normedge,
               norm_edge_img.rows - 2 * kernel_normedge);
   norm_edge_img = norm_edge_img(crop);
   norm_bin_edge_img = norm_bin_edge_img(crop);
 
-  medianBlur(norm_bin_edge_img, norm_bin_edge_img, 5);
-
-  end = clock();
-  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  cout << "Detection of Surface Normal Edges end \nElapsed time: "
-       << elapsed_secs << "\n";
   //*/
 
   //*
@@ -132,6 +98,12 @@ int prepare_segmentation(int argc, char **argv) {
 
 void estimate_normals(const Mat &img, const int radius,
                       std::vector<Point3f> &normals) {
+  begin = clock();
+  cout << "Estimation of Surface Normals begin \n";
+
+  normals.reserve((median_img.rows - 2 * radius - 1) *
+                    (median_img.cols - 2 * radius - 1));
+
   for (int i = radius; i < img.rows - radius; ++i) {
     for (int j = radius; j < img.cols - radius; ++j) {
       // Points a, b, c in the neighborhood of pixel (i, j)
@@ -163,11 +135,26 @@ void estimate_normals(const Mat &img, const int radius,
       normals.push_back(n);
     }
   }
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  cout << "Estimation of Surface Normals end \nElapsed time: "
+       << elapsed_secs << "\n";
 }
 
 void print_normals(Mat &arrowed_dst, Mat &color_dst,
                    const std::vector<Point3f> normals, const int radius,
                    const int kernel) {
+  begin = clock();
+  cout << "Printing of Surface Normals begin \n";
+
+  norm_img = median_img.clone();
+  norm_color_img = median_img.clone();
+
+  kernel_normals = 10;
+
+  cvtColor(image, norm_color_img,
+           CV_GRAY2RGB); // Make norm_color_img 3 channels
+
   for (int i = 0; i < arrowed_dst.rows; ++i) {
     for (int j = 0; j < arrowed_dst.cols; ++j) {
       // Calculate Index
@@ -186,11 +173,22 @@ void print_normals(Mat &arrowed_dst, Mat &color_dst,
       }
     }
   }
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  cout << "Printing of Surface Normals end \nElapsed time: " << elapsed_secs
+       << "\n";
 }
 
 void detect_normal_edges(Mat &dst, Mat &dst_bin,
                          const std::vector<Point3f> norm, const int radius,
                          const int kernel_normedge) {
+  begin = clock();
+  cout << "Detection of Surface Normal Edges begin \n";
+
+  norm_edge_img = median_img.clone();
+
+
+  norm_bin_edge_img = norm_edge_img.clone();
   for (int i = 0; i < dst.rows; ++i) {
     for (int j = 0; j < dst.cols; ++j) {
       if (i >= kernel_normedge && j >= kernel_normedge &&
@@ -251,6 +249,15 @@ void detect_normal_edges(Mat &dst, Mat &dst_bin,
       }
     }
   }
+
+
+
+  medianBlur(norm_bin_edge_img, norm_bin_edge_img, 5);
+
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  cout << "Detection of Surface Normal Edges end \nElapsed time: "
+       << elapsed_secs << "\n";
 }
 
 void color_regions(const Mat &median, Mat &dst, int &numregions) {
