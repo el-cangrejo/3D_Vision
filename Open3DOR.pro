@@ -13,40 +13,30 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-<<<<<<< HEAD
 INCLUDEPATH += "/usr/include/pcl-1.7"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
                "include" \
                "src/cqtopencvviewergl"
 
-INCLUDEPATH += "/usr/local/include/opencv2"
-=======
 INCLUDEPATH += "/usr/include/pcl-1.7" \
                "/usr/include/eigen3" \
                "/usr/include/boost" \
                "usr/local/include/opencv2" \
                "include"
->>>>>>> master
 
 SOURCES += src/main.cpp\
            src/mainwindow.cpp \
            src/glwidget.cpp \
            src/Open3DOR.cpp \
-<<<<<<< HEAD
-           src/cqtopencvviewergl/cqtopencvviewergl.cpp
-=======
+           src/cqtopencvviewergl/cqtopencvviewergl.cpp \
            src/segmentation.cpp
->>>>>>> master
 
 HEADERS  += include/mainwindow.h \
             include/glwidget.h \
             include/Open3DOR.hpp \
-<<<<<<< HEAD
-            src/cqtopencvviewergl/cqtopencvviewergl.h
-=======
+            src/cqtopencvviewergl/cqtopencvviewergl.h \
             include/segmentation.hpp
->>>>>>> master
 
 FORMS    += mainwindow.ui
 
@@ -64,7 +54,6 @@ LIBS += -lpcl_io\
 LIBS += -lboost_system \
         -lboost_filesystem
 
-<<<<<<< HEAD
 LIBS += -L/usr/local/lib
 LIBS += -lopencv_core
 LIBS += -lopencv_imgproc
@@ -76,12 +65,7 @@ LIBS += -lopencv_calib3d
 LIBS += -lopencv_objdetect
 LIBS += -lopencv_flann
 LIBS += -lopencv_imgcodecs
-=======
-LIBS += -lopencv_core \
-        -lopencv_imgproc \
-        -lopencv_highgui \
-        -lopencv_imgcodecs \
->>>>>>> master
+
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_DEBUG += -O1
