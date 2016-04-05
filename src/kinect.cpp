@@ -1,15 +1,15 @@
 #include "kinect.hpp"
 
-int prepare_kinect(int argc, char **argv) {
+int prepare_kinect() {
 	bool die(false);
-	string filename("snapshot");
-	string suffix(".png");
+    std::string filename("snapshot");
+    std::string suffix(".png");
 	int i_snap(0),iter(0);
 
-	Mat depthMat(Size(640,480),CV_16UC1);
-	Mat depthf (Size(640,480),CV_8UC1);
-	Mat rgbMat(Size(640,480),CV_8UC3,Scalar(0));
-	Mat ownMat(Size(640,480),CV_8UC3,Scalar(0));
+    cv::Mat depthMat(cv::Size(640,480), CV_16UC1);
+    cv::Mat depthf (cv::Size(640,480), CV_8UC1);
+    cv::Mat rgbMat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
+    cv::Mat ownMat(cv::Size(640,480), CV_8UC3, cv::Scalar(0));
 
 	// The next two lines must be changed as Freenect::Freenect
 	// isn't a template but the method createDevice:
@@ -20,8 +20,6 @@ int prepare_kinect(int argc, char **argv) {
 	Freenect::Freenect freenect;
 	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 
-	namedWindow("rgb",CV_WINDOW_AUTOSIZE);
-	namedWindow("depth",CV_WINDOW_AUTOSIZE);
 	device.startVideo();
 	device.startDepth();
 	while (!die) {
@@ -30,10 +28,10 @@ int prepare_kinect(int argc, char **argv) {
 		cv::imshow("rgb", rgbMat);
 		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
 		cv::imshow("depth",depthf);
-		char k = cvWaitKey(5);
+        char k = cvWaitKey(5);
 		if( k == 27 ){
-			cvDestroyWindow("rgb");
-			cvDestroyWindow("depth");
+            cvDestroyWindow("rgb");
+            cvDestroyWindow("depth");
 			std::ostringstream file;
 			file << filename << i_snap << suffix;
 			cv::imwrite(file.str(),depthMat);
