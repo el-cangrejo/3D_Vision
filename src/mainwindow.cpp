@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "glwidget.h"
-//#include "cqtopencvviewergl/cqtopencvviewergl.h"
+#include "kinect.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -31,8 +31,6 @@ MainWindow::~MainWindow () {
  * */
 
 void MainWindow::inititializeUI () {
-    // Layouts
-    //ui->verticalLayout_14->setStretch(3, 2);
     // CheckBox Initializers
     ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
     ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
@@ -187,6 +185,41 @@ void MainWindow::onActionOpenImage () {
         image = cv::imread(file_name.toStdString());
     }
     ui->OrigDepthWidget->showImage(image);
+}
+
+void MainWindow::onActionOpenKinect () {
+    bool die(false);
+    std::string filename("snapshot");
+    std::string suffix(".png");
+    int i_snap(0),iter(0);
+
+    cv::Mat depthMat(cv::Size(640,480), CV_16UC1);
+    cv::Mat depthf (cv::Size(640,480), CV_8UC1);
+    Freenect::Freenect freenect;
+    MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
+
+    device.startVideo();
+    device.startDepth();
+    while (!die) {
+        device.getDepth(depthMat);
+        depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
+        ui->OrigDepthWidget->showImage(depthf);
+        char k = cvWaitKey(5);
+        if( k == 27 ) {
+            std::ostringstream file;
+            file << filename << i_snap << suffix;
+            cv::imwrite(file.str(),depthMat);
+            break;
+        }
+        if( k == 8 ) {
+            std::ostringstream file;
+            file << filename << i_snap << suffix;
+            cv::imwrite(file.str(),depthMat);
+            i_snap++;
+        }
+    }
+    device.stopVideo();
+    device.stopDepth();
 }
 
 void MainWindow::onActionLoadDatabase () {

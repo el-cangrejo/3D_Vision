@@ -199,7 +199,7 @@
          <x>0</x>
          <y>0</y>
          <width>178</width>
-         <height>293</height>
+         <height>303</height>
         </rect>
        </property>
        <attribute name="label">
@@ -517,7 +517,7 @@
          <x>0</x>
          <y>0</y>
          <width>157</width>
-         <height>175</height>
+         <height>303</height>
         </rect>
        </property>
        <attribute name="label">
@@ -611,7 +611,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_OpenMesh"/>
-    <addaction name="actionOpen_Kinect"/>
+    <addaction name="action_OpenKinect"/>
     <addaction name="action_OpenImg"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -654,7 +654,7 @@
     <string>Open &amp;Image</string>
    </property>
   </action>
-  <action name="actionOpen_Kinect">
+  <action name="action_OpenKinect">
    <property name="text">
     <string>Open &amp;Kinect</string>
    </property>
