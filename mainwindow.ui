@@ -198,8 +198,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>286</width>
-         <height>315</height>
+         <width>178</width>
+         <height>293</height>
         </rect>
        </property>
        <attribute name="label">
@@ -517,7 +517,7 @@
          <x>0</x>
          <y>0</y>
          <width>157</width>
-         <height>315</height>
+         <height>175</height>
         </rect>
        </property>
        <attribute name="label">
@@ -611,8 +611,9 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_OpenMesh"/>
-    <addaction name="action_Quit"/>
+    <addaction name="actionOpen_Kinect"/>
     <addaction name="action_OpenImg"/>
+    <addaction name="action_Quit"/>
    </widget>
    <widget class="QMenu" name="menu_Database">
     <property name="title">
@@ -635,7 +636,7 @@
   </action>
   <action name="action_OpenMesh">
    <property name="text">
-    <string>&amp;Open Mesh</string>
+    <string>Open &amp;Mesh</string>
    </property>
   </action>
   <action name="action_Load_Database">
@@ -650,7 +651,12 @@
   </action>
   <action name="action_OpenImg">
    <property name="text">
-    <string>Open Image</string>
+    <string>Open &amp;Image</string>
+   </property>
+  </action>
+  <action name="actionOpen_Kinect">
+   <property name="text">
+    <string>Open &amp;Kinect</string>
    </property>
   </action>
  </widget>

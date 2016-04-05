@@ -17,12 +17,15 @@ INCLUDEPATH += "/usr/include/pcl-1.7"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
                "include" \
-               "src/cqtopencvviewergl"
+               "src/cqtopencvviewergl" \
+
 
 INCLUDEPATH += "/usr/include/pcl-1.7" \
                "/usr/include/eigen3" \
                "/usr/include/boost" \
                "usr/local/include/opencv2" \
+               "usr/local/include/libfreenect" \
+               "/usr/include/libusb-1.0" \
                "include"
 
 SOURCES += src/main.cpp\
@@ -30,13 +33,15 @@ SOURCES += src/main.cpp\
            src/glwidget.cpp \
            src/Open3DOR.cpp \
            src/cqtopencvviewergl/cqtopencvviewergl.cpp \
-           src/segmentation.cpp
+           src/segmentation.cpp \
+           src/kinect.cpp
 
 HEADERS  += include/mainwindow.h \
             include/glwidget.h \
             include/Open3DOR.hpp \
             src/cqtopencvviewergl/cqtopencvviewergl.h \
-            include/segmentation.hpp
+            include/segmentation.hpp \
+            include/kinect.hpp \
 
 FORMS    += mainwindow.ui
 
@@ -55,17 +60,13 @@ LIBS += -lboost_system \
         -lboost_filesystem
 
 LIBS += -L/usr/local/lib
-LIBS += -lopencv_core
-LIBS += -lopencv_imgproc
-LIBS += -lopencv_highgui
-LIBS += -lopencv_ml
-LIBS += -lopencv_video
-LIBS += -lopencv_features2d
-LIBS += -lopencv_calib3d
-LIBS += -lopencv_objdetect
-LIBS += -lopencv_flann
-LIBS += -lopencv_imgcodecs
+LIBS += -lopencv_core \
+        -lopencv_imgproc \
+        -lopencv_highgui \
+        -lopencv_video \
+        -lopencv_imgcodecs \
 
+LIBS += -lfreenect
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_DEBUG += -O1
