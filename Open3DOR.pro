@@ -52,4 +52,4 @@ LIBS += -lopencv_core \
         -lopencv_imgcodecs \
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-QMAKE_CXXFLAGS_DEBUG += -O1
+#QMAKE_CXXFLAGS_DEBUG += -O1

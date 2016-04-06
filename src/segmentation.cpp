@@ -94,6 +94,7 @@ int prepare_segmentation(int argc, char **argv) {
   imshow("Colored Regions Image", colored);
 
   waitKey(0);
+  return 0;
 }
 
 void estimate_normals(const Mat &img, const int radius,
