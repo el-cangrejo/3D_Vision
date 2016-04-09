@@ -1,21 +1,21 @@
 #ifndef SEGMENTATION_HPP_
 #define SEGMENTATION_HPP_
 
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
 #include "opencv2/core/utility.hpp"
+#include "opencv2/highgui.hpp"
 #include "opencv2/highgui/highgui_c.h"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 
-#include <stdio.h>
-#include <iostream>
-#include <ctime>
 #include <algorithm>
-#include <vector>
+#include <ctime>
 #include <fstream>
-#include <sstream>
-#include <string>
 #include <initializer_list>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 using std::cout;
 using namespace cv;

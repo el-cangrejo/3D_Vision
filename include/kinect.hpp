@@ -1,12 +1,12 @@
 #include "libfreenect/libfreenect.hpp"
-#include <iostream>
-#include <vector>
 #include <cmath>
-#include <pthread.h>
+#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <pthread.h>
+#include <vector>
 
-//class myMutex {
-//public:
+// class myMutex {
+// public:
 //  myMutex() {
 //        pthread_mutex_init(&m_mutex, NULL);
 //	}
@@ -16,15 +16,15 @@
 //	void unlock() {
 //        pthread_mutex_unlock(&m_mutex);
 //	}
-//private:
+// private:
 // 	pthread_mutex_t m_mutex;
 //};
 
-
-//class MyFreenectDevice : public Freenect::FreenectDevice {
-//public:
+// class MyFreenectDevice : public Freenect::FreenectDevice {
+// public:
 //	MyFreenectDevice(freenect_context *_ctx, int _index)
-// 	: Freenect::FreenectDevice(_ctx, _index), m_buffer_depth(FREENECT_DEPTH_11BIT),
+// 	: Freenect::FreenectDevice(_ctx, _index),
+// m_buffer_depth(FREENECT_DEPTH_11BIT),
 // 	m_buffer_rgb(FREENECT_VIDEO_RGB), m_gamma(2048), m_new_rgb_frame(false),
 //    m_new_depth_frame(false), depthMat(cv::Size(640,480),CV_16UC1),
 //    rgbMat(cv::Size(640,480), CV_8UC3, cv::Scalar(0)),
@@ -82,7 +82,7 @@
 //		return false;
 //		}
 //	}
-//private:
+// private:
 //	std::vector<uint8_t> m_buffer_depth;
 //	std::vector<uint8_t> m_buffer_rgb;
 //	std::vector<uint16_t> m_gamma;
@@ -95,4 +95,4 @@
 //	bool m_new_depth_frame;
 //};
 
-//int prepare_kinect ();
+// int prepare_kinect ();
