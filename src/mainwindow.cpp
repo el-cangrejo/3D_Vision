@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "glwidget.h"
-#include "kinect.hpp"
+//#include "kinect.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -57,6 +57,7 @@ void MainWindow::connectUI () {
     // Connect Actions
     connect(ui->action_OpenMesh, SIGNAL(triggered()), this, SLOT(onActionOpenMesh()));
     connect(ui->action_OpenImg, SIGNAL(triggered()), this, SLOT(onActionOpenImage()));
+    connect(ui->action_OpenKinect, SIGNAL(triggered()), this, SLOT(onActionOpenKinect()));
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(onActionQuit()));
     connect(ui->action_Load_Database, SIGNAL(triggered()), this, SLOT(onActionLoadDatabase()));
     connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this, SLOT(onActionPreprocessDatabase()));
@@ -200,26 +201,31 @@ void MainWindow::onActionOpenKinect () {
 
     device.startVideo();
     device.startDepth();
-    while (!die) {
-        device.getDepth(depthMat);
-        depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
-        ui->OrigDepthWidget->showImage(depthf);
-        char k = cvWaitKey(5);
-        if( k == 27 ) {
-            std::ostringstream file;
-            file << filename << i_snap << suffix;
-            cv::imwrite(file.str(),depthMat);
-            break;
-        }
-        if( k == 8 ) {
-            std::ostringstream file;
-            file << filename << i_snap << suffix;
-            cv::imwrite(file.str(),depthMat);
-            i_snap++;
-        }
-    }
+    std::cout << "Opening Kinect Device.. \n";
+//    while (!die) {
+//        device.getDepth(depthMat);
+//        depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
+//        ui->OrigDepthWidget->showImage(depthf);
+//        char k = cvWaitKey(5);
+//        if( k == 27 ) {
+//            std::ostringstream file;
+//            file << filename << i_snap << suffix;
+//            cv::imwrite(file.str(),depthMat);
+//            break;
+//        }
+//        if( k == 8 ) {
+//            std::ostringstream file;
+//            file << filename << i_snap << suffix;
+//            cv::imwrite(file.str(),depthMat);
+//            i_snap++;
+//        }
+//    }
     device.stopVideo();
     device.stopDepth();
+
+    ui->Kinect_Widget->device = &freenect.createDevice<MyFreenectDevice>(0);
+    ui->Kinect_Widget->device->startVideo();
+    ui->Kinect_Widget->device->startDepth();
 }
 
 void MainWindow::onActionLoadDatabase () {

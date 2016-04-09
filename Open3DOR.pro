@@ -20,13 +20,9 @@ INCLUDEPATH += "/usr/include/pcl-1.7"\
                "src/cqtopencvviewergl" \
 
 
-INCLUDEPATH += "/usr/include/pcl-1.7" \
-               "/usr/include/eigen3" \
-               "/usr/include/boost" \
-               "usr/local/include/opencv2" \
+INCLUDEPATH += "usr/local/include/opencv2" \
                "usr/local/include/libfreenect" \
                "/usr/include/libusb-1.0" \
-               "include"
 
 SOURCES += src/main.cpp\
            src/mainwindow.cpp \
@@ -34,14 +30,17 @@ SOURCES += src/main.cpp\
            src/Open3DOR.cpp \
            src/cqtopencvviewergl/cqtopencvviewergl.cpp \
            src/segmentation.cpp \
-           src/kinect.cpp
+#           src/kinect.cpp \
+           src/KinectWidget.cpp
+
 
 HEADERS  += include/mainwindow.h \
             include/glwidget.h \
             include/Open3DOR.hpp \
             src/cqtopencvviewergl/cqtopencvviewergl.h \
             include/segmentation.hpp \
-            include/kinect.hpp \
+#            include/kinect.hpp \
+            include/KinectWidget.hpp
 
 FORMS    += mainwindow.ui
 
