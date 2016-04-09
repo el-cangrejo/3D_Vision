@@ -90,10 +90,10 @@ int prepare_segmentation(int argc, char **argv) {
   //*
   begin = clock();
   cout << "Region Growing begin \n";
-  
+
   regions = 0;
   cvtColor(norm_bin_edge_img, colored, CV_GRAY2RGB);
-  
+
   color_regions(median_img, colored, regions);
 
   write_tofile(median_img, colored);
@@ -256,32 +256,32 @@ void detect_normal_edges(Mat &dst, Mat &dst_bin,
 void color_regions(const Mat &median, Mat &dst, int &numregions) {
   std::vector<Scalar> colors{Scalar(0, 0, 255),   Scalar(0, 255, 0),
                              Scalar(255, 0, 0),   Scalar(255, 0, 255),
-                             Scalar(0, 255, 255), Scalar(255, 255, 0)};  
-  
+                             Scalar(0, 255, 255), Scalar(255, 255, 0)};
+
   for (int i = 0; i < dst.rows; ++i) {
     for (int j = 0; j < dst.cols; ++j) {
       Point seed;
       if (dst.at<Vec3b>(i, j) == Vec3b(255, 255, 255)) {
         ++regions;
         seed = Point(j, i);
-        floodFill(dst, seed, colors[regions % 6]); 
+        floodFill(dst, seed, colors[regions % 6]);
       }
     }
   }
-  
+
   int ke = 7;
   for (int r = 0; r < dst.rows; ++r) {
     for (int c = 0; c < dst.cols; ++c) {
       if (dst.at<Vec3b>(r, c) == Vec3b(0, 0, 0)) {
         Point min_distp = Point(0, 0);
         float min_dist = 3;
-        for (int i = -ke/2; i <= ke/2; ++i) {
-          for (int j = -ke/2; j < ke/2; ++j) {
+        for (int i = -ke / 2; i <= ke / 2; ++i) {
+          for (int j = -ke / 2; j < ke / 2; ++j) {
             int image_r = std::min(std::max(r + i, 0), (int)(dst.rows - 1));
             int image_c = std::min(std::max(c + j, 0), (int)(dst.cols - 1));
-            if (dst.at<Vec3b>(image_r, image_c) != Vec3b(0, 0, 0)) { 
-              float depth_dif = abs((int)median.at<uchar>(image_r, image_c) - 
-                                (int)median.at<uchar>(r, c));
+            if (dst.at<Vec3b>(image_r, image_c) != Vec3b(0, 0, 0)) {
+              float depth_dif = abs((int)median.at<uchar>(image_r, image_c) -
+                                    (int)median.at<uchar>(r, c));
               float euc_dist = sqrt(pow(i, 2) + pow(j, 2) + pow(depth_dif, 2));
               if (euc_dist < min_dist) {
                 min_dist = euc_dist;
@@ -293,44 +293,43 @@ void color_regions(const Mat &median, Mat &dst, int &numregions) {
         if (min_distp != Point(0, 0)) {
           dst.at<Vec3b>(r, c) = dst.at<Vec3b>(min_distp);
         }
-      } 
+      }
     }
   }
 }
 
-void write_tofile(const Mat &median, const Mat &colored) { 
+void write_tofile(const Mat &median, const Mat &colored) {
   std::ofstream myfile;
-  myfile.open ("example.obj");
-  
+  myfile.open("example.obj");
+
   int count_i(0);
   int count_j(0);
 
   for (int i = 0; i < colored.rows; ++i) {
     for (int j = 0; j < colored.cols; ++j) {
       if ((i % 2 == 0) && (j % 2 == 0)) {
-        //cout << "I = " << i << "J = " << j << "\n";
-        myfile << "v " << ((colored.cols / 2.0) - j) / colored.cols << " " 
-        << ((colored.rows / 2.0) - i) / colored.rows << " " 
-        << (int)median.at<uchar>(i, j) / 255. << "\n";
+        // cout << "I = " << i << "J = " << j << "\n";
+        myfile << "v " << ((colored.cols / 2.0) - j) / colored.cols << " "
+               << ((colored.rows / 2.0) - i) / colored.rows << " "
+               << (int)median.at<uchar>(i, j) / 255. << "\n";
         myfile << "c " << colored.at<Vec3b>(i, j)[0] / 255 << " "
-        << colored.at<Vec3b>(i, j)[1] / 255 << " "
-        << colored.at<Vec3b>(i, j)[2] / 255 << "\n";
-        if ( (i <= colored.rows - 2) && (j <= colored.cols - 4)) {
-          myfile << "f " << (count_i*(colored.cols/2)+j/2) << " "
-                         << (count_i*(colored.cols/2)+(j/2+1)) << " "
-                         << ((count_i+1)*(colored.cols/2)+(j/2+1)) 
-                         << "\n";
-          myfile << "f " << (count_i*(colored.cols/2)+j/2) << " "
-                         << ((count_i+1)*(colored.cols/2)+j/2) << " "
-                         << ((count_i+1)*(colored.cols/2)+(j/2+1)) 
-                         << "\n";
+               << colored.at<Vec3b>(i, j)[1] / 255 << " "
+               << colored.at<Vec3b>(i, j)[2] / 255 << "\n";
+        if ((i <= colored.rows - 2) && (j <= colored.cols - 4)) {
+          myfile << "f " << (count_i * (colored.cols / 2) + j / 2) << " "
+                 << (count_i * (colored.cols / 2) + (j / 2 + 1)) << " "
+                 << ((count_i + 1) * (colored.cols / 2) + (j / 2 + 1)) << "\n";
+          myfile << "f " << (count_i * (colored.cols / 2) + j / 2) << " "
+                 << ((count_i + 1) * (colored.cols / 2) + j / 2) << " "
+                 << ((count_i + 1) * (colored.cols / 2) + (j / 2 + 1)) << "\n";
         }
-      } 
-      //if (j % 2 == 0) ++count_j;
+      }
+      // if (j % 2 == 0) ++count_j;
     }
-    if (i % 2 == 0) ++count_i;
+    if (i % 2 == 0)
+      ++count_i;
   }
   cout << "count_i = " << count_i << " count_j = " << count_j << "\n";
-  cout << colored.rows << " " << (int)colored.cols/2 << "\n";
+  cout << colored.rows << " " << (int)colored.cols / 2 << "\n";
   myfile.close();
 }
