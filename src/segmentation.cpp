@@ -1,118 +1,29 @@
 #include "segmentation.hpp"
 
-int prepare_segmentation(int argc, char **argv) {
+ImgSegmenter::ImgSegmenter () {}
 
-  if (argc != 2) {
-    cout << "Usage: DisplayImage.out <Image_Path>\n";
-    return -1;
-  }
+ImgSegmenter::ImgSegmenter (cv::Mat &img) image(img), 
+                                          median_kernel(1), 
+                                          normal_radius(1), 
+                                          normal_step(1),
+                                          edge_radius(1),
+                                          num_regions(0) {}
 
-  image = imread(argv[1], CV_8UC1);
-
-  if (!image.data) {
-    cout << "No image data \n";
-    return -1;
-  }
-
-  kernel_size = 3;
-  radius = 3;
-
-  // Median Filter for Noise Reduction
-  medianBlur(image, median_img, kernel_size);
-
-  // Estimation of Surface Normals
-  //*
-  estimate_normals(median_img, radius, normals);
-  //*/
-
-  // Prints Normal Vector at every pixel and Map xyz to RGB
-  //*
-  Rect crop(radius, radius, norm_color_img.cols - 2 * radius,
-            norm_color_img.rows - 2 * radius); // Crop image according to radius
-
-  norm_color_img = norm_color_img(crop);
-  norm_img = norm_img(crop);
-
-  print_normals(norm_img, norm_color_img, normals, radius, kernel_normals);
-
-
-  //*/
-
-  // Detection of Surface Normal Edges
-  //*
-
-  kernel_normedge = 4;
-  norm_edge_img = norm_edge_img(crop);
-  detect_normal_edges(norm_edge_img, norm_bin_edge_img, normals, radius,
-                      kernel_normedge);
-  crop = Rect(kernel_normedge, kernel_normedge,
-              norm_edge_img.cols - 2 * kernel_normedge,
-              norm_edge_img.rows - 2 * kernel_normedge);
-  norm_edge_img = norm_edge_img(crop);
-  norm_bin_edge_img = norm_bin_edge_img(crop);
-
-  //*/
-
-  //*
-  begin = clock();
-  cout << "Region Growing begin \n";
-  
-  regions = 0;
-  cvtColor(norm_bin_edge_img, colored, CV_GRAY2RGB);
-  
-  color_regions(median_img, colored, regions);
-
-  write_tofile(median_img, colored);
-
-  cout << "Regions found: " << regions << "\n";
-  end = clock();
-  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  cout << "Region Growing end \n";
-  cout << "Elapsed time: " << elapsed_secs << "\n";
-  //*/
-
-  // Shows Images
-  namedWindow("Original Image", CV_WINDOW_AUTOSIZE);
-  imshow("Original Image", image);
-
-  // namedWindow("Median Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Median Image", median_img);
-
-  // namedWindow("Surface Normals Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normals Image", norm_img);
-
-  // namedWindow("Surface Normals Image Mapped to RGB", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normals Image Mapped to RGB", norm_color_img);
-
-  // namedWindow("Surface Normal Edges Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normal Edges Image", norm_edge_img);
-
-  namedWindow("Surface Normal Binary Edges Image", CV_WINDOW_AUTOSIZE);
-  imshow("Surface Normal Binary Edges Image", norm_bin_edge_img);
-
-  namedWindow("Colored Regions Image", CV_WINDOW_AUTOSIZE);
-  imshow("Colored Regions Image", colored);
-
-  waitKey(0);
-  return 0;
-}
-
-void estimate_normals(const Mat &img, const int radius,
-                      std::vector<Point3f> &normals) {
+void ImgSegmenter::estimateNormals (void) {
   begin = clock();
   cout << "Estimation of Surface Normals begin \n";
 
-  normals.reserve((median_img.rows - 2 * radius - 1) *
-                    (median_img.cols - 2 * radius - 1));
+  normals.reserve((median_img.rows - 2 * normal_radius - 1) *
+                    (median_img.cols - 2 * normal_radius - 1));
 
-  for (int i = radius; i < img.rows - radius; ++i) {
-    for (int j = radius; j < img.cols - radius; ++j) {
+  for (int i = normal_radius; i < img.rows - normal_radius; ++i) {
+    for (int j = normal_radius; j < img.cols - normal_radius; ++j) {
       // Points a, b, c in the neighborhood of pixel (i, j)
-      Point3f a(i + radius, j - radius,
-                (float)img.at<uchar>(i + radius, j - radius));
-      Point3f b(i + radius, j + radius,
-                (float)img.at<uchar>(i + radius, j + radius));
-      Point3f c(i - radius, j, (float)img.at<uchar>(i - radius, j));
+      Point3f a(i + normal_radius, j - normal_radius,
+                (float)img.at<uchar>(i + normal_radius, j - normal_radius));
+      Point3f b(i + normal_radius, j + normal_radius,
+                (float)img.at<uchar>(i + normal_radius, j + normal_radius));
+      Point3f c(i - normal_radius, j, (float)img.at<uchar>(i - normal_radius, j));
       Point3f n;
       // Check if pixel is not a valid measurment
       if (a.z == 0 || b.z == 0 || c.z == 0) {
@@ -142,9 +53,7 @@ void estimate_normals(const Mat &img, const int radius,
        << elapsed_secs << "\n";
 }
 
-void print_normals(Mat &arrowed_dst, Mat &color_dst,
-                   const std::vector<Point3f> normals, const int radius,
-                   const int kernel) {
+void ImgSegmenter::printNormals (void) {
   begin = clock();
   cout << "Printing of Surface Normals begin \n";
 
@@ -180,9 +89,7 @@ void print_normals(Mat &arrowed_dst, Mat &color_dst,
        << "\n";
 }
 
-void detect_normal_edges(Mat &dst, Mat &dst_bin,
-                         const std::vector<Point3f> norm, const int radius,
-                         const int kernel_normedge) {
+void ImgSegmenter::detectNormalEdges (void) {
   begin = clock();
   cout << "Detection of Surface Normal Edges begin \n";
 
@@ -192,8 +99,8 @@ void detect_normal_edges(Mat &dst, Mat &dst_bin,
   norm_bin_edge_img = norm_edge_img.clone();
   for (int i = 0; i < dst.rows; ++i) {
     for (int j = 0; j < dst.cols; ++j) {
-      if (i >= kernel_normedge && j >= kernel_normedge &&
-          i < dst.rows - kernel_normedge && j < dst.cols - kernel_normedge) {
+      if (i >= edge_radius && j >= edge_radius &&
+          i < dst.rows - edge_radius && j < dst.cols - edge_radius) {
         // Calculate Index
         int index = i * dst.cols + j;
         Point3f n0 = norm[index];
@@ -208,31 +115,31 @@ void detect_normal_edges(Mat &dst, Mat &dst_bin,
         float costhetasw = 0; // South-West
         float costhetase = 0; // South-East
 
-        for (int count = 1; count <= kernel_normedge; ++count) {
+        for (int count = 1; count <= edge_radius; ++count) {
           // North Direction
           Point3f n = normals[(i - count) * dst.cols + j];
-          costhetan += n0.dot(n) / kernel_normedge;
+          costhetan += n0.dot(n) / edge_radius;
           // South Direction
           Point3f s = normals[(i + count) * dst.cols + j];
-          costhetas += n0.dot(s) / kernel_normedge;
+          costhetas += n0.dot(s) / edge_radius;
           // West Direction
           Point3f w = normals[i * dst.cols + (j - count)];
-          costhetaw += n0.dot(w) / kernel_normedge;
+          costhetaw += n0.dot(w) / edge_radius;
           // East Direction
           Point3f e = normals[i * dst.cols + (j + count)];
-          costhetae += n0.dot(e) / kernel_normedge;
+          costhetae += n0.dot(e) / edge_radius;
           // North West Direction
           Point3f nw = normals[(i - count) * dst.cols + (j - count)];
-          costhetanw += n0.dot(nw) / kernel_normedge;
+          costhetanw += n0.dot(nw) / edge_radius;
           // North East Direction
           Point3f ne = normals[(i - count) * dst.cols + (j + count)];
-          costhetane += n0.dot(ne) / kernel_normedge;
+          costhetane += n0.dot(ne) / edge_radius;
           // South West Direction
           Point3f sw = normals[(i + count) * dst.cols + (j - count)];
-          costhetasw += n0.dot(sw) / kernel_normedge;
+          costhetasw += n0.dot(sw) / edge_radius;
           // South East Direction
           Point3f se = normals[(i + count) * dst.cols + (j + count)];
-          costhetase += n0.dot(se) / kernel_normedge;
+          costhetase += n0.dot(se) / edge_radius;
         }
         std::vector<float> thetas{costhetan,  costhetas,  costhetaw,
                                   costhetae,  costhetanw, costhetane,
@@ -261,7 +168,7 @@ void detect_normal_edges(Mat &dst, Mat &dst_bin,
        << elapsed_secs << "\n";
 }
 
-void color_regions(const Mat &median, Mat &dst, int &numregions) {
+void ImgSegmenter::colorRegions (void) {
   std::vector<Scalar> colors{Scalar(0, 0, 255),   Scalar(0, 255, 0),
                              Scalar(255, 0, 0),   Scalar(255, 0, 255),
                              Scalar(0, 255, 255), Scalar(255, 255, 0)};  
@@ -306,9 +213,9 @@ void color_regions(const Mat &median, Mat &dst, int &numregions) {
   }
 }
 
-void write_tofile(const Mat &median, const Mat &colored) { 
+void ImgSegmenter::writetoFile (std::string filename) { 
   std::ofstream myfile;
-  myfile.open ("example.obj");
+  myfile.open (filename + ".obj");
   
   int count_i(0);
   int count_j(0);
@@ -341,4 +248,68 @@ void write_tofile(const Mat &median, const Mat &colored) {
   cout << "count_i = " << count_i << " count_j = " << count_j << "\n";
   cout << colored.rows << " " << (int)colored.cols/2 << "\n";
   myfile.close();
+}
+
+ImgSegmenter::~ImgSegmenter () {}
+
+int prepare_segmentation(cv::Mat &img) {
+
+  ImgSegmenter segmenter(img);
+
+  median_kernel = 3;
+  normal_radius = 3;
+
+  // Median Filter for Noise Reduction
+  cv::medianBlur(image, median_img, median_kernel);
+
+  // Estimation of Surface Normals
+  estimateNormals(median_img, normal_radius, normals);
+
+  // Prints Normal Vector at every pixel and Map xyz to RGB
+  //*
+  Rect crop(normal_radius, normal_radius, norm_color_img.cols - 2 * normal_radius,
+            norm_color_img.rows - 2 * normal_radius); // Crop image according to normal_radius
+
+  norm_color_img = norm_color_img(crop);
+  norm_img = norm_img(crop);
+
+  print_normals(norm_img, norm_color_img, normals, normal_radius, kernel_normals);
+
+
+  //*/
+
+  // Detection of Surface Normal Edges
+  //*
+
+  edge_radius = 4;
+  norm_edge_img = norm_edge_img(crop);
+  detect_normal_edges(norm_edge_img, norm_bin_edge_img, normals, normal_radius,
+                      edge_radius);
+  crop = Rect(edge_radius, edge_radius,
+              norm_edge_img.cols - 2 * edge_radius,
+              norm_edge_img.rows - 2 * edge_radius);
+  norm_edge_img = norm_edge_img(crop);
+  norm_bin_edge_img = norm_bin_edge_img(crop);
+
+  //*/
+
+  //*
+  begin = clock();
+  cout << "Region Growing begin \n";
+  
+  regions = 0;
+  cvtColor(norm_bin_edge_img, colored, CV_GRAY2RGB);
+  
+  color_regions(median_img, colored, regions);
+
+  write_tofile(median_img, colored);
+
+  cout << "Regions found: " << regions << "\n";
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  cout << "Region Growing end \n";
+  cout << "Elapsed time: " << elapsed_secs << "\n";
+  //*/
+
+  return 0;
 }
