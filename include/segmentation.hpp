@@ -37,14 +37,14 @@ void color_regions(const Mat &, Mat &, int &);
 //
 void write_tofile(const Mat &, const Mat &);
 
-Mat image;          // Original Input Image
-Mat median_img;     // Median Blured Image
-Mat norm_img;       // Image with Surface Normals for every pixel
-Mat norm_color_img; // Image with Surface Normals mapped to RGB for every pixel
-Mat norm_edge_img;  // Image with painted Edges estimated from Surface Normals
-Mat norm_bin_edge_img; // Image with painted Edges estimated from Surface
-                       // Normals
-Mat colored;           // Image with colored regions
+Mat image;          		// Original Input Image
+Mat median_img;     		// Median Blured Image
+Mat norm_img;       		// Image with Surface Normals for every pixel
+Mat norm_color_img; 		// Image with Surface Normals mapped to RGB for every pixel
+Mat norm_edge_img;  		// Image with painted Edges estimated from Surface Normals
+Mat norm_bin_edge_img; 	// Image with painted Edges estimated from Surface
+                       	// Normals
+Mat colored;           	// Image with colored regions
 
 int kernel_size;     // Median Filter Kernel
 int radius;          // Radius of Normal Estimation Triangle
