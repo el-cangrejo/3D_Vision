@@ -105,29 +105,6 @@ int prepare_segmentation(int argc, char **argv) {
   cout << "Elapsed time: " << elapsed_secs << "\n";
   //*/
 
-  // Shows Images
-  namedWindow("Original Image", CV_WINDOW_AUTOSIZE);
-  imshow("Original Image", image);
-
-  // namedWindow("Median Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Median Image", median_img);
-
-  // namedWindow("Surface Normals Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normals Image", norm_img);
-
-  // namedWindow("Surface Normals Image Mapped to RGB", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normals Image Mapped to RGB", norm_color_img);
-
-  // namedWindow("Surface Normal Edges Image", CV_WINDOW_AUTOSIZE );
-  // imshow("Surface Normal Edges Image", norm_edge_img);
-
-  namedWindow("Surface Normal Binary Edges Image", CV_WINDOW_AUTOSIZE);
-  imshow("Surface Normal Binary Edges Image", norm_bin_edge_img);
-
-  namedWindow("Colored Regions Image", CV_WINDOW_AUTOSIZE);
-  imshow("Colored Regions Image", colored);
-
-  waitKey(0);
 }
 
 void estimate_normals(const Mat &img, const int radius,
