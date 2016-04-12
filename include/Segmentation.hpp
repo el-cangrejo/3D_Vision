@@ -25,11 +25,10 @@ public:
   ImgSegmenter(const cv::Mat &img);
   ImgSegmenter(cv::Mat &&img);
 
-  void estimateNormals(); // Function to Estimate Normals for Every Point
-  void printNormals();    // Function to Print Normals
-  void
-  detectNormalEdges(); // Function to Detect Normal Edges and Print cos(thetas)
-  void colorRegions(); // Function to Color the found Regions
+  void estimateNormals(); // Estimates Normals for Every Point
+  void printNormals();    // Prints Normals
+  void detectNormalEdges(); // Detects Normal Edges and Print cos(thetas)
+  void colorRegions(); // Colors the found Regions
   void writetoFile(std::string filename);
 
   virtual ~ImgSegmenter();
@@ -39,8 +38,8 @@ public:
   cv::Mat norm_img;       // Image with Surface Normals for every pixel
   cv::Mat norm_color_img; // Image with Surface Normals mapped to RGB for every
                           // pixel
-  cv::Mat
-      norm_edge_img; // Image with painted Edges estimated from Surface Normals
+  cv::Mat norm_edge_img; // Image with painted Edges estimated from Surface
+                         // Normals
   cv::Mat norm_bin_edge_img; // Image with painted Edges estimated from Surface
                              // Normals
   cv::Mat colored_img;       // Image with colored regions

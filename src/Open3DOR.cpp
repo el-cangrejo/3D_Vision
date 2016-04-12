@@ -471,6 +471,17 @@ Mesh Mesh::statoutFilter(void) {
 
   return filtered_mesh;
 }
+void Mesh::printInfo(void) {
+  // Prints Information about the mesh
+  std::cout << "Object size : \n"
+            << this->vertices.size() << " vertices \n"
+            << this->triangles.size() << " triangles \n"
+            << this->edges.size() << " edges \n"
+            << this->normals.size() << " normals \n"
+            << this->dvertices.size() << " dvertices \n"
+            << this->dedges.size() << " dedges \n"
+            << this->trinormals.size() << " trinormals \n";
+}
 
 void read_mesh(const std::string filepath, Mesh &mesh) {
   if (filepath.substr(filepath.size() - 3, 3) != "obj") {
@@ -582,10 +593,7 @@ void read_mesh(const std::string filepath, Mesh &mesh) {
   mesh.centroid.y /= mesh.vertices.size();
   mesh.centroid.z /= mesh.vertices.size();
 
-  // Prints Information about the mesh
-  std::cout << "Object size = " << mesh.vertices.size() << " vertices \n";
-  std::cout << "Object size = " << mesh.triangles.size() << " triangles \n";
-  std::cout << "Object size = " << mesh.normals.size() << " edges \n";
+  mesh.printInfo();
 }
 
 void preprocess_mesh(Mesh &mesh) {

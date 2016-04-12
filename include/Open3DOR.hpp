@@ -92,6 +92,7 @@ public:
   void clear(void);
   Mesh gridFilter(void);
   Mesh statoutFilter(void);
+  void printInfo(void);
 
   ~Mesh();
 

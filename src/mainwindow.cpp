@@ -181,8 +181,8 @@ void MainWindow::on_SearchinDBButton_clicked() {
  * */
 
 void MainWindow::onActionQuit() {
-  std::cout << "User evoked exiting.. \nGoodbye!";
-  exit(0);
+  std::cout << "User evoked exiting.. \nGoodbye!\n";
+  QApplication::quit();
 }
 
 void MainWindow::onActionOpenMesh() {
@@ -249,6 +249,7 @@ void MainWindow::onActionOpenKinect() {
   ui->Kinect_Widget->device = &freenect.createDevice<MyFreenectDevice>(0);
   ui->Kinect_Widget->device->startVideo();
   ui->Kinect_Widget->device->startDepth();
+  ui->Kinect_Widget->kinect_initialized = true;
 }
 
 void MainWindow::onActionLoadDatabase() {
