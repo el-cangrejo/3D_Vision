@@ -7,71 +7,70 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+  explicit MainWindow(QWidget *parent = 0);
+  ~MainWindow();
 
 private slots:
-    void on_StatOutFIlter_clicked();
+  void on_StatOutFIlter_clicked();
 
-    void on_GridSize_valueChanged(double arg1);
+  void on_GridSize_valueChanged(double arg1);
 
-    void on_NormalsLengthSlider_valueChanged(int value);
+  void on_NormalsLengthSlider_valueChanged(int value);
 
-    void on_ZoomFactSlider_sliderMoved(int position);
+  void on_ZoomFactSlider_sliderMoved(int position);
 
-    void on_RotFactorSlider_sliderMoved(int position);
+  void on_RotFactorSlider_sliderMoved(int position);
 
-    void on_SearchinDBButton_clicked();
+  void on_SearchinDBButton_clicked();
 
-    /*
-     * Menu Actions
-     * */
+  /*
+   * Menu Actions
+   * */
 
-    void onActionQuit ();
-    void onActionOpen ();
-    void onActionLoadDatabase ();
-    void onActionPreprocessDatabase ();
+  void onActionQuit();
+  void onActionOpen();
+  void onActionLoadDatabase();
+  void onActionPreprocessDatabase();
 
-    /*
-     * Color Setting Functions
-     * */
+  /*
+   * Color Setting Functions
+   * */
 
-    void setModelColorR (int);
-    void setModelColorG (int);
-    void setModelColorB (int);
+  void setModelColorR(int);
+  void setModelColorG(int);
+  void setModelColorB(int);
 
-    void setBackgroundColorR (int);
-    void setBackgroundColorB (int);
-    void setBackgroundColorG (int);
+  void setBackgroundColorR(int);
+  void setBackgroundColorB(int);
+  void setBackgroundColorG(int);
 
-    /*
-     * Rendering Options Setting Functions
-     * */
+  /*
+   * Rendering Options Setting Functions
+   * */
 
-    void setShowVertices (bool);
-    void setShowTriangles (bool);
-    void setShowWire (bool);
-    void setShowNormals (bool);
-    void setShowGrid (bool);
-    void setShowSolid (bool);
-    void setShowAxis (bool);
-    void setShowFilteredMesh (bool);
-    void setShowTargetMesh (bool);
-    void setModelLighting (bool);
-    void setNormalsLighting (bool);
+  void setShowVertices(bool);
+  void setShowTriangles(bool);
+  void setShowWire(bool);
+  void setShowNormals(bool);
+  void setShowGrid(bool);
+  void setShowSolid(bool);
+  void setShowAxis(bool);
+  void setShowFilteredMesh(bool);
+  void setShowTargetMesh(bool);
+  void setModelLighting(bool);
+  void setNormalsLighting(bool);
 
-    void gridFilter ();
+  void gridFilter();
 
 private:
-    Ui::MainWindow *ui;
+  Ui::MainWindow *ui;
 
-    void inititializeUI ();
-    void connectUI ();
+  void inititializeUI();
+  void connectUI();
 };
 
 #endif // MAINWINDOW_H
