@@ -38,9 +38,7 @@ LIBS += -lpcl_io\
         -lpcl_common \
         -lpcl_filters \
         -lpcl_kdtree \
-        -lpcl_registration \
         -lpcl_features \
-        -lpcl_segmentation \
         -lpcl_search
 
 LIBS += -lboost_system \
@@ -52,4 +50,4 @@ LIBS += -lopencv_core \
         -lopencv_imgcodecs \
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-#QMAKE_CXXFLAGS_DEBUG += -O1
+QMAKE_CXXFLAGS_DEBUG += -O1
