@@ -1,4 +1,4 @@
-#include "segmentation.hpp"
+#include "Segmentation.hpp"
 
 ImgSegmenter::ImgSegmenter() {}
 
