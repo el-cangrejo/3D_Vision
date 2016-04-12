@@ -23,12 +23,12 @@ SOURCES += src/main.cpp\
            src/mainwindow.cpp \
            src/glwidget.cpp \
            src/Open3DOR.cpp \
-           src/segmentation.cpp
+           src/Segmentation.cpp
 
 HEADERS  += include/mainwindow.h \
             include/glwidget.h \
             include/Open3DOR.hpp \
-            include/segmentation.hpp
+            include/Segmentation.hpp
 
 FORMS    += mainwindow.ui
 
