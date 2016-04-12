@@ -12,7 +12,7 @@ void GLWidget::initializeGL() {
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
   up_vector = Vertex(0, 1, 0);
-  sphere = std::move(Vertex(-0.5, -0.5, -0.5));
+  sphere = Vertex(-0.5, -0.5, -0.5);
 }
 
 void GLWidget::paintGL() {
@@ -64,42 +64,9 @@ void GLWidget::paintGL() {
     draw_axis();
     glPopMatrix();
   }
-
-  /*
-  glBegin(GL_QUADS);
-  glShadeModel(GL_FLAT);
-  glDisable(GL_LIGHTING);
-  glColor3f(1.0, 1.0, 1.0);
-  for ( int x = -5; x < 5; x++) {
-    for ( int z = -5; z < 5; z++)
-    {
-      glNormal3f(0, 1, 0);
-      glVertex3f(x, -1.0, z);
-      glNormal3f(0, 1, 0);
-      glVertex3f(x, -1.0, z + 1.0);
-      glNormal3f(0, 1, 0);
-      glVertex3f(x + 1.0, -1.0, z + 1.0);
-      glNormal3f(0, 1, 0);
-      glVertex3f(x + 1.0, -1.0, z);
-    }
-  }
-  for ( int x = -5; x < 5; x++) {
-    for ( int y = -1; y < 5; y++)
-    {
-      glVertex3f(x, y, -5.0);
-      glVertex3f(x, y + 1.0, -5.0);
-      glVertex3f(x + 1.0, y + 1.0, -5.0);
-      glVertex3f(x + 1.0, y, -5.0);
-    }
-  }
-  glEnable(GL_LIGHTING);
-  glEnd();
-  //*/
 }
 
 void GLWidget::resizeGL(int w, int h) {
-  _width = w;
-  _height = h;
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

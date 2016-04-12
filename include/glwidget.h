@@ -78,9 +78,6 @@ public:
   float _zoomStep = 0.01;
   float _rotFactor = 0.01;
 
-  float _width;
-  float _height;
-
   Vertex up_vector;
 
   Vertex sphere;
