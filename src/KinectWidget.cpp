@@ -1,13 +1,11 @@
 #include "KinectWidget.hpp"
 
-KinectWidget::KinectWidget(QWidget *parent) : QGLWidget(parent) {
-  startTimer(10);
+KinectWidget::KinectWidget(QWidget *parent) : QGLWidget(parent),
+    kinect_initialized(false) {
+  //startTimer(10);
 }
 
 void KinectWidget::initializeGL() {
-  device = &freenect.createDevice<MyFreenectDevice>(0);
-  device->startVideo();
-  device->startDepth();
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClearDepth(1.0);
   glDepthFunc(GL_LESS);
@@ -23,10 +21,11 @@ void KinectWidget::initializeGL() {
   glBindTexture(GL_TEXTURE_2D, gl_rgb_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  // ReSizeGLScene(Width, Height);
 }
 
 void KinectWidget::paintGL() {
+  if(!kinect_initialized) return;
+
   static std::vector<uint8_t> depth(640 * 480 * 4);
   static std::vector<uint8_t> rgb(640 * 480 * 4);
 
@@ -85,8 +84,6 @@ void KinectWidget::paintGL() {
   glTexCoord2f(0, 1);
   glVertex3f(640, 480, 0);
   glEnd();
-
-  // glutSwapBuffers();
 }
 
 void KinectWidget::resizeGL(int w, int h) {

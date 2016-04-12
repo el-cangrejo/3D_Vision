@@ -188,6 +188,8 @@ public:
 
   // double freenect_angle(0);
   int got_frames, window;
+
+  bool kinect_initialized;
 };
 
 #endif // KINECTWIDGET_H
