@@ -26,15 +26,14 @@ public:
 	ImgSegmenter(const cv::Mat &img);
 	ImgSegmenter(cv::Mat &&img);
 
-	estimateNormals();// Function to Estimate Normals for Every Point
-	printNormals();// Function to Print Normals
-	detectNormalEdges();// Function to Detect Normal Edges and Print cos(thetas)
-	colorRegions(); // Function to Color the found Regions
-	writetoFile(std::string filename);
+    void estimateNormals();// Function to Estimate Normals for Every Point
+    void printNormals();// Function to Print Normals
+    void detectNormalEdges();// Function to Detect Normal Edges and Print cos(thetas)
+    void colorRegions(); // Function to Color the found Regions
+    void writetoFile(std::string filename);
 
 	virtual ~ImgSegmenter();
 
-private:
 	cv::Mat image;          		// Original Input Image
 	cv::Mat median_img;     		// Median Blured Image
 	cv::Mat norm_img;       		// Image with Surface Normals for every pixel
@@ -42,7 +41,7 @@ private:
 	cv::Mat norm_edge_img;  		// Image with painted Edges estimated from Surface Normals
 	cv::Mat norm_bin_edge_img; 	// Image with painted Edges estimated from Surface
 	                       	// Normals
-	cv::Mat colored;           	// Image with colored regions
+    cv::Mat colored_img;           	// Image with colored regions
 
 	int median_kernel;     	// Median Filter Kernel
 	int normal_radius;          	// Radius of Normal Estimation Triangle
