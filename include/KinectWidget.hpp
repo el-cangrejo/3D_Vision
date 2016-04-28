@@ -29,6 +29,8 @@
 
 #include "libfreenect/libfreenect.hpp"
 
+#include <opencv2/opencv.hpp>
+
 #include <QGLWidget>
 #include <QMouseEvent>
 
@@ -78,7 +80,8 @@ public:
         m_buffer_video(freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM,
                                                 FREENECT_VIDEO_RGB)
                            .bytes),
-        m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false) {
+        m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false),
+        depthMat(cv::Size(640, 480), CV_16UC1), capture_depth(false) {
     for (unsigned int i = 0; i < 2048; i++) {
       float v = i / 2048.0;
       v = std::pow(v, 3) * 6;
@@ -138,8 +141,10 @@ public:
         break;
       }
     }
+    depthMat.data = (uchar *)depth;
     m_new_depth_frame = true;
   }
+
   bool getRGB(std::vector<uint8_t> &buffer) {
     Mutex::ScopedLock lock(m_rgb_mutex);
     if (!m_new_rgb_frame)
@@ -149,19 +154,29 @@ public:
     return true;
   }
 
-  bool getDepth(std::vector<uint8_t> &buffer) {
+  bool getDepth(std::vector<uint8_t> &buffer, cv::Mat &output) {
     Mutex::ScopedLock lock(m_depth_mutex);
     if (!m_new_depth_frame)
       return false;
     buffer.swap(m_buffer_depth);
+    if (capture_depth) {
+      depthMat.copyTo(output);
+      setCaptureDepth(false);
+    }
     m_new_depth_frame = false;
     return true;
+  }
+
+  void setCaptureDepth(bool b) {
+      capture_depth = b;
   }
 
 private:
   std::vector<uint8_t> m_buffer_depth;
   std::vector<uint8_t> m_buffer_video;
   std::vector<uint16_t> m_gamma;
+  cv::Mat depthMat;
+  bool capture_depth;
   Mutex m_rgb_mutex;
   Mutex m_depth_mutex;
   bool m_new_rgb_frame;
@@ -190,6 +205,10 @@ public:
   int got_frames, window;
 
   bool kinect_initialized;
+
+  int width_, height_;
+
+  cv::Mat depthMat;
 };
 
 #endif // KINECTWIDGET_H
