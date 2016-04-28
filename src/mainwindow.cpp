@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "glwidget.h"
 #include "ui_mainwindow.h"
-//#include "kinect.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -66,6 +65,8 @@ void MainWindow::connectUI() {
           SLOT(onActionLoadDatabase()));
   connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this,
           SLOT(onActionPreprocessDatabase()));
+  connect(ui->action_TakeSnapshot, SIGNAL(triggered()), this,
+          SLOT(onActionTakeSnapshot()));
 
   // Connect Sliders
   connect(ui->ModelColorRSlider, SIGNAL(valueChanged(int)), this,
@@ -208,47 +209,14 @@ void MainWindow::onActionOpenImage() {
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
     image = cv::imread(file_name.toStdString());
   }
-  ui->OrigDepthWidget->showImage(image);
+  ui->ImgViewer_Widget->setImg(image);
 }
 
 void MainWindow::onActionOpenKinect() {
-  bool die(false);
-  std::string filename("snapshot");
-  std::string suffix(".png");
-  int i_snap(0), iter(0);
-
-  cv::Mat depthMat(cv::Size(640, 480), CV_16UC1);
-  cv::Mat depthf(cv::Size(640, 480), CV_8UC1);
-  Freenect::Freenect freenect;
-  MyFreenectDevice &device = freenect.createDevice<MyFreenectDevice>(0);
-
-  device.startVideo();
-  device.startDepth();
-  std::cout << "Opening Kinect Device.. \n";
-  //    while (!die) {
-  //        device.getDepth(depthMat);
-  //        depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
-  //        ui->OrigDepthWidget->showImage(depthf);
-  //        char k = cvWaitKey(5);
-  //        if( k == 27 ) {
-  //            std::ostringstream file;
-  //            file << filename << i_snap << suffix;
-  //            cv::imwrite(file.str(),depthMat);
-  //            break;
-  //        }
-  //        if( k == 8 ) {
-  //            std::ostringstream file;
-  //            file << filename << i_snap << suffix;
-  //            cv::imwrite(file.str(),depthMat);
-  //            i_snap++;
-  //        }
-  //    }
-  device.stopVideo();
-  device.stopDepth();
-
-  ui->Kinect_Widget->device = &freenect.createDevice<MyFreenectDevice>(0);
+  ui->Kinect_Widget->device = &ui->Kinect_Widget->freenect.createDevice<MyFreenectDevice>(0);
   ui->Kinect_Widget->device->startVideo();
   ui->Kinect_Widget->device->startDepth();
+  ui->Kinect_Widget->startTimer(10);
   ui->Kinect_Widget->kinect_initialized = true;
 }
 
@@ -270,6 +238,16 @@ void MainWindow::onActionPreprocessDatabase() {
               << " : " << directory_name.toStdString() << "\n";
     preprocess_database(directory_name.toStdString());
   }
+}
+
+void MainWindow::onActionTakeSnapshot() {
+  ui->Kinect_Widget->device->setCaptureDepth(true);
+  std::string filename("snapshot");
+  std::string suffix(".png");
+  std::ostringstream file;
+  file << filename << suffix;
+  cv::imwrite(file.str(), ui->Kinect_Widget->depthMat);
+  std::cout << "Took snapshot.. \n";
 }
 
 /*
