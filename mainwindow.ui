@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
-    <height>482</height>
+    <width>1348</width>
+    <height>735</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,68 +17,27 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_14">
-      <item>
-       <widget class="QLabel" name="OrigDepthImgLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Original Depth Image</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CQtOpenCVViewerGl" name="OrigDepthWidget" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>3</horstretch>
-          <verstretch>3</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="SegDepthImgLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Semgented Depth Image</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="SegDepthWidget" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>3</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Kinect Widget</string>
-        </property>
-       </widget>
-      </item>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMaximumSize</enum>
+      </property>
       <item>
        <widget class="KinectWidget" name="Kinect_Widget" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>3</horstretch>
-          <verstretch>3</verstretch>
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>1</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>480</height>
+         </size>
+        </property>
        </widget>
+      </item>
+      <item>
+       <widget class="ImgViewerWidget" name="ImgViewer_Widget" native="true"/>
       </item>
      </layout>
     </item>
@@ -101,15 +60,15 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
-         <height>320</height>
+         <width>163</width>
+         <height>568</height>
         </rect>
        </property>
        <attribute name="label">
@@ -216,7 +175,7 @@
          <x>0</x>
          <y>0</y>
          <width>178</width>
-         <height>303</height>
+         <height>556</height>
         </rect>
        </property>
        <attribute name="label">
@@ -423,8 +382,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>141</width>
-         <height>315</height>
+         <width>163</width>
+         <height>568</height>
         </rect>
        </property>
        <attribute name="label">
@@ -533,8 +492,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>157</width>
-         <height>303</height>
+         <width>163</width>
+         <height>568</height>
         </rect>
        </property>
        <attribute name="label">
@@ -619,7 +578,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>883</width>
+     <width>1348</width>
      <height>25</height>
     </rect>
    </property>
@@ -631,6 +590,7 @@
     <addaction name="action_OpenKinect"/>
     <addaction name="action_OpenImg"/>
     <addaction name="action_Quit"/>
+    <addaction name="action_TakeSnapshot"/>
    </widget>
    <widget class="QMenu" name="menu_Database">
     <property name="title">
@@ -676,6 +636,11 @@
     <string>Open &amp;Kinect</string>
    </property>
   </action>
+  <action name="action_TakeSnapshot">
+   <property name="text">
+    <string>Take &amp;Snapshot</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -686,15 +651,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>CQtOpenCVViewerGl</class>
-   <extends>QWidget</extends>
-   <header>cqtopencvviewergl.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>KinectWidget</class>
    <extends>QWidget</extends>
    <header>KinectWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ImgViewerWidget</class>
+   <extends>QWidget</extends>
+   <header>ImgViewerWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
