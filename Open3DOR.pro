@@ -30,7 +30,8 @@ SOURCES += src/main.cpp\
            src/Open3DOR.cpp \
            src/cqtopencvviewergl/cqtopencvviewergl.cpp \
            src/Segmentation.cpp \
-           src/KinectWidget.cpp
+           src/KinectWidget.cpp \
+           src/ImgViewerWidget.cpp
 
 
 HEADERS  += include/mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS  += include/mainwindow.h \
             include/Open3DOR.hpp \
             src/cqtopencvviewergl/cqtopencvviewergl.h \
             include/Segmentation.hpp \
-            include/KinectWidget.hpp
+            include/KinectWidget.hpp \
+            include/ImgViewerWidget.hpp
 
 FORMS    += mainwindow.ui
 
