@@ -1,8 +1,8 @@
 #include "KinectWidget.hpp"
 
-KinectWidget::KinectWidget(QWidget *parent) : QGLWidget(parent),
-    kinect_initialized(false) {
-  //startTimer(10);
+KinectWidget::KinectWidget(QWidget *parent)
+    : QGLWidget(parent), kinect_initialized(false),
+      depthMat(cv::Size(640, 480), CV_16UC1) {
 }
 
 void KinectWidget::initializeGL() {
@@ -24,22 +24,17 @@ void KinectWidget::initializeGL() {
 }
 
 void KinectWidget::paintGL() {
-  if(!kinect_initialized) return;
 
-  static std::vector<uint8_t> depth(640 * 480 * 4);
-  static std::vector<uint8_t> rgb(640 * 480 * 4);
 
-  // using getTiltDegs() in a closed loop is unstable
-  /*if(device->getState().m_code == TILT_STATUS_STOPPED){
-    freenect_angle = device->getState().getTiltDegs();
-  }*/
-  device->updateState();
-  // printf("\r demanded tilt angle: %+4.2f device tilt angle: %+4.2f",
-  // freenect_angle, device->getState().getTiltDegs());
-  fflush(stdout);
+  static std::vector<uint8_t> depth(640 * 480 * 4, 0);
+  static std::vector<uint8_t> rgb(640 * 480 * 4, 0);
 
-  device->getDepth(depth);
-  device->getRGB(rgb);
+  if (kinect_initialized) {
+    device->updateState();
+
+    device->getDepth(depth, depthMat);
+    device->getRGB(rgb);
+  }
 
   got_frames = 0;
 
@@ -57,41 +52,44 @@ void KinectWidget::paintGL() {
   glTexCoord2f(0, 0);
   glVertex3f(0, 0, 0);
   glTexCoord2f(1, 0);
-  glVertex3f(640, 0, 0);
+  glVertex3f(width_, 0, 0);
   glTexCoord2f(1, 1);
-  glVertex3f(640, 480, 0);
+  glVertex3f(width_, height_ / 2.0, 0);
   glTexCoord2f(0, 1);
-  glVertex3f(0, 480, 0);
+  glVertex3f(0, height_ / 2.0, 0);
   glEnd();
 
   glBindTexture(GL_TEXTURE_2D, gl_rgb_tex);
-  if (device->getVideoFormat() == FREENECT_VIDEO_RGB ||
-      device->getVideoFormat() == FREENECT_VIDEO_YUV_RGB)
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 &rgb[0]);
-  else
-    glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE, &rgb[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               &rgb[0]);
+//  if (device->getVideoFormat() == FREENECT_VIDEO_RGB ||
+//      device->getVideoFormat() == FREENECT_VIDEO_YUV_RGB)
+//    glTexImage2D(GL_TEXTURE_2D, 0, 3, 640, 480, 0, GL_RGB, GL_UNSIGNED_BYTE,
+//                 &rgb[0]);
+//  else
+//    glTexImage2D(GL_TEXTURE_2D, 0, 1, 640, 480, 0, GL_LUMINANCE,
+//                 GL_UNSIGNED_BYTE, &rgb[0]);
 
   glBegin(GL_TRIANGLE_FAN);
   glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
   glTexCoord2f(0, 0);
-  glVertex3f(640, 0, 0);
+  glVertex3f(0 , height_ / 2.0, 0);
   glTexCoord2f(1, 0);
-  glVertex3f(1280, 0, 0);
+  glVertex3f(width_, height_ / 2.0, 0);
   glTexCoord2f(1, 1);
-  glVertex3f(1280, 480, 0);
+  glVertex3f(width_, height_, 0);
   glTexCoord2f(0, 1);
-  glVertex3f(640, 480, 0);
+  glVertex3f(0, height_, 0);
   glEnd();
 }
 
 void KinectWidget::resizeGL(int w, int h) {
+  width_ = w;
+  height_ = h;
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0, w, h, 0, -1.0f, 1.0f);
-  // gluPerspective(50.0, (float)width / height, 900.0, 11000.0);
   glMatrixMode(GL_MODELVIEW);
 }
 
