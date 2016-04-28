@@ -37,6 +37,7 @@ private slots:
   void onActionOpenKinect();
   void onActionLoadDatabase();
   void onActionPreprocessDatabase();
+  void onActionTakeSnapshot();
 
   /*
    * Color Setting Functions
