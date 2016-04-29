@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "glwidget.h"
 #include "ui_mainwindow.h"
+#include "Segmentation.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -107,6 +108,7 @@ void MainWindow::connectUI() {
 
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
+  connect(ui->SegmentatImgButton, SIGNAL(clicked()), this, SLOT(onSegmentImg()));
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -209,6 +211,7 @@ void MainWindow::onActionOpenImage() {
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
     image = cv::imread(file_name.toStdString());
   }
+  std::cout << "Open image : " << file_name.toStdString() << "\n";
   ui->ImgViewer_Widget->setImg(image);
 }
 
@@ -328,4 +331,14 @@ void MainWindow::setNormalsLighting(bool light) {
 
 void MainWindow::gridFilter() {
   ui->widget->filtered_mesh = ui->widget->primary_mesh.gridFilter();
+}
+
+void MainWindow::onSegmentImg() {
+  ImgSegmenter segm;
+
+  segm.image = ui->ImgViewer_Widget->getImg();
+
+  segm.estimateNormals();
+  segm.detectNormalEdges();
+  segm.colorRegions();
 }

@@ -41,6 +41,7 @@ private slots:
 
   /*
    * Color Setting Functions
+   * Sliders
    * */
 
   void setModelColorR(int);
@@ -53,6 +54,7 @@ private slots:
 
   /*
    * Rendering Options Setting Functions
+   * Check Boxes
    * */
 
   void setShowVertices(bool);
@@ -67,6 +69,7 @@ private slots:
   void setModelLighting(bool);
   void setNormalsLighting(bool);
 
+  void onSegmentImg();
   void gridFilter();
 
 private:
