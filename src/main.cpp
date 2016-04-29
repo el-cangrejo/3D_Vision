@@ -1,4 +1,3 @@
-#include "cqtopencvviewergl/cqtopencvviewergl.h"
 #include "glwidget.h"
 #include "mainwindow.h"
 
@@ -6,7 +5,6 @@
 #include <QApplication>
 
 int main(int argc, char *argv[]) {
-
   glutInit(&argc, argv);
 
   QApplication a(argc, argv);

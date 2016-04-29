@@ -1,7 +1,7 @@
 #include "mainwindow.h"
+#include "Segmentation.hpp"
 #include "glwidget.h"
 #include "ui_mainwindow.h"
-#include "Segmentation.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -108,7 +108,8 @@ void MainWindow::connectUI() {
 
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
-  connect(ui->SegmentatImgButton, SIGNAL(clicked()), this, SLOT(onSegmentImg()));
+  connect(ui->SegmentatImgButton, SIGNAL(clicked()), this,
+          SLOT(onSegmentImg()));
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -216,7 +217,8 @@ void MainWindow::onActionOpenImage() {
 }
 
 void MainWindow::onActionOpenKinect() {
-  ui->Kinect_Widget->device = &ui->Kinect_Widget->freenect.createDevice<MyFreenectDevice>(0);
+  ui->Kinect_Widget->device =
+      &ui->Kinect_Widget->freenect.createDevice<MyFreenectDevice>(0);
   ui->Kinect_Widget->device->startVideo();
   ui->Kinect_Widget->device->startDepth();
   ui->Kinect_Widget->startTimer(10);

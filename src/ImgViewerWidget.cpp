@@ -1,8 +1,6 @@
 #include "ImgViewerWidget.hpp"
 
-ImgViewerWidget::ImgViewerWidget(QWidget *parent)
-    : QGLWidget(parent) {
-}
+ImgViewerWidget::ImgViewerWidget(QWidget *parent) : QGLWidget(parent) {}
 
 void ImgViewerWidget::initializeGL() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -25,8 +23,8 @@ void ImgViewerWidget::paintGL() {
   glEnable(GL_TEXTURE_2D);
 
   glBindTexture(GL_TEXTURE_2D, gl_img_tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, img.cols, img.rows, 0, GL_RGB, GL_UNSIGNED_BYTE,
-               img.data);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, img.cols, img.rows, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, img.data);
 
   glBegin(GL_TRIANGLE_FAN);
   glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
@@ -52,14 +50,12 @@ void ImgViewerWidget::resizeGL(int w, int h) {
 }
 
 void ImgViewerWidget::setImg(cv::Mat depthMat) {
-  //cv::Mat image(cv::Size(depthMat.cols, depthMat.rows),CV_8UC1);
-  //depthMat.convertTo(image, CV_8UC1, 255.0/2048.0);
+  // cv::Mat image(cv::Size(depthMat.cols, depthMat.rows),CV_8UC1);
+  // depthMat.convertTo(image, CV_8UC1, 255.0/2048.0);
   img = depthMat;
   updateGL();
-  //setMinimumHeight(img.rows);
-  //setMinimumWidth(img.cols);
+  // setMinimumHeight(img.rows);
+  // setMinimumWidth(img.cols);
 }
 
-cv::Mat ImgViewerWidget::getImg() {
-    return img;
-}
+cv::Mat ImgViewerWidget::getImg() { return img; }
