@@ -30,7 +30,6 @@ SOURCES += src/main.cpp\
            src/KinectWidget.cpp \
            src/ImgViewerWidget.cpp
 
-
 HEADERS  += include/mainwindow.h \
             include/glwidget.h \
             include/Open3DOR.hpp \
