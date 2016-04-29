@@ -59,3 +59,7 @@ void ImgViewerWidget::setImg(cv::Mat depthMat) {
   //setMinimumHeight(img.rows);
   //setMinimumWidth(img.cols);
 }
+
+cv::Mat ImgViewerWidget::getImg() {
+    return img;
+}

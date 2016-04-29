@@ -15,6 +15,7 @@ public:
   void paintGL();
   void resizeGL(int w, int h);
   void setImg(cv::Mat depthMat);
+  cv::Mat getImg();
 
 private:
   cv::Mat img;
