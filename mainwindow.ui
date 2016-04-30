@@ -37,7 +37,30 @@
        </widget>
       </item>
       <item>
-       <widget class="ImgViewerWidget" name="ImgViewer_Widget" native="true"/>
+       <widget class="QWidget" name="widget_2" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>204</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ImgViewerWidget" name="ImgViewer_Widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>204</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -175,7 +198,7 @@
          <x>0</x>
          <y>0</y>
          <width>178</width>
-         <height>293</height>
+         <height>556</height>
         </rect>
        </property>
        <attribute name="label">

@@ -50,8 +50,6 @@ void ImgViewerWidget::resizeGL(int w, int h) {
 }
 
 void ImgViewerWidget::setImg(cv::Mat depthMat) {
-  // cv::Mat image(cv::Size(depthMat.cols, depthMat.rows),CV_8UC1);
-  // depthMat.convertTo(image, CV_8UC1, 255.0/2048.0);
   img = depthMat;
   updateGL();
   // setMinimumHeight(img.rows);
