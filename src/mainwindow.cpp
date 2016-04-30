@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "Segmentation.hpp"
-#include "glwidget.h"
+#include "GlWidget.hpp"
 #include "ui_mainwindow.h"
 
 #include <opencv2/core/core.hpp>

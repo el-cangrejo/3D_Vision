@@ -24,14 +24,14 @@ INCLUDEPATH += "usr/local/include/opencv2" \
 
 SOURCES += src/main.cpp\
            src/mainwindow.cpp \
-           src/glwidget.cpp \
+           src/GlWidget.cpp \
            src/Open3DOR.cpp \
            src/Segmentation.cpp \
            src/KinectWidget.cpp \
            src/ImgViewerWidget.cpp
 
 HEADERS  += include/mainwindow.h \
-            include/glwidget.h \
+            include/GlWidget.hpp \
             include/Open3DOR.hpp \
             include/Segmentation.hpp \
             include/KinectWidget.hpp \

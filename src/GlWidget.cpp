@@ -1,4 +1,4 @@
-#include "glwidget.h"
+#include "GlWidget.hpp"
 
 #include <GL/glu.h>
 #include <GL/glut.h>

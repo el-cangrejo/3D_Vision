@@ -1,4 +1,3 @@
-#include "glwidget.h"
 #include "mainwindow.h"
 
 #include <GL/glut.h>
