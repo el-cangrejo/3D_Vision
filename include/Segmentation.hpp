@@ -1,6 +1,8 @@
 #ifndef SEGMENTATION_HPP_
 #define SEGMENTATION_HPP_
 
+#include "Open3DOR.hpp"
+
 #include "opencv2/core/utility.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/highgui/highgui_c.h"
@@ -30,6 +32,7 @@ public:
   void detectNormalEdges(); // Detects Normal Edges and Print cos(thetas)
   void colorRegions(); // Colors the found Regions
   void writetoFile(std::string filename);
+  void writetoMesh(Mesh &m);
 
   virtual ~ImgSegmenter();
 
@@ -52,6 +55,8 @@ public:
 
   clock_t begin, end;
   double elapsed_secs;
+
+  cv::Rect crop;
 
   std::vector<cv::Point3f> normals; // Vector of Normals for every Point
 };
