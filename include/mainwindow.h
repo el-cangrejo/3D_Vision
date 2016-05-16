@@ -70,6 +70,7 @@ private slots:
   void setNormalsLighting(bool);
 
   void onSegmentImg();
+  void onGenerateMesh();
   void gridFilter();
 
 private:
