@@ -210,19 +210,27 @@ void MainWindow::onActionOpenImage() {
   QString file_name = QFileDialog::getOpenFileName(this);
   cv::Mat image;
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
-    image = cv::imread(file_name.toStdString());
+    image = cv::imread(file_name.toStdString(), CV_8UC1);
   }
   std::cout << "Open image : " << file_name.toStdString() << "\n";
-  ui->ImgViewer_Widget->setImg(image);
+  std::cout << "Channels : " << image.channels() << "\n";
+
+  ui->SnapShot_Widget->setImg(image);
 }
 
 void MainWindow::onActionOpenKinect() {
+  if (ui->Kinect_Widget->freenect.deviceCount() == 0) {
+      std::cout << "No devices connected! \n";
+      return;
+  }
+
   ui->Kinect_Widget->device =
       &ui->Kinect_Widget->freenect.createDevice<MyFreenectDevice>(0);
   ui->Kinect_Widget->device->startVideo();
   ui->Kinect_Widget->device->startDepth();
   ui->Kinect_Widget->startTimer(10);
   ui->Kinect_Widget->kinect_initialized = true;
+  ui->action_OpenKinect->setText("Close &Kinect");
 }
 
 void MainWindow::onActionLoadDatabase() {
@@ -327,7 +335,8 @@ void MainWindow::setNormalsLighting(bool light) {
   ui->widget->setNormalsLighting(light);
 }
 
-/*
+/*  cvtColor(norm_bin_edge_img, colored_img, CV_GRAY2RGB);
+
  * Button Functions
  * */
 
@@ -336,11 +345,39 @@ void MainWindow::gridFilter() {
 }
 
 void MainWindow::onSegmentImg() {
-  ImgSegmenter segm;
-
-  segm.image = ui->ImgViewer_Widget->getImg();
+  ImgSegmenter segm(ui->SnapShot_Widget->getImg());
 
   segm.estimateNormals();
+  segm.printNormals();
   segm.detectNormalEdges();
   segm.colorRegions();
+
+//  imwrite("normals.png", segm.norm_img);
+//  imwrite("normals_color.png", segm.norm_color_img);
+//  imwrite("edges.png", segm.norm_edge_img);
+//  imwrite("bin_edges.png", segm.norm_bin_edge_img);
+//  imwrite("color_img.png", segm.colored_img);
+
+  ui->Normals_Widget->setImg(segm.norm_img);
+  ui->Colored_Widget->setImg(segm.colored_img);
+  ui->Binarized_Widget->setImg(segm.norm_bin_edge_img);
+}
+
+void MainWindow::onGenerateMesh() {
+  ImgSegmenter segm(ui->SnapShot_Widget->getImg());
+  segm.estimateNormals();
+
+  cv::Mat depthMat(ui->SnapShot_Widget->getImg());
+  if (depthMat.empty()) {
+      std::cout << "There is no depth image! \n";
+      return;
+  }
+
+  if (ui->widget->primary_mesh.empty()) {
+    ui->widget->primary_mesh.clear();
+  }
+  segm.writetoMesh(ui->widget->primary_mesh);
+  ui->widget->primary_mesh.movetoCenter();
+  ui->widget->primary_mesh.fittoUnitSphere();
+  ui->widget->primary_mesh.printInfo();
 }
