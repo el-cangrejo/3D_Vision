@@ -22,12 +22,31 @@ void ImgViewerWidget::paintGL() {
 
   glEnable(GL_TEXTURE_2D);
 
-  glBindTexture(GL_TEXTURE_2D, gl_img_tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, img.cols, img.rows, 0, GL_RGB,
-               GL_UNSIGNED_BYTE, img.data);
+  QImage image;
 
-  glBegin(GL_TRIANGLE_FAN);
-  glColor4f(255.0f, 255.0f, 255.0f, 255.0f);
+  GLuint type = GL_LUMINANCE;
+
+  if( img.channels() == 3) {
+      image = QImage((const unsigned char*)(img.data),
+                            img.cols, img.rows,
+                            img.step, QImage::Format_RGB888)/*.rgbSwapped()*/;
+      type = GL_RGB;
+  }
+  else if( img.channels() == 1) {
+      image = QImage((const unsigned char*)(img.data),
+                            img.cols, img.rows,
+                            img.step, QImage::Format_Indexed8);
+  }
+
+  std::cout << "Image step : " << img.step << "\n";
+  
+  glBindTexture(GL_TEXTURE_2D, gl_img_tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, type,
+               GL_UNSIGNED_BYTE, image.bits());
+
+
+
+  glBegin(GL_QUADS);
   glTexCoord2f(0, 0);
   glVertex3f(0, 0, 0);
   glTexCoord2f(1, 0);
@@ -50,7 +69,8 @@ void ImgViewerWidget::resizeGL(int w, int h) {
 }
 
 void ImgViewerWidget::setImg(cv::Mat depthMat) {
-  img = depthMat;
+  depthMat.copyTo(img);
+  std::cout << "Channels set img : " << img.channels() << "\n";
   updateGL();
   // setMinimumHeight(img.rows);
   // setMinimumWidth(img.cols);
