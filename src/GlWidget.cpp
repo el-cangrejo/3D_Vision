@@ -203,9 +203,11 @@ void GLWidget::draw_mesh(Mesh &mesh) {
     auto end = mesh.vertices.end();
     auto it = mesh.vertices.begin();
     for (; it != end; ++it) {
-      glNormal3f(mesh.normals[std::distance(start, it)].x,
-                 mesh.normals[std::distance(start, it)].y,
-                 mesh.normals[std::distance(start, it)].z);
+      if (!mesh.normals.empty()) {
+        glNormal3f(mesh.normals[std::distance(start, it)].x,
+                   mesh.normals[std::distance(start, it)].y,
+                   mesh.normals[std::distance(start, it)].z);
+      }
       glVertex3f((*it).x, (*it).y, (*it).z);
     }
     glEnd();
