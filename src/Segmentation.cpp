@@ -3,10 +3,15 @@
 ImgSegmenter::ImgSegmenter() {}
 
 ImgSegmenter::ImgSegmenter(const cv::Mat &img)
-    : image(img), median_kernel(1), normal_radius(1), normal_step(1),
-      edge_radius(1), num_regions(0) {}
+    : image(img), median_kernel(5), normal_radius(3), normal_step(5),
+      edge_radius(4), num_regions(0) {}
+
+ImgSegmenter::ImgSegmenter(cv::Mat &&img)
+    : image(img), median_kernel(5), normal_radius(3), normal_step(5),
+      edge_radius(4), num_regions(0) { }
 
 void ImgSegmenter::estimateNormals(void) {
+  cv::medianBlur(image, median_img, 5);
   begin = clock();
   cout << "Estimation of Surface Normals begin \n";
 
@@ -26,7 +31,7 @@ void ImgSegmenter::estimateNormals(void) {
                     (float)image.at<uchar>(i - normal_radius, j));
       cv::Point3f n;
       // Check if pixel is not a valid measurment
-      if (a.z == 0 || b.z == 0 || c.z == 0) {
+      if (a.z == 255 || b.z == 255 || c.z == 255) {
         n = cv::Point3f(0, 0, 0);
       } else {
         // Vectors for normal estimation
@@ -60,9 +65,19 @@ void ImgSegmenter::printNormals(void) {
   norm_img = median_img.clone();
   norm_color_img = median_img.clone();
 
-  normal_step = 10;
+  crop = cv::Rect(normal_radius, normal_radius, norm_color_img.cols - 2 * normal_radius,
+          norm_color_img.rows - 2 * normal_radius); // Crop image according to radius
 
-  cvtColor(image, norm_color_img,
+  norm_color_img = norm_color_img(crop);
+  norm_img = norm_img(crop);
+
+  cout << "Norm Color Image Size : " << norm_color_img.rows << " "
+          << norm_color_img.cols << "\n";
+
+  cout << "Image Size : " << image.channels() << " "
+          << image.cols << "\n";
+
+  cvtColor(median_img, norm_color_img,
            CV_GRAY2RGB); // Make norm_color_img 3 channels
 
   for (int i = 0; i < norm_img.rows; ++i) {
@@ -93,9 +108,9 @@ void ImgSegmenter::detectNormalEdges(void) {
   begin = clock();
   cout << "Detection of Surface Normal Edges begin \n";
 
-  norm_edge_img = median_img.clone();
-
+  norm_edge_img = median_img(crop);
   norm_bin_edge_img = norm_edge_img.clone();
+
   for (int i = 0; i < norm_edge_img.rows; ++i) {
     for (int j = 0; j < norm_edge_img.cols; ++j) {
       if (i >= edge_radius && j >= edge_radius &&
@@ -119,7 +134,7 @@ void ImgSegmenter::detectNormalEdges(void) {
           // North Direction
           cv::Point3f n = normals[(i - count) * norm_edge_img.cols + j];
           costhetan += n0.dot(n) / edge_radius;
-          // South Direction
+          // Soutedge_radiush Direction
           cv::Point3f s = normals[(i + count) * norm_edge_img.cols + j];
           costhetas += n0.dot(s) / edge_radius;
           // West Direction
@@ -158,9 +173,20 @@ void ImgSegmenter::detectNormalEdges(void) {
         } else {
           norm_bin_edge_img.at<uchar>(i, j) = 0;
         }
+
+        if (i == 150 && j == 180) {
+            imwrite("edges2.png", norm_edge_img);
+        }
       }
     }
   }
+
+  crop = cv::Rect(edge_radius, edge_radius,
+                  norm_edge_img.cols - 2 * edge_radius,
+                  norm_edge_img.rows - 2 * edge_radius);
+
+  norm_edge_img = norm_edge_img(crop);
+  norm_bin_edge_img = norm_bin_edge_img(crop);
 
   cv::medianBlur(norm_bin_edge_img, norm_bin_edge_img, 5);
 
@@ -173,6 +199,8 @@ void ImgSegmenter::detectNormalEdges(void) {
 void ImgSegmenter::colorRegions(void) {
   begin = clock();
   cout << "Region Growing begin \n";
+
+  cvtColor(norm_bin_edge_img, colored_img, CV_GRAY2RGB);
 
   std::vector<cv::Scalar> colors{
       cv::Scalar(0, 0, 255),   cv::Scalar(0, 255, 0),
@@ -244,9 +272,9 @@ void ImgSegmenter::writetoFile(std::string filename) {
         myfile << "v " << ((colored_img.cols / 2.0) - j) / colored_img.cols
                << " " << ((colored_img.rows / 2.0) - i) / colored_img.rows
                << " " << (int)median_img.at<uchar>(i, j) / 255. << "\n";
-        myfile << "c " << colored_img.at<cv::Vec3b>(i, j)[0] / 255 << " "
-               << colored_img.at<cv::Vec3b>(i, j)[1] / 255 << " "
-               << colored_img.at<cv::Vec3b>(i, j)[2] / 255 << "\n";
+//        myfile << "c " << colored_img.at<cv::Vec3b>(i, j)[0] / 255 << " "
+//               << colored_img.at<cv::Vec3b>(i, j)[1] / 255 << " "
+//               << colored_img.at<cv::Vec3b>(i, j)[2] / 255 << "\n";
         if ((i <= colored_img.rows - 2) && (j <= colored_img.cols - 4)) {
           myfile << "f " << (count_i * (colored_img.cols / 2) + j / 2) << " "
                  << (count_i * (colored_img.cols / 2) + (j / 2 + 1)) << " "
@@ -268,45 +296,24 @@ void ImgSegmenter::writetoFile(std::string filename) {
   myfile.close();
 }
 
+void ImgSegmenter::writetoMesh(Mesh &m) {
+    int count_i(0);
+    int count_j(0);
+
+    for (int i = 0; i < colored_img.rows; ++i) {
+      for (int j = 0; j < colored_img.cols; ++j) {
+        if ((i % 4 == 0) && (j % 4 == 0)) {
+          Vertex v(((colored_img.cols / 2.0) - j) / colored_img.cols,
+                   ((colored_img.rows / 2.0) - i) / colored_img.rows,
+                    image.at<uchar>(i, j) / 255.);
+          m.vertices.push_back(v);
+        }
+        if (j % 2 == 0) ++count_j;
+      }
+      if (i % 2 == 0)
+        ++count_i;
+    }
+}
+
 ImgSegmenter::~ImgSegmenter() {}
 
-int prepare_segmentation(cv::Mat &img) {
-
-  ImgSegmenter segmenter(img);
-
-  // Median Filter for Noise Reduction
-  cv::medianBlur(segmenter.image, segmenter.median_img,
-                 segmenter.median_kernel);
-
-  // Estimation of Surface Normals
-  segmenter.estimateNormals();
-
-  // Prints Normal Vector at every pixel and Map xyz to RGB
-
-  cv::Rect crop(
-      segmenter.normal_radius, segmenter.normal_radius,
-      segmenter.norm_color_img.cols - 2 * segmenter.normal_radius,
-      segmenter.norm_color_img.rows -
-          2 * segmenter.normal_radius); // Crop image according to normal_radius
-
-  segmenter.norm_color_img = segmenter.norm_color_img(crop);
-  segmenter.norm_img = segmenter.norm_img(crop);
-
-  segmenter.printNormals();
-
-  // Detection of Surface Normal Edges
-
-  segmenter.norm_edge_img = segmenter.norm_edge_img(crop);
-  segmenter.detectNormalEdges();
-  crop = cv::Rect(segmenter.edge_radius, segmenter.edge_radius,
-                  segmenter.norm_edge_img.cols - 2 * segmenter.edge_radius,
-                  segmenter.norm_edge_img.rows - 2 * segmenter.edge_radius);
-  segmenter.norm_edge_img = segmenter.norm_edge_img(crop);
-  segmenter.norm_bin_edge_img = segmenter.norm_bin_edge_img(crop);
-
-  cvtColor(segmenter.norm_bin_edge_img, segmenter.colored_img, CV_GRAY2RGB);
-
-  segmenter.colorRegions();
-
-  return 0;
-}
