@@ -13,7 +13,7 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-INCLUDEPATH += "/usr/include/pcl-1.7"\
+INCLUDEPATH += "/usr/local/include/pcl-1.8"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
                "include" \
