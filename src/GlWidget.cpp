@@ -26,7 +26,7 @@ void GLWidget::paintGL() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(eyex, eyey, eyez, // camera position
-            0, 0, 0,          // target position
+            targetx, targety, targetz,          // target position
             up_vector.x, up_vector.y, up_vector.z);
 
   float scale_size(1 / 1.5);
@@ -86,7 +86,6 @@ void GLWidget::mousePressEvent(QMouseEvent *qevent) {
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *qevent) {
-
   if (mouseClickDown) {
     // Calculate angles
     azimuthAngle -= (qevent->x() - mx0) * _rotFactor;
@@ -126,6 +125,27 @@ void GLWidget::wheelEvent(QWheelEvent *qevent) {
   eyey = cdist * cos(altitudeAngle);
   eyez = cdist * sin(altitudeAngle) * cos(azimuthAngle);
   updateGL();
+}
+
+void GLWidget::keyPressEvent(QKeyEvent *qevent) {
+    switch (qevent->key()) {
+    case Qt::Key_Up: {
+        targetx += 0.1;
+        break;
+    }  case Qt::Key_Down: {
+        targetx -= 0.1;
+        break;
+    }
+    case Qt::Key_Left: {
+        targety -= 0.1;
+        break;
+    }  case Qt::Key_Right: {
+        targety += 0.1;
+        break;
+    } default:
+        break;
+    }
+    updateGL();
 }
 
 /*
@@ -208,7 +228,14 @@ void GLWidget::draw_mesh(Mesh &mesh) {
                    mesh.normals[std::distance(start, it)].y,
                    mesh.normals[std::distance(start, it)].z);
       }
+      if (!mesh.colors.empty()) {
+        auto v = mesh.colors[std::distance(start, it)];
+        glColor3f(v.val[0] / 255.,
+                  v.val[1] / 255.,
+                  v.val[2] / 255.);
+      }
       glVertex3f((*it).x, (*it).y, (*it).z);
+
     }
     glEnd();
   }
@@ -217,7 +244,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
       glDisable(GL_LIGHTING);
     glColor3f(1.0, 0.0, 1.0);
     glBegin(GL_LINES);
-    for (size_t i = 0; i < mesh.normals.size(); ++i) {
+    for (size_t i = 0; i < mesh.normals.size(); i += 28) {
       glNormal3f(mesh.normals[i].x, mesh.normals[i].y, mesh.normals[i].z);
       glVertex3f((mesh.vertices[i].x + _NormalsLength * mesh.normals[i].x),
                  (mesh.vertices[i].y + _NormalsLength * mesh.normals[i].y),
@@ -233,49 +260,16 @@ void GLWidget::draw_mesh(Mesh &mesh) {
 }
 
 void GLWidget::draw_grid(Mesh &mesh) {
-
-  Vertex max(0., 0., 0.);
-  Vertex min(1., 1., 1.);
-
-  for (const auto &v : mesh.vertices) {
-    if (v.x >= max.x)
-      max.x = v.x;
-    if (v.y >= max.y)
-      max.y = v.y;
-    if (v.z >= max.z)
-      max.z = v.z;
-    if (v.x <= min.x)
-      min.x = v.x;
-    if (v.y <= min.y)
-      min.y = v.y;
-    if (v.z <= min.z)
-      min.z = v.z;
-  }
-
-  /*
-  glPushMatrix();
-    glTranslatef(max.x, max.y, max.z);
-    glColor3f(1.0, 0.0, 0.0);
-    glutWireSphere(0.1, 10, 10);
-  glPopMatrix();
-
-  glPushMatrix();
-    glTranslatef(min.x, min.y, min.z);
-    glColor3f(1.0, 0.0, 0.0);
-    glutWireSphere(0.1, 10, 10);
-  glPopMatrix();
-  //*/
-
-  int dim_x = ceil(fabs(max.x - min.x) / mesh.grid_size);
-  int dim_y = ceil(fabs(max.y - min.y) / mesh.grid_size);
-  int dim_z = ceil(fabs(max.z - min.z) / mesh.grid_size);
+  int dim_x = ceil(fabs(mesh.max.x - mesh.min.x) / mesh.grid_size);
+  int dim_y = ceil(fabs(mesh.max.y - mesh.min.y) / mesh.grid_size);
+  int dim_z = ceil(fabs(mesh.max.z - mesh.min.z) / mesh.grid_size);
 
   // std::cout << "Grid size = " << dim_x << " * " << dim_y << " * " << dim_z <<
   // "\n";
 
-  float displacement_x = min.x + mesh.grid_size / 2;
-  float displacement_y = min.y + mesh.grid_size / 2;
-  float displacement_z = min.z + mesh.grid_size / 2;
+  float displacement_x = mesh.min.x + mesh.grid_size / 2;
+  float displacement_y = mesh.min.y + mesh.grid_size / 2;
+  float displacement_z = mesh.min.z + mesh.grid_size / 2;
 
   glTranslatef(displacement_x, displacement_y, displacement_z);
 
