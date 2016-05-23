@@ -22,6 +22,7 @@ public:
   void mousePressEvent(QMouseEvent *qevent);
   void mouseMoveEvent(QMouseEvent *qevent);
   void wheelEvent(QWheelEvent *qevent);
+  void keyPressEvent(QKeyEvent *qevent);
 
   // Rendering Functions
   void draw_mesh(Mesh &);
@@ -66,9 +67,9 @@ public:
   bool _normalLighting = false;
   bool _modelLighting = false;
 
-  float _BackgroundColorR = 0.8;
-  float _BackgroundColorG = 0.8;
-  float _BackgroundColorB = 0.8;
+  float _BackgroundColorR = 0.0;
+  float _BackgroundColorG = 0.0;
+  float _BackgroundColorB = 0.3;
 
   float _ModelColorR = 0.1;
   float _ModelColorG = 0.0;
@@ -97,6 +98,9 @@ private:
   float cdist = 3.5;
   float eyex = 0.0;
   float eyey = 0.0;
+  float targetx = 0.0;
+  float targety = 0.0;
+  float targetz = 0.0;
   float eyez = cdist;
   float azimuthAngle = 0.0;
   float altitudeAngle = PI / 2.;
