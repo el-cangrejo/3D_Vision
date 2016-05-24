@@ -21,14 +21,30 @@ void ImgSegmenter::estimateNormals(void) {
   for (int i = normal_radius; i < image.rows - normal_radius; ++i) {
     for (int j = normal_radius; j < image.cols - normal_radius; ++j) {
       // Points a, b, c in the neighborhood of pixel (i, j)
-      cv::Point3f a(
-          i + normal_radius, j - normal_radius,
-          (float)image.at<uchar>(i + normal_radius, j - normal_radius));
-      cv::Point3f b(
-          i + normal_radius, j + normal_radius,
-          (float)image.at<uchar>(i + normal_radius, j + normal_radius));
-      cv::Point3f c(i - normal_radius, j,
-                    (float)image.at<uchar>(i - normal_radius, j));
+      cv::Point3f a, b, c;
+      if (image.type() == CV_8UC1) {
+        a = cv::Point3f(
+            i + normal_radius, j - normal_radius,
+            static_cast<float>(image.at<uchar>(i + normal_radius, j - normal_radius)));
+        b = cv::Point3f(
+            i + normal_radius, j + normal_radius,
+            static_cast<float>(image.at<uchar>(i + normal_radius, j + normal_radius)));
+        c = cv::Point3f(i - normal_radius, j,
+                      static_cast<float>(image.at<uchar>(i - normal_radius, j)));
+      } else if (image.type() == CV_16UC1) {
+        a = cv::Point3f(
+            i + normal_radius, j - normal_radius,
+            static_cast<float>(image.at<ushort>(i + normal_radius, j - normal_radius)));
+        b = cv::Point3f(
+            i + normal_radius, j + normal_radius,
+            static_cast<float>(image.at<ushort>(i + normal_radius, j + normal_radius)));
+        c = cv::Point3f(i - normal_radius, j,
+                      static_cast<float>(image.at<ushort>(i - normal_radius, j)));
+      } else {
+          std::cout << "Unsupported image type! \n";
+          return;
+      }
+
       cv::Point3f n;
       // Check if pixel is not a valid measurment
       if (a.z == 255 || b.z == 255 || c.z == 255) {
@@ -70,12 +86,6 @@ void ImgSegmenter::printNormals(void) {
 
   norm_color_img = norm_color_img(crop);
   norm_img = norm_img(crop);
-
-  cout << "Norm Color Image Size : " << norm_color_img.rows << " "
-          << norm_color_img.cols << "\n";
-
-  cout << "Image Size : " << image.channels() << " "
-          << image.cols << "\n";
 
   cvtColor(median_img, norm_color_img,
            CV_GRAY2RGB); // Make norm_color_img 3 channels
@@ -199,13 +209,11 @@ void ImgSegmenter::detectNormalEdges(void) {
 void ImgSegmenter::colorRegions(void) {
   begin = clock();
   cout << "Region Growing begin \n";
+  colored_img = cv::Mat(cv::Size(norm_bin_edge_img.cols, norm_bin_edge_img.rows), CV_8UC1);
 
-  cvtColor(norm_bin_edge_img, colored_img, CV_GRAY2RGB);
-
-  std::vector<cv::Scalar> colors{
-      cv::Scalar(0, 0, 255),   cv::Scalar(0, 255, 0),
-      cv::Scalar(255, 0, 0),   cv::Scalar(255, 0, 255),
-      cv::Scalar(0, 255, 255), cv::Scalar(255, 255, 0)};
+//  norm_bin_edge_img.convertTo(colored_img, CV_8UC1, 255.0/2048.0);
+  //norm_bin_edge_img.convertTo(norm_bin_edge_img, CV_8UC1, 255.0/2048.0);
+  cvtColor(colored_img, colored_img, CV_GRAY2RGB);
 
   for (int i = 0; i < colored_img.rows; ++i) {
     for (int j = 0; j < colored_img.cols; ++j) {
@@ -213,7 +221,7 @@ void ImgSegmenter::colorRegions(void) {
       if (colored_img.at<cv::Vec3b>(i, j) == cv::Vec3b(255, 255, 255)) {
         ++num_regions;
         seed = cv::Point(j, i);
-        cv::floodFill(colored_img, seed, colors[num_regions % 6]);
+        cv::floodFill(colored_img, seed, getNextColor(num_regions));
       }
     }
   }
@@ -231,10 +239,10 @@ void ImgSegmenter::colorRegions(void) {
             int image_c =
                 std::min(std::max(c + j, 0), (int)(colored_img.cols - 1));
             if (colored_img.at<cv::Vec3b>(image_r, image_c) !=
-                cv::Vec3b(0, 0, 0)) {
+                cv::Vec3b()) {
               float depth_dif =
-                  abs((int)median_img.at<uchar>(image_r, image_c) -
-                      (int)median_img.at<uchar>(r, c));
+                  abs(static_cast<float>(median_img.at<uchar>(image_r, image_c) -
+                      static_cast<float>(median_img.at<uchar>(r, c))));
               float euc_dist = sqrt(pow(i, 2) + pow(j, 2) + pow(depth_dif, 2));
               if (euc_dist < min_dist) {
                 min_dist = euc_dist;
@@ -262,9 +270,6 @@ void ImgSegmenter::writetoFile(std::string filename) {
   std::ofstream myfile;
   myfile.open(filename + ".obj");
 
-  int count_i(0);
-  int count_j(0);
-
   for (int i = 0; i < colored_img.rows; ++i) {
     for (int j = 0; j < colored_img.cols; ++j) {
       if ((i % 2 == 0) && (j % 2 == 0)) {
@@ -272,48 +277,95 @@ void ImgSegmenter::writetoFile(std::string filename) {
         myfile << "v " << ((colored_img.cols / 2.0) - j) / colored_img.cols
                << " " << ((colored_img.rows / 2.0) - i) / colored_img.rows
                << " " << (int)median_img.at<uchar>(i, j) / 255. << "\n";
-//        myfile << "c " << colored_img.at<cv::Vec3b>(i, j)[0] / 255 << " "
-//               << colored_img.at<cv::Vec3b>(i, j)[1] / 255 << " "
-//               << colored_img.at<cv::Vec3b>(i, j)[2] / 255 << "\n";
-        if ((i <= colored_img.rows - 2) && (j <= colored_img.cols - 4)) {
-          myfile << "f " << (count_i * (colored_img.cols / 2) + j / 2) << " "
-                 << (count_i * (colored_img.cols / 2) + (j / 2 + 1)) << " "
-                 << ((count_i + 1) * (colored_img.cols / 2) + (j / 2 + 1))
-                 << "\n";
-          myfile << "f " << (count_i * (colored_img.cols / 2) + j / 2) << " "
-                 << ((count_i + 1) * (colored_img.cols / 2) + j / 2) << " "
-                 << ((count_i + 1) * (colored_img.cols / 2) + (j / 2 + 1))
-                 << "\n";
-        }
+        myfile << "c " << colored_img.at<cv::Vec3b>(i, j)[0] / 255. << " "
+               << colored_img.at<cv::Vec3b>(i, j)[1] / 255. << " "
+               << colored_img.at<cv::Vec3b>(i, j)[2] / 255. << "\n";
       }
-      // if (j % 2 == 0) ++count_j;
     }
-    if (i % 2 == 0)
-      ++count_i;
   }
-  cout << "count_i = " << count_i << " count_j = " << count_j << "\n";
   cout << colored_img.rows << " " << (int)colored_img.cols / 2 << "\n";
   myfile.close();
 }
 
-void ImgSegmenter::writetoMesh(Mesh &m) {
-    int count_i(0);
-    int count_j(0);
+void ImgSegmenter::writetoMesh(Mesh &m, int step) {
+    std::cout << "Starting writing mesh. \n";
+    for (int i = 0; i < colored_img.rows; i += step) {
+      for (int j = 0; j < colored_img.cols; j += step) {
+//          int depthValue = static_cast<int>(image.at<uchar>(i, j));
+//          float depth;
+//          if (depthValue < 254) {
+//            depth = static_cast<float>(1.0 / ((static_cast<double>(depthValue) * (-0.0030711016)) + 3.3309495161));
+//          } else {
+//            continue;
+//          }
+//          double fx_d = 1.0 / 5.9421434211923247e+02;
+//          double fy_d = 1.0 / 5.9104053696870778e+02;
+//          double cx_d = 3.3930780975300314e+02;
+//          double cy_d = 2.4273913761751615e+02;
+//          float x = static_cast<float>((j - cy_d) * depth * fy_d);
+//          float y = -static_cast<float>((i - cx_d) * depth * fx_d);
+//          float z = static_cast<float>(depth);
+//          Vertex v(x, y, z);
 
-    for (int i = 0; i < colored_img.rows; ++i) {
-      for (int j = 0; j < colored_img.cols; ++j) {
-        if ((i % 4 == 0) && (j % 4 == 0)) {
-          Vertex v(((colored_img.cols / 2.0) - j) / colored_img.cols,
-                   ((colored_img.rows / 2.0) - i) / colored_img.rows,
-                    image.at<uchar>(i, j) / 255.);
-          m.vertices.push_back(v);
+        int index = i * (colored_img.cols + 2) + j + 2;
+        Vertex v(- ((image.cols / 2.0) - j) / image.cols,
+                 ((image.rows / 2.0) - i) / image.rows,
+                   image.at<uchar>(i, j) / 255.);
+        Vertex n(normals[index].x, normals[index].y, normals[index].z);
+        m.vertices.push_back(v);
+        //m.normals.push_back(n);
+        if (i < colored_img.rows - 1 && j < colored_img.cols - 1) {
+            Triangle t(i * colored_img.cols + j,
+                       i * colored_img.cols + j + 1,
+                       (i + 1) * colored_img.cols + j);
+            m.triangles.push_back(t);
         }
-        if (j % 2 == 0) ++count_j;
+        if (i > 0 && j < colored_img.cols - 1) {
+            Triangle t(i * colored_img.cols + j,
+                       i * colored_img.cols + j + 1,
+                       (i - 1) * colored_img.cols + j);
+            m.triangles.push_back(t);
+        }
+        if (!colored_img.empty()) {
+          cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
+          m.colors.push_back(color);
+        }
       }
-      if (i % 2 == 0)
-        ++count_i;
     }
+    m.printInfo();
+    std::cout << "Ended writing mesh. \n";
+}
+
+void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
+  for (int i = 0; i < im.rows; ++i) {
+    for (int j = 0; j < im.cols; ++j) {
+      if ((i % step == 0) && (j % step == 0) && im.at<cv::Vec3b>(i, j) == mask) {
+        Vertex v(-((im.cols / 2.0) - j) / im.cols,
+                 ((im.rows / 2.0) - i) / im.rows,
+                  image.at<uchar>(i, j) / 255.);
+        m.vertices.push_back(v);
+        cv::Vec3b color(cv::Vec3b(im.at<cv::Vec3b>(i, j)));
+        m.colors.push_back(color);
+      }
+    }
+  }
+}
+
+cv::Scalar ImgSegmenter::getNextColor(int seed) {
+    cv::Mat hsv(1, 1, CV_8UC3);
+    cv::Mat rgb(1, 1, CV_8UC3);
+    int hue = (seed * 5) % 255;
+    int sat = 255 - (seed % 255) * 5;
+
+    cv::cvtColor(hsv, hsv, CV_RGB2HSV);
+    hsv.at<cv::Vec3b>(0, 0) = cv::Vec3b(hue, sat, 255);
+    cv::cvtColor(hsv, rgb, CV_HSV2RGB);
+
+    return cv::Scalar(rgb.at<cv::Vec3b>(0, 0)[0],
+                      rgb.at<cv::Vec3b>(0, 0)[1],
+                      rgb.at<cv::Vec3b>(0, 0)[2]);
 }
 
 ImgSegmenter::~ImgSegmenter() {}
+
 
