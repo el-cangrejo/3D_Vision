@@ -32,7 +32,8 @@ public:
   void detectNormalEdges(); // Detects Normal Edges and Print cos(thetas)
   void colorRegions(); // Colors the found Regions
   void writetoFile(std::string filename);
-  void writetoMesh(Mesh &m);
+  void writetoMesh(Mesh &m, int step);
+  void writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask);
 
   virtual ~ImgSegmenter();
 
@@ -46,7 +47,7 @@ public:
   cv::Mat norm_bin_edge_img; // Image with painted Edges estimated from Surface
                              // Normals
   cv::Mat colored_img;       // Image with colored regions
-
+private:
   int median_kernel; // Median Filter Kernel
   int normal_radius; // Radius of Normal Estimation Triangle
   int normal_step;   // Kernel to Print Normals
@@ -57,8 +58,9 @@ public:
   double elapsed_secs;
 
   cv::Rect crop;
-
   std::vector<cv::Point3f> normals; // Vector of Normals for every Point
+
+  cv::Scalar getNextColor(int);
 };
 
 #endif // SEGMENTATION_HPP
