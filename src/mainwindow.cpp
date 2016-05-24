@@ -110,6 +110,10 @@ void MainWindow::connectUI() {
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
   connect(ui->SegmentatImgButton, SIGNAL(clicked()), this,
           SLOT(onSegmentImg()));
+  connect(ui->GenerateMeshButton, SIGNAL(clicked()), this, SLOT(onGenerateMesh()));
+  connect(ui->DrawButton, SIGNAL(clicked()), this, SLOT(onDraw()));
+  connect(ui->ClearAllButton, SIGNAL(clicked()), this, SLOT(onClearAll()));
+  connect(ui->ZoomImgWidgetButton, SIGNAL(clicked()), this, SLOT(onZoomImgWidget()));
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -210,11 +214,9 @@ void MainWindow::onActionOpenImage() {
   QString file_name = QFileDialog::getOpenFileName(this);
   cv::Mat image;
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
-    image = cv::imread(file_name.toStdString(), CV_8UC1);
+    image = cv::imread(file_name.toStdString(), CV_16UC1);
   }
   std::cout << "Open image : " << file_name.toStdString() << "\n";
-  std::cout << "Channels : " << image.channels() << "\n";
-
   ui->SnapShot_Widget->setImg(image);
 }
 
@@ -254,6 +256,10 @@ void MainWindow::onActionPreprocessDatabase() {
 }
 
 void MainWindow::onActionTakeSnapshot() {
+  if (ui->Kinect_Widget->freenect.deviceCount() == 0) {
+    std::cout << "No Kinect device connected!\n";
+    return;
+  }
   ui->Kinect_Widget->device->setCaptureDepth(true);
   std::string filename("snapshot");
   std::string suffix(".png");
@@ -335,8 +341,7 @@ void MainWindow::setNormalsLighting(bool light) {
   ui->widget->setNormalsLighting(light);
 }
 
-/*  cvtColor(norm_bin_edge_img, colored_img, CV_GRAY2RGB);
-
+/*
  * Button Functions
  * */
 
@@ -346,21 +351,19 @@ void MainWindow::gridFilter() {
 
 void MainWindow::onSegmentImg() {
   ImgSegmenter segm(ui->SnapShot_Widget->getImg());
-
   segm.estimateNormals();
   segm.printNormals();
   segm.detectNormalEdges();
   segm.colorRegions();
 
-//  imwrite("normals.png", segm.norm_img);
-//  imwrite("normals_color.png", segm.norm_color_img);
-//  imwrite("edges.png", segm.norm_edge_img);
-//  imwrite("bin_edges.png", segm.norm_bin_edge_img);
-//  imwrite("color_img.png", segm.colored_img);
-
   ui->Normals_Widget->setImg(segm.norm_img);
   ui->Colored_Widget->setImg(segm.colored_img);
   ui->Binarized_Widget->setImg(segm.norm_bin_edge_img);
+  segm.writetoMesh(ui->widget->primary_mesh, 1);
+
+  ui->widget->primary_mesh.computeNormals();
+  ui->widget->primary_mesh.movetoCenter();
+  ui->widget->primary_mesh.fittoUnitSphere();
 }
 
 void MainWindow::onGenerateMesh() {
@@ -373,11 +376,53 @@ void MainWindow::onGenerateMesh() {
       return;
   }
 
-  if (ui->widget->primary_mesh.empty()) {
+  if (!ui->widget->primary_mesh.empty()) {
     ui->widget->primary_mesh.clear();
   }
-  segm.writetoMesh(ui->widget->primary_mesh);
-  ui->widget->primary_mesh.movetoCenter();
-  ui->widget->primary_mesh.fittoUnitSphere();
+
+  if (ui->Colored_Widget->mask_bool) {
+    std::cout << "Writing masked mesh!\n";
+    segm.writetoMesh(ui->widget->primary_mesh, 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
+    ui->Colored_Widget->mask_bool = false;
+  } else {
+    segm.writetoMesh(ui->widget->primary_mesh, 1);
+  }
   ui->widget->primary_mesh.printInfo();
+  ui->widget->updateGL();
+}
+
+void MainWindow::onDraw() {
+  ui->Colored_Widget->draw = !ui->Colored_Widget->draw;
+  ui->Binarized_Widget->draw = !ui->Binarized_Widget->draw;
+  ui->SnapShot_Widget->draw = !ui->SnapShot_Widget->draw;
+  ui->Normals_Widget->draw = !ui->Normals_Widget->draw;
+}
+
+void MainWindow::onClearAll() {
+  ui->widget->primary_mesh.clear();
+  ui->widget->updateGL();
+  ui->Colored_Widget->clearImg();
+  ui->Colored_Widget->updateGL();
+  ui->Binarized_Widget->clearImg();
+  ui->Binarized_Widget->updateGL();
+  ui->Normals_Widget->clearImg();
+  ui->Normals_Widget->updateGL();
+}
+
+void MainWindow::onZoomImgWidget() {
+  if (!zoom) {
+    zoom = true;
+    ui->Colored_Widget->setMinimumSize(ui->Colored_Widget->getImg().rows,
+                                       ui->Kinect_Widget->width());
+    ui->Binarized_Widget->setMinimumSize(0, 0);
+    ui->SnapShot_Widget->setMinimumSize(0, 0);
+    ui->Normals_Widget->setMinimumSize(0, 0);
+  } else {
+    zoom = false;
+    ui->Colored_Widget->setMinimumSize(200, 150);
+    ui->Binarized_Widget->setMinimumSize(200, 150);
+    ui->SnapShot_Widget->setMinimumSize(200, 150);
+    ui->Normals_Widget->setMinimumSize(200, 150);
+  }
+
 }
