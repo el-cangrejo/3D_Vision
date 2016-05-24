@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1069</width>
+    <width>1293</width>
     <height>765</height>
    </rect>
   </property>
@@ -99,6 +99,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -118,7 +121,7 @@
          <x>0</x>
          <y>0</y>
          <width>150</width>
-         <height>586</height>
+         <height>320</height>
         </rect>
        </property>
        <attribute name="label">
@@ -225,7 +228,7 @@
          <x>0</x>
          <y>0</y>
          <width>178</width>
-         <height>586</height>
+         <height>293</height>
         </rect>
        </property>
        <attribute name="label">
@@ -432,7 +435,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>136</width>
+         <width>228</width>
          <height>586</height>
         </rect>
        </property>
@@ -487,7 +490,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_13" stretch="1,0,0,0,0,0,0">
+         <layout class="QVBoxLayout" name="verticalLayout_13" stretch="1,0,0,0,0,0">
           <item>
            <widget class="QLabel" name="label_4">
             <property name="sizePolicy">
@@ -521,6 +524,63 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
           </item>
           <item>
+           <layout class="QFormLayout" name="formLayout_2">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="SegmentatImgButton">
+              <property name="text">
+               <string>Segment Img</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="GenerateMeshButton">
+              <property name="text">
+               <string>Generate Mesh</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="DrawButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>15</width>
+                <height>5</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Draw</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="ClearAllButton">
+              <property name="text">
+               <string>Clear all</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QPushButton" name="ZoomImgWidgetButton">
+              <property name="text">
+               <string>Zoom Widget</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
            <widget class="QPushButton" name="StatOutFIlter">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -530,20 +590,6 @@
             </property>
             <property name="text">
              <string>Statistical Outlier</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="SegmentatImgButton">
-            <property name="text">
-             <string>Segment Img</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="GenerateMeshButton">
-            <property name="text">
-             <string>Generate Mesh</string>
             </property>
            </widget>
           </item>
@@ -557,7 +603,7 @@
          <x>0</x>
          <y>0</y>
          <width>157</width>
-         <height>586</height>
+         <height>175</height>
         </rect>
        </property>
        <attribute name="label">
@@ -642,7 +688,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1069</width>
+     <width>1293</width>
      <height>25</height>
     </rect>
    </property>
