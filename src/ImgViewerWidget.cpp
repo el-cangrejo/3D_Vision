@@ -1,6 +1,12 @@
 #include "ImgViewerWidget.hpp"
+#include "Segmentation.hpp"
 
-ImgViewerWidget::ImgViewerWidget(QWidget *parent) : QGLWidget(parent) {}
+#include <GL/glu.h>
+#include <GL/glut.h>
+
+
+ImgViewerWidget::ImgViewerWidget(QWidget *parent) : QGLWidget(parent),
+            mask_bool(false), draw(false) {}
 
 void ImgViewerWidget::initializeGL() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -19,17 +25,13 @@ void ImgViewerWidget::initializeGL() {
 void ImgViewerWidget::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-
   glEnable(GL_TEXTURE_2D);
-
   QImage image;
-
   GLuint type = GL_LUMINANCE;
-
   if( img.channels() == 3) {
       image = QImage((const unsigned char*)(img.data),
                             img.cols, img.rows,
-                            img.step, QImage::Format_RGB888)/*.rgbSwapped()*/;
+                            img.step, QImage::Format_RGB888);
       type = GL_RGB;
   }
   else if( img.channels() == 1) {
@@ -37,14 +39,10 @@ void ImgViewerWidget::paintGL() {
                             img.cols, img.rows,
                             img.step, QImage::Format_Indexed8);
   }
-
-  std::cout << "Image step : " << img.step << "\n";
   
   glBindTexture(GL_TEXTURE_2D, gl_img_tex);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, type,
                GL_UNSIGNED_BYTE, image.bits());
-
-
 
   glBegin(GL_QUADS);
   glTexCoord2f(0, 0);
@@ -70,10 +68,48 @@ void ImgViewerWidget::resizeGL(int w, int h) {
 
 void ImgViewerWidget::setImg(cv::Mat depthMat) {
   depthMat.copyTo(img);
-  std::cout << "Channels set img : " << img.channels() << "\n";
   updateGL();
-  // setMinimumHeight(img.rows);
-  // setMinimumWidth(img.cols);
 }
 
 cv::Mat ImgViewerWidget::getImg() { return img; }
+
+void ImgViewerWidget::clearImg() {
+  img.release();
+}
+
+void ImgViewerWidget::mousePressEvent(QMouseEvent *qevent) {
+  if (qevent->button() == Qt::LeftButton) {
+    mouseClickDown = true;
+    int c = ceil((qevent->x() * img.cols ) / width_);
+    int r = ceil((qevent->y() * img.rows ) / height_);
+    std::cout << "Color : " << (int)img.at<cv::Vec3b>(r, c)[0] << " "
+              << (int)img.at<cv::Vec3b>(r, c)[1] << " "
+              << (int)img.at<cv::Vec3b>(r, c)[2] << "\n";
+    std::cout << "Pixel : " << r << " " << c << "\n";
+    mask = img.at<cv::Vec3b>(r, c);
+    mask_bool = true;
+    if (draw) {
+      cv::circle(img, cv::Point(c, r), 15, cv::Scalar(255, 255, 255), -1);
+      updateGL();
+    } else {
+        mouseClickDown = false;
+    }
+  }
+}
+
+void ImgViewerWidget::mouseMoveEvent(QMouseEvent *qevent) {
+  if (mouseClickDown) {
+    int c = ceil((qevent->x() * img.cols ) / width_);
+    int r = ceil((qevent->y() * img.rows ) / height_);
+    std::cout << "Color : " << (int)img.at<cv::Vec3b>(r, c)[0] << " "
+              << (int)img.at<cv::Vec3b>(r, c)[1] << " "
+              << (int)img.at<cv::Vec3b>(r, c)[2] << "\n";
+    std::cout << "Pixel : " << r << " " << c << "\n";
+    mask = img.at<cv::Vec3b>(r, c);
+    mask_bool = true;
+    if (draw) {
+      cv::circle(img, cv::Point(c, r), 15, cv::Scalar(255, 255, 255), -1);
+      updateGL();
+    }
+  }
+}
