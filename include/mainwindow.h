@@ -12,6 +12,7 @@ class MainWindow : public QMainWindow {
 
 public:
   explicit MainWindow(QWidget *parent = 0);
+  bool zoom;
   ~MainWindow();
 
 private slots:
@@ -71,8 +72,10 @@ private slots:
 
   void onSegmentImg();
   void onGenerateMesh();
+  void onDraw();
+  void onClearAll();
+  void onZoomImgWidget();
   void gridFilter();
-
 private:
   Ui::MainWindow *ui;
 
