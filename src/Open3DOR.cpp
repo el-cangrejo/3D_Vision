@@ -3,6 +3,7 @@
 #include <armadillo>
 #include <boost/filesystem.hpp>
 #include <pcl/features/fpfh.h>
+#include <pcl/features/normal_3d.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/point_types.h>
 
@@ -46,6 +47,9 @@ float Vertex::Angle(const Vertex &other) {
 Vertex &Vertex::operator=(Vertex &&other) = default;
 Vertex &Vertex::operator=(const Vertex &other) = default;
 bool Vertex::operator==(const Vertex &other) const {
+  return (x == other.x && y == other.y && z == other.z);
+}
+bool Vertex::operator==(Vertex &&other) const {
   return (x == other.x && y == other.y && z == other.z);
 }
 Vertex Vertex::operator-(const Vertex &other) {
@@ -217,7 +221,46 @@ void Mesh::computeNormals(void) {
   std::cout << "Calculating normals end : elapsed time: " << elapsed_secs
             << "\n";
 }
-void Mesh::computeNormals_PCA(void) {}
+void Mesh::computeNormals_PCA(void) {
+    clock_t begin, end;
+    double elapsed_secs;
+    begin = clock();
+    std::cout << "Calculating normals PCA begin\n";
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+
+    cloud->points.resize(vertices.size());
+    for (size_t i = 0; i < cloud->points.size(); ++i) {
+      cloud->points[i] = pcl::PointXYZ(vertices[i].x,
+                                       vertices[i].y,
+                                       vertices[i].z);
+    }
+    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    ne.setInputCloud (cloud);
+
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+    ne.setSearchMethod (tree);
+
+    pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+
+    ne.setRadiusSearch (0.03);
+    ne.setViewPoint(0, 0, 3.5);
+    ne.compute (*cloud_normals);
+
+    normals.resize(cloud_normals->points.size());
+    for (size_t i = 0; i < cloud_normals->points.size(); ++i) {
+      normals[i] = Vertex(cloud_normals->points[0].normal_x,
+                          cloud_normals->points[0].normal_y,
+                          cloud_normals->points[0].normal_z);
+//      normals[i].x = cloud_normals->points[0].x;
+//      normals[i].y = cloud_normals->points[0].y;
+//      normals[i].z = cloud_normals->points[0].z;
+    }
+
+    end = clock();
+    elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "Calculating normals PCA end : elapsed time: " << elapsed_secs
+              << "\n";
+}
 void Mesh::computeFPFH(void) {
 
   clock_t begin, end;
@@ -297,6 +340,7 @@ void Mesh::computeFPFH(void) {
   std::cout << "Calculating FPFH end : elapsed time: " << elapsed_secs << "\n";
   // std::cout << "Fpfhs size = " << fpfhs->points.size() << "\n";
 }
+
 void Mesh::fittoUnitSphere(void) {
   float max_dist(0.0);
   for (const auto &v : vertices)
@@ -309,15 +353,26 @@ void Mesh::fittoUnitSphere(void) {
     v.z /= max_dist;
   }
 }
+
 void Mesh::movetoCenter(void) {
+  if (centroid == Vertex(0, 0, 0)) {
+    for (auto &v : vertices) {
+      centroid = centroid + v;
+    }
+  }
+  centroid = centroid / vertices.size();
   for (auto &v : vertices) {
     v = v - centroid;
   }
 }
+
 bool Mesh::empty(void) { return vertices.empty(); }
+
 void Mesh::clear(void) {
   vertices.clear();
   vertices.shrink_to_fit();
+  colors.clear();
+  colors.shrink_to_fit();
   triangles.clear();
   triangles.shrink_to_fit();
   normals.clear();
@@ -326,7 +381,11 @@ void Mesh::clear(void) {
   fpfhist.shrink_to_fit();
   voxel_grid.clear();
   voxel_grid.shrink_to_fit();
+  centroid = Vertex();
+  max = Vertex();
+  min = Vertex();
 }
+
 Mesh Mesh::gridFilter(void) {
   std::cout << "Start grid filtering.." << std::endl;
 
@@ -336,8 +395,8 @@ Mesh Mesh::gridFilter(void) {
 
   Mesh fil_mesh;
 
-  Vertex max(0., 0., 0.);
-  Vertex min(1., 1., 1.);
+  max = Vertex(0., 0., 0.);
+  min = Vertex(1., 1., 1.);
 
   for (const auto &v : vertices) {
     if (v.x > max.x)
@@ -412,8 +471,9 @@ Mesh Mesh::gridFilter(void) {
 
         for (size_t i = 0; i < pointIdxRadiusSearch.size(); ++i) {
           voxel_centroid = voxel_centroid + vertices[pointIdxRadiusSearch[i]];
-          voxel_centroid_normal =
-              voxel_centroid_normal + normals[pointIdxRadiusSearch[i]];
+          if (!normals.empty()) {
+            voxel_centroid_normal = voxel_centroid_normal + normals[pointIdxRadiusSearch[i]];
+          }
           if (fpfhist.empty())
             continue;
           for (size_t j = 0; j < fpfhist[0].size(); ++j) {
@@ -439,6 +499,7 @@ Mesh Mesh::gridFilter(void) {
   std::cout << "Filtered mesh size " << fil_mesh.vertices.size() << "\n";
   return fil_mesh;
 }
+
 Mesh Mesh::statoutFilter(void) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(
@@ -471,6 +532,7 @@ Mesh Mesh::statoutFilter(void) {
 
   return filtered_mesh;
 }
+
 void Mesh::printInfo(void) {
   // Prints Information about the mesh
   std::cout << "Object size : \n"
@@ -599,23 +661,6 @@ void read_mesh(const std::string filepath, Mesh &mesh) {
 void preprocess_mesh(Mesh &mesh) {
   mesh.movetoCenter();
   mesh.fittoUnitSphere();
-  mesh.computeNormals();
-  mesh.computeFPFH();
-  // std::vector<Edge> v;
-  // Copies Unique Edges
-  // std::copy_if(v.begin(), v.end(), std::back_inserter(mesh.edges),
-  //   [](Edge &e) { auto result = std::find(mesh.edges.begin(),
-  //   mesh.edges.end(), e);
-  //                 if (result == mesh.edges.end()) return true;
-  //                 return false;});
-
-  // Finds the Dual Vertices for every Vertex
-  // mesh.computeDualVertices();
-
-  // Finds the Dual Edges for every Dual Vertex
-  // mesh.computeDualEdges();
-
-  // mesh.findNeighbors();
 }
 
 float local_distance(const Mesh &query_mesh, const Mesh &target_mesh) {
@@ -687,6 +732,7 @@ float dist_L1(const std::vector<float> &hist1,
   return dist;
 }
 
+
 int find_type(const std::string line) {
   int count(0);
 
@@ -704,6 +750,7 @@ int find_type(const std::string line) {
 
   return 4;
 }
+
 
 void save_descriptors(const std::string filepath, const Mesh &mesh) {
   std::ofstream descriptor_file(filepath);
@@ -743,6 +790,7 @@ std::vector<std::vector<float>> load_descriptors(const std::string filepath) {
   }
   return descr;
 }
+
 
 void preprocess_database(std::string db_path) {
   boost::filesystem::path p(db_path);
