@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
+
+#include <opencv2/opencv.hpp>
 
 /** Vertex class declaration
  *
@@ -23,6 +26,7 @@ public:
   float Angle(const Vertex &);
 
   bool operator==(const Vertex &) const;
+  bool operator==(Vertex &&) const;
   Vertex &operator=(const Vertex &);
   Vertex &operator=(Vertex &&);
   Vertex operator-(const Vertex &);
@@ -97,7 +101,9 @@ public:
   ~Mesh();
 
   Vertex centroid;
+  Vertex max, min;
   std::vector<Vertex> vertices;
+  std::vector<cv::Vec3b> colors;
   std::vector<Triangle> triangles;
   std::vector<Vertex> normals;
   std::vector<std::vector<float>> fpfhist;
@@ -110,7 +116,6 @@ public:
   std::vector<Edge> edges;
   std::vector<Edge> dedges;
   std::vector<std::vector<int>> neighbors;
-
 private:
   void computeNormals_PCA();
 };
