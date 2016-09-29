@@ -29,6 +29,7 @@ public:
   bool mouseClickDown;
 private:
   cv::Mat img;
+  cv::Mat img16u;
   GLuint gl_img_tex;
   int width_, height_;
 };

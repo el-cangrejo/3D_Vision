@@ -13,21 +13,21 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-INCLUDEPATH += "/usr/local/include/pcl-1.8"\
+INCLUDEPATH += "/usr/include/pcl-1.7"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
-               "include" \
+               "include"\
 
-INCLUDEPATH += "usr/local/include/opencv2" \
-               "usr/local/include/libfreenect" \
-               "/usr/include/libusb-1.0" \
+INCLUDEPATH += "usr/local/include/opencv2"\
+               "usr/local/include/libfreenect"\
+               "/usr/include/libusb-1.0"\
 
 SOURCES += src/main.cpp\
-           src/mainwindow.cpp \
-           src/GlWidget.cpp \
-           src/Open3DOR.cpp \
-           src/Segmentation.cpp \
-           src/KinectWidget.cpp \
+           src/mainwindow.cpp\
+           src/GlWidget.cpp\
+           src/Open3DOR.cpp\
+           src/Segmentation.cpp\
+           src/KinectWidget.cpp\
            src/ImgViewerWidget.cpp
 
 HEADERS  += include/mainwindow.h \
@@ -38,6 +38,8 @@ HEADERS  += include/mainwindow.h \
             include/ImgViewerWidget.hpp
 
 FORMS    += mainwindow.ui
+
+LIBS += -L/usr/local/lib
 
 LIBS += -lglut -lGLU
 
@@ -53,14 +55,13 @@ LIBS += -lpcl_io\
 LIBS += -lboost_system \
         -lboost_filesystem
 
-LIBS += -L/usr/local/lib
 LIBS += -lopencv_core \
         -lopencv_imgproc \
         -lopencv_highgui \
         -lopencv_video \
-        -lopencv_imgcodecs \
+        -lopencv_imgcodecs
 
 LIBS += -lfreenect
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
-QMAKE_CXXFLAGS_DEBUG += -O1
+QMAKE_CXXFLAGS_DEBUG += -O3

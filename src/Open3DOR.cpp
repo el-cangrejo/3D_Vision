@@ -3,6 +3,9 @@
 #include <armadillo>
 #include <boost/filesystem.hpp>
 #include <pcl/features/fpfh.h>
+#include <pcl/kdtree/kdtree.h>
+
+#include <pcl/search/search.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/point_types.h>
@@ -176,7 +179,7 @@ void Mesh::computeNormals(void) {
     return;
   }
   if (this->triangles.empty()) {
-    computeNormals_PCA();
+    //computeNormals_PCA();
     return;
   }
 
@@ -261,6 +264,7 @@ void Mesh::computeNormals_PCA(void) {
     std::cout << "Calculating normals PCA end : elapsed time: " << elapsed_secs
               << "\n";
 }
+
 void Mesh::computeFPFH(void) {
 
   clock_t begin, end;

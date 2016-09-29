@@ -33,11 +33,15 @@ void ImgViewerWidget::paintGL() {
                             img.cols, img.rows,
                             img.step, QImage::Format_RGB888);
       type = GL_RGB;
-  }
-  else if( img.channels() == 1) {
+  } else if( img.channels() == 1 && img.type() == CV_8UC1) {
       image = QImage((const unsigned char*)(img.data),
                             img.cols, img.rows,
                             img.step, QImage::Format_Indexed8);
+  } else {
+      img.convertTo(img16u, CV_8UC1, 255.0 / 2048.0);
+      image = QImage((const unsigned char*)(img16u.data),
+                            img16u.cols, img16u.rows,
+                            img16u.step, QImage::Format_Indexed8);
   }
   
   glBindTexture(GL_TEXTURE_2D, gl_img_tex);

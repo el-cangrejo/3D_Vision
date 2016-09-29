@@ -120,8 +120,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
-         <height>320</height>
+         <width>171</width>
+         <height>598</height>
         </rect>
        </property>
        <attribute name="label">
@@ -228,7 +228,7 @@
          <x>0</x>
          <y>0</y>
          <width>178</width>
-         <height>293</height>
+         <height>586</height>
         </rect>
        </property>
        <attribute name="label">
@@ -578,6 +578,43 @@
               </property>
              </widget>
             </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="median_kernel">
+              <property name="text">
+               <string>median_kernel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="normal_radius">
+              <property name="text">
+               <string>normal_radius</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="median_kernelSpinBox"/>
+            </item>
+            <item row="5" column="1">
+             <widget class="QSpinBox" name="normal_radiusSpinBox"/>
+            </item>
+            <item row="6" column="1">
+             <widget class="QSpinBox" name="edge_radiusSpinBox"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="edge_radius">
+              <property name="text">
+               <string>edge_radius</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -602,8 +639,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>157</width>
-         <height>175</height>
+         <width>171</width>
+         <height>598</height>
         </rect>
        </property>
        <attribute name="label">
@@ -698,7 +735,9 @@
     </property>
     <addaction name="action_OpenMesh"/>
     <addaction name="action_OpenKinect"/>
-    <addaction name="action_OpenImg"/>
+    <addaction name="action_OpenImage8U"/>
+    <addaction name="separator"/>
+    <addaction name="action_OpenImage16U"/>
     <addaction name="action_Quit"/>
     <addaction name="action_TakeSnapshot"/>
    </widget>
@@ -736,9 +775,9 @@
     <string>&amp;Preprocess Database</string>
    </property>
   </action>
-  <action name="action_OpenImg">
+  <action name="action_OpenImage8U">
    <property name="text">
-    <string>Open &amp;Image</string>
+    <string>Open &amp;Image8U</string>
    </property>
   </action>
   <action name="action_OpenKinect">
@@ -749,6 +788,11 @@
   <action name="action_TakeSnapshot">
    <property name="text">
     <string>Take &amp;Snapshot</string>
+   </property>
+  </action>
+  <action name="action_OpenImage16U">
+   <property name="text">
+    <string>Open Image16U</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,8 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include <QFileDialog>
 #include <boost/filesystem.hpp>
@@ -57,8 +59,10 @@ void MainWindow::connectUI() {
   // Connect Actions
   connect(ui->action_OpenMesh, SIGNAL(triggered()), this,
           SLOT(onActionOpenMesh()));
-  connect(ui->action_OpenImg, SIGNAL(triggered()), this,
-          SLOT(onActionOpenImage()));
+  connect(ui->action_OpenImage8U, SIGNAL(triggered()), this,
+          SLOT(onActionOpenImage8U()));
+  connect(ui->action_OpenImage16U, SIGNAL(triggered()), this,
+          SLOT(onActionOpenImage16U()));
   connect(ui->action_OpenKinect, SIGNAL(triggered()), this,
           SLOT(onActionOpenKinect()));
   connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(onActionQuit()));
@@ -105,6 +109,8 @@ void MainWindow::connectUI() {
           SLOT(setModelLighting(bool)));
   connect(ui->NormalsLightingCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setNormalsLighting(bool)));
+  connect(ui->ShowSolidCheckBox, SIGNAL(clicked(bool)), this,
+            SLOT(setShowSolid(bool)));
 
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
@@ -114,6 +120,14 @@ void MainWindow::connectUI() {
   connect(ui->DrawButton, SIGNAL(clicked()), this, SLOT(onDraw()));
   connect(ui->ClearAllButton, SIGNAL(clicked()), this, SLOT(onClearAll()));
   connect(ui->ZoomImgWidgetButton, SIGNAL(clicked()), this, SLOT(onZoomImgWidget()));
+
+  /*
+   * Segmetnai
+   * */
+  connect(ui->median_kernelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMedianKernel(int)));
+  connect(ui->normal_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNormalsRadius(int)));
+  connect(ui->edge_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEdgeRadius(int)));
+
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -149,12 +163,12 @@ void MainWindow::on_SearchinDBButton_clicked() {
   Mesh *query;
 
   if (!ui->widget->filtered_mesh.empty()) {
-    ui->widget->filtered_mesh.computeFPFH();
+    //ui->widget->filtered_mesh.computeFPFH();
     std::cout << "Query mesh fpfh size : "
               << ui->widget->filtered_mesh.fpfhist.size() << "\n";
     query = &ui->widget->filtered_mesh;
   } else if (!ui->widget->primary_mesh.empty()) {
-    ui->widget->primary_mesh.computeFPFH();
+    //ui->widget->primary_mesh.computeFPFH();
     std::cout << "Query mesh fpfh size : "
               << ui->widget->primary_mesh.fpfhist.size() << "\n";
     query = &ui->widget->primary_mesh;
@@ -210,14 +224,29 @@ void MainWindow::onActionOpenMesh() {
   ui->widget->updateGL();
 }
 
-void MainWindow::onActionOpenImage() {
+void MainWindow::onActionOpenImage8U() {
+  onActionOpenImage(CV_8UC1);
+}
+
+void MainWindow::onActionOpenImage16U() {
+  onActionOpenImage(CV_16UC1);
+}
+
+void MainWindow::onActionOpenImage(int type) {
   QString file_name = QFileDialog::getOpenFileName(this);
   cv::Mat image;
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
-    image = cv::imread(file_name.toStdString(), CV_16UC1);
+
+    if (type == CV_8UC1) {
+        image = cv::imread(file_name.toStdString(), CV_8UC1);
+        std::cout << "Channels " << image.channels() << " CV_8UC1\n";
+    } else {
+        image = cv::imread(file_name.toStdString(), CV_16UC1);
+        std::cout << "Channels " << image.channels() << " CV_16UC1\n";
+    }
   }
   std::cout << "Open image : " << file_name.toStdString() << "\n";
-  ui->SnapShot_Widget->setImg(image);
+  ui->SnapShot_Widget->setImg(std::move(image));
 }
 
 void MainWindow::onActionOpenKinect() {
@@ -265,7 +294,7 @@ void MainWindow::onActionTakeSnapshot() {
   std::string suffix(".png");
   std::ostringstream file;
   file << filename << suffix;
-  cv::imwrite(file.str(), ui->Kinect_Widget->depthMat);
+  imwrite(file.str(), ui->Kinect_Widget->depthMat);
   std::cout << "Took snapshot.. \n";
 }
 
@@ -350,7 +379,7 @@ void MainWindow::gridFilter() {
 }
 
 void MainWindow::onSegmentImg() {
-  ImgSegmenter segm(ui->SnapShot_Widget->getImg());
+  ImgSegmenter segm(ui->SnapShot_Widget->getImg(), median_kernel, normals_radius, edge_radius);
   segm.estimateNormals();
   segm.printNormals();
   segm.detectNormalEdges();
@@ -361,7 +390,7 @@ void MainWindow::onSegmentImg() {
   ui->Binarized_Widget->setImg(segm.norm_bin_edge_img);
   segm.writetoMesh(ui->widget->primary_mesh, 1);
 
-  ui->widget->primary_mesh.computeNormals();
+  //ui->widget->primary_mesh.computeNormals();
   ui->widget->primary_mesh.movetoCenter();
   ui->widget->primary_mesh.fittoUnitSphere();
 }
@@ -425,4 +454,20 @@ void MainWindow::onZoomImgWidget() {
     ui->Normals_Widget->setMinimumSize(200, 150);
   }
 
+}
+
+/*
+ * Seemgentation Parameters
+ * */
+
+void MainWindow::setMedianKernel(int x) {
+    median_kernel = x;
+}
+
+void MainWindow::setNormalsRadius(int x) {
+    normals_radius = x;
+}
+
+void MainWindow::setEdgeRadius(int x) {
+    edge_radius = x;
 }

@@ -55,8 +55,8 @@ public:
   void eraseDatabase();
 
   // Rendering Options
-  bool _showVerts = false;
-  bool _showTriangles = true;
+  bool _showVerts = true;
+  bool _showTriangles = false;
   bool _showNormals = false;
   bool _showFilteredMesh = false;
   bool _showWire = false;
@@ -76,7 +76,7 @@ public:
   float _ModelColorB = 1.0;
 
   float _NormalsLength = 0.0;
-  float _zoomStep = 0.01;
+  float _zoomStep = 0.1;
   float _rotFactor = 0.01;
 
   Vertex up_vector;

@@ -34,7 +34,9 @@ private slots:
 
   void onActionQuit();
   void onActionOpenMesh();
-  void onActionOpenImage();
+  void onActionOpenImage8U();
+  void onActionOpenImage16U();
+  void onActionOpenImage(int type);
   void onActionOpenKinect();
   void onActionLoadDatabase();
   void onActionPreprocessDatabase();
@@ -76,11 +78,25 @@ private slots:
   void onClearAll();
   void onZoomImgWidget();
   void gridFilter();
+
+  /*
+   * Segmentation Parameters
+   * */
+
+  void setMedianKernel(int );
+  void setNormalsRadius(int );
+  void setEdgeRadius(int );
+
 private:
   Ui::MainWindow *ui;
 
   void inititializeUI();
   void connectUI();
+
+  float median_kernel;
+  float normals_radius;
+  float edge_radius;
+
 };
 
 #endif // MAINWINDOW_H

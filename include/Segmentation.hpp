@@ -26,6 +26,7 @@ public:
   ImgSegmenter(void);
   ImgSegmenter(const cv::Mat &img);
   ImgSegmenter(cv::Mat &&img);
+  ImgSegmenter(cv::Mat &&img, int, int, int);
 
   void estimateNormals(); // Estimates Normals for Every Point
   void printNormals();    // Prints Normals
@@ -37,7 +38,8 @@ public:
 
   virtual ~ImgSegmenter();
 
-  cv::Mat image;          // Original Input Image
+  cv::Mat orig_img;          // Original Input Image
+  cv::Mat image;
   cv::Mat median_img;     // Median Blured Image
   cv::Mat norm_img;       // Image with Surface Normals for every pixel
   cv::Mat norm_color_img; // Image with Surface Normals mapped to RGB for every
