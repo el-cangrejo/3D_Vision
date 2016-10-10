@@ -28,14 +28,18 @@ SOURCES += src/main.cpp\
            src/Open3DOR.cpp\
            src/Segmentation.cpp\
            src/KinectWidget.cpp\
-           src/ImgViewerWidget.cpp
+           src/ImgViewerWidget.cpp \
+    src/MeshComponents.cpp \
+    src/Mesh.cpp
 
 HEADERS  += include/mainwindow.h \
             include/GlWidget.hpp \
             include/Open3DOR.hpp \
             include/Segmentation.hpp \
             include/KinectWidget.hpp \
-            include/ImgViewerWidget.hpp
+            include/ImgViewerWidget.hpp \
+    include/MeshComponents.hpp \
+    include/Mesh.hpp
 
 FORMS    += mainwindow.ui
 

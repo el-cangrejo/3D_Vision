@@ -208,14 +208,14 @@ void MainWindow::onActionQuit() {
 }
 
 void MainWindow::onActionOpenMesh() {
-  QString file_name = QFileDialog::getOpenFileName(this);
-  if (!file_name.isEmpty() && file_name.endsWith(".obj")) {
+  QStringList file_name = QFileDialog::getOpenFileNames(this);
+  if (!file_name.isEmpty() && file_name.at(0).endsWith(".obj")) {
     if (!ui->widget->primary_mesh.vertices.empty()) {
       ui->widget->filtered_mesh.clear();
       ui->widget->primary_mesh.clear();
-      read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
+      read_mesh(file_name.at(0).toStdString(), ui->widget->primary_mesh);
     } else {
-      read_mesh(file_name.toStdString(), ui->widget->primary_mesh);
+      read_mesh(file_name.at(0).toStdString(), ui->widget->primary_mesh);
     }
     ui->widget->primary_mesh.movetoCenter();
     ui->widget->primary_mesh.fittoUnitSphere();

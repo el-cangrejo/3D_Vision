@@ -89,6 +89,7 @@ public:
   Mesh filtered_mesh;
   Mesh target_mesh;
 
+  std::vector<Mesh> meshes;
   std::vector<Mesh> db_descriptors;
   std::vector<std::string> db_files;
   std::string database;
