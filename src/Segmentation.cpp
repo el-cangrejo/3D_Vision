@@ -331,8 +331,8 @@ void ImgSegmenter::writetoFile(std::string filename) {
 void ImgSegmenter::writetoMesh(Mesh &m, int step) {
     std::cout << "Starting writing mesh. \n";
 
-    double fx_d = 1.0 / 5.9421434211923247e+02;
-    double fy_d = 1.0 / 5.9104053696870778e+02;
+    double fx_d =  5.9421434211923247e+02;
+    double fy_d =  5.9104053696870778e+02;
     double cx_d = 3.3930780975300314e+02;
     double cy_d = 2.4273913761751615e+02;
 
@@ -349,7 +349,7 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step) {
             }
 
             float x = static_cast<float>((j - cy_d) * depth * fy_d);
-            float y = -static_cast<float>((i - cx_d) * depth * fx_d);
+            float y = static_cast<float>((i - cx_d) * depth * fx_d);
             float z = -static_cast<float>(depth);
             v = Vertex(x, y, z);
 

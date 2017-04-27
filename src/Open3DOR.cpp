@@ -7,10 +7,10 @@
 #include <cmath>
 #include <ctime>
 
-void read_mesh(const std::string filepath, Mesh &mesh) {
+int loadObj(const std::string filepath, Mesh &mesh) {
   if (filepath.substr(filepath.size() - 3, 3) != "obj") {
     std::cout << "Wrong file format!\n";
-    return;
+    return 0;
   }
   std::ifstream objfile;
   std::string line;
@@ -118,16 +118,18 @@ void read_mesh(const std::string filepath, Mesh &mesh) {
   mesh.centroid.z /= mesh.vertices.size();
 
   mesh.printInfo();
+  return 1;
 }
 
 void read_mesh(const std::string filepath, Mesh &mesh) {
     if (filepath.substr(filepath.size() - 3, 3) == "obj") {
-      loadObj(const std::string filepath, Mesh &mesh);
+      loadObj(filepath, mesh);
     } else if (filepath.substr(filepath.size() - 3, 3) == "off") {
       std::cout << "Wrong file format!\n";
       return;
     }
 }
+
 int loadOff(const std::string filepath, Mesh &mesh) {
     std::ifstream off_file;
   std::string line;
@@ -365,7 +367,7 @@ void load_database(std::string db_path, std::vector<Mesh> &db_descr,
       continue;
 
     Mesh target_mesh;
-    target_mesh.fpfhist = std::move(load_descriptors(target_file));
+    target_mesh.fpfhist = load_descriptors(target_file);
     std::string target_obj =
         target_file.substr(0, target_file.size() - 3) + "obj";
     db_fil.push_back(target_obj);
