@@ -11,7 +11,7 @@
 void read_mesh(const std::string, Mesh &);
 int loadObj(const std::string filepath, Mesh &mesh);
 int loadOff(const std::string filepath, Mesh &mesh);
-int findType(const std::string line);
+int find_type(const std::string line);
 
 void preprocess_mesh(Mesh &);
 float local_distance(const Mesh &, const Mesh &);

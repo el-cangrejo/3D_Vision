@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl widgets
+QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,7 +13,7 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-INCLUDEPATH += "/usr/include/pcl-1.7"\
+INCLUDEPATH += "/usr/local/include/pcl-1.8"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
                "include"\
@@ -29,8 +29,8 @@ SOURCES += src/main.cpp\
            src/Segmentation.cpp\
            src/KinectWidget.cpp\
            src/ImgViewerWidget.cpp \
-    src/MeshComponents.cpp \
-    src/Mesh.cpp
+           src/MeshComponents.cpp \
+           src/Mesh.cpp
 
 HEADERS  += include/mainwindow.h \
             include/GlWidget.hpp \
@@ -38,8 +38,8 @@ HEADERS  += include/mainwindow.h \
             include/Segmentation.hpp \
             include/KinectWidget.hpp \
             include/ImgViewerWidget.hpp \
-    include/MeshComponents.hpp \
-    include/Mesh.hpp
+            include/MeshComponents.hpp \
+            include/Mesh.hpp
 
 FORMS    += mainwindow.ui
 
@@ -67,5 +67,11 @@ LIBS += -lopencv_core \
 
 LIBS += -lfreenect
 
+LIBS += -lusb-1.0
+
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_DEBUG += -O3
+
+QMAKE_CC=clang
+QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXX=clang++

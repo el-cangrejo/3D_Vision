@@ -244,7 +244,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
       glDisable(GL_LIGHTING);
     glColor3f(1.0, 0.0, 1.0);
     glBegin(GL_LINES);
-    for (size_t i = 0; i < mesh.normals.size(); i += 28) {
+    for (size_t i = 0; i < mesh.normals.size(); ++i) {
       glNormal3f(mesh.normals[i].x, mesh.normals[i].y, mesh.normals[i].z);
       glVertex3f((mesh.vertices[i].x + _NormalsLength * mesh.normals[i].x),
                  (mesh.vertices[i].y + _NormalsLength * mesh.normals[i].y),
