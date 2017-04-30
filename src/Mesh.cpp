@@ -445,3 +445,64 @@ void Mesh::printInfo(void) {
             << this->dedges.size() << " dedges \n"
             << this->trinormals.size() << " trinormals \n";
 }
+
+void Mesh::triangulate() {
+// Load input file into a PointCloud<T> with an appropriate type
+	std::cout << "Start triangulation!\n";
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  cloud->points.resize(vertices.size());
+  for (size_t i = 0; i < cloud->points.size(); ++i) {
+    cloud->points[i] =
+        pcl::PointXYZ(vertices[i].x, vertices[i].y, vertices[i].z);
+  }
+  //* the data should be available in cloud
+
+  // Normal estimation*
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+  pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+  tree->setInputCloud (cloud);
+	std::cout << "Start triangulation!\n";
+  n.setInputCloud (cloud);
+  n.setSearchMethod (tree);
+  n.setRadiusSearch (0.08);
+  n.compute (*normals);
+  //* normals should not contain the point normals + surface curvatures
+
+	std::cout << "Start triangulation!\n";
+  // Concatenate the XYZ and normal fields*
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
+  pcl::concatenateFields (*cloud, *normals, *cloud_with_normals);
+  //* cloud_with_normals = cloud + normals
+
+	std::cout << "Start triangulation!\n";
+  // Create search tree*
+  pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
+  tree2->setInputCloud (cloud_with_normals);
+
+  // Initialize objects
+  pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+  pcl::PolygonMesh triangles;
+
+  // Set the maximum distance between connected points (maximum edge length)
+  gp3.setSearchRadius (0.15);
+
+  // Set typical values for the parameters
+  gp3.setMu (2.5);
+  gp3.setMaximumNearestNeighbors (90);
+  gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+  gp3.setMinimumAngle(M_PI/18); // 10 degrees
+  gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
+  gp3.setNormalConsistency(false);
+
+	std::cout << "Start triangulation!\n";
+  // Get result
+  gp3.setInputCloud (cloud_with_normals);
+  gp3.setSearchMethod (tree2);
+  gp3.reconstruct (triangles);
+
+  // Additional vertex information
+	//std::cout << triangles << "\n";
+  // Finish
+  return;
+}

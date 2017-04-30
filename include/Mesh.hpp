@@ -9,6 +9,9 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/point_types.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/surface/gp3.h>
+
 
 #include "MeshComponents.hpp"
 
@@ -31,7 +34,7 @@ public:
   Mesh gridFilter(void);
   Mesh statoutFilter(void);
   void printInfo(void);
-
+	void triangulate();
   ~Mesh();
 
   Vertex centroid;
