@@ -27,7 +27,12 @@
 #ifndef KINECTWIDGET_H
 #define KINECTWIDGET_H
 
-#include "libfreenect/libfreenect.hpp"
+/// [headers]
+#include <libfreenect2/libfreenect2.hpp>
+#include <libfreenect2/frame_listener_impl.h>
+#include <libfreenect2/registration.h>
+#include <libfreenect2/packet_pipeline.h>
+#include <libfreenect2/logger.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -41,6 +46,8 @@
 #include <string.h>
 #include <vector>
 
+#include "Mesh.hpp"
+
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
 #include <OpenGL/gl.h>
@@ -51,137 +58,259 @@
 #include <GL/glut.h>
 #endif
 
-class Mutex {
-public:
-  Mutex() { pthread_mutex_init(&m_mutex, NULL); }
-  void lock() { pthread_mutex_lock(&m_mutex); }
-  void unlock() { pthread_mutex_unlock(&m_mutex); }
+#include "flextGL.h"
 
-  class ScopedLock {
-    Mutex &_mutex;
+struct Vertex_
+{
+    float x, y;
+    float u, v;
+};
+//
+//class WithOpenGLBindings
+//{
+//private:
+//    OpenGLBindings *bindings;
+//protected:
+//    WithOpenGLBindings() : bindings(0) {}
+//    virtual ~WithOpenGLBindings() {}
+//
+//    virtual void onOpenGLBindingsChanged(OpenGLBindings *b) { }
+//public:
+//    void gl(OpenGLBindings *bindings)
+//    {
+//        this->bindings = bindings;
+//        onOpenGLBindingsChanged(this->bindings);
+//    }
+//
+//    OpenGLBindings *gl()
+//    {
+//        return bindings;
+//    }
+//};
 
-  public:
-    ScopedLock(Mutex &mutex) : _mutex(mutex) { _mutex.lock(); }
-    ~ScopedLock() { _mutex.unlock(); }
-  };
-
-private:
-  pthread_mutex_t m_mutex;
+template<size_t TBytesPerPixel, GLenum TInternalFormat, GLenum TFormat, GLenum TType>
+struct ImageFormat
+{
+    static const size_t BytesPerPixel = TBytesPerPixel;
+    static const GLenum InternalFormat = TInternalFormat;
+    static const GLenum Format = TFormat;
+    static const GLenum Type = TType;
 };
 
-/* thanks to Yoda---- from IRC */
-class MyFreenectDevice : public Freenect::FreenectDevice {
+typedef ImageFormat<1, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE> U8C1;
+typedef ImageFormat<2, GL_R16I, GL_RED_INTEGER, GL_SHORT> S16C1;
+typedef ImageFormat<2, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT> U16C1;
+typedef ImageFormat<4, GL_R32F, GL_RED, GL_FLOAT> F32C1;
+typedef ImageFormat<8, GL_RG32F, GL_RG, GL_FLOAT> F32C2;
+typedef ImageFormat<12, GL_RGB32F, GL_RGB, GL_FLOAT> F32C3;
+typedef ImageFormat<4, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE> F8C4;
+typedef ImageFormat<16, GL_RGBA32F, GL_RGBA, GL_FLOAT> F32C4;
+
+template<typename FormatT>
+struct Texture //: public WithOpenGLBindings
+{
+protected:
+    size_t bytes_per_pixel, height, width;
+
 public:
-  MyFreenectDevice(freenect_context *_ctx, int _index)
-      : Freenect::FreenectDevice(_ctx, _index),
-        m_buffer_depth(freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM,
-                                                FREENECT_VIDEO_RGB)
-                           .bytes),
-        m_buffer_video(freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM,
-                                                FREENECT_VIDEO_RGB)
-                           .bytes),
-        m_gamma(2048), m_new_rgb_frame(false), m_new_depth_frame(false),
-        depthMat(cv::Size(640, 480), CV_16UC1), capture_depth(false) {
-    for (unsigned int i = 0; i < 2048; i++) {
-      float v = i / 2048.0;
-      v = std::pow(v, 3) * 6;
-      m_gamma[i] = v * 6 * 256;
+    GLuint texture;
+    unsigned char *data;
+    size_t size;
+
+    Texture() : bytes_per_pixel(FormatT::BytesPerPixel), height(0), width(0), texture(0), data(0), size(0)
+    {
     }
-  }
-  //~MyFreenectDevice(){}
-  // Do not call directly even in child
-  void VideoCallback(void *_rgb, uint32_t timestamp) {
-    Mutex::ScopedLock lock(m_rgb_mutex);
-    uint8_t *rgb = static_cast<uint8_t *>(_rgb);
-    std::copy(rgb, rgb + getVideoBufferSize(), m_buffer_video.begin());
-    m_new_rgb_frame = true;
-  };
-  // Do not call directly even in child
-  void DepthCallback(void *_depth, uint32_t timestamp) {
-    Mutex::ScopedLock lock(m_depth_mutex);
-    uint16_t *depth = static_cast<uint16_t *>(_depth);
-    for (unsigned int i = 0; i < 640 * 480; i++) {
-      int pval = m_gamma[depth[i]];
-      int lb = pval & 0xff;
-      switch (pval >> 8) {
-      case 0:
-        m_buffer_depth[3 * i + 0] = 255;
-        m_buffer_depth[3 * i + 1] = 255 - lb;
-        m_buffer_depth[3 * i + 2] = 255 - lb;
-        break;
-      case 1:
-        m_buffer_depth[3 * i + 0] = 255;
-        m_buffer_depth[3 * i + 1] = lb;
-        m_buffer_depth[3 * i + 2] = 0;
-        break;
-      case 2:
-        m_buffer_depth[3 * i + 0] = 255 - lb;
-        m_buffer_depth[3 * i + 1] = 255;
-        m_buffer_depth[3 * i + 2] = 0;
-        break;
-      case 3:
-        m_buffer_depth[3 * i + 0] = 0;
-        m_buffer_depth[3 * i + 1] = 255;
-        m_buffer_depth[3 * i + 2] = lb;
-        break;
-      case 4:
-        m_buffer_depth[3 * i + 0] = 0;
-        m_buffer_depth[3 * i + 1] = 255 - lb;
-        m_buffer_depth[3 * i + 2] = 255;
-        break;
-      case 5:
-        m_buffer_depth[3 * i + 0] = 0;
-        m_buffer_depth[3 * i + 1] = 0;
-        m_buffer_depth[3 * i + 2] = 255 - lb;
-        break;
-      default:
-        m_buffer_depth[3 * i + 0] = 0;
-        m_buffer_depth[3 * i + 1] = 0;
-        m_buffer_depth[3 * i + 2] = 0;
-        break;
-      }
+
+    void bindToUnit(GLenum unit)
+    {
+        //gl()->glActiveTexture(unit);
+				glActiveTexture(unit);
+        glBindTexture(GL_TEXTURE_RECTANGLE, texture);
     }
-    depthMat.data = (uchar *)depth;
-    m_new_depth_frame = true;
-  }
 
-  bool getRGB(std::vector<uint8_t> &buffer) {
-    Mutex::ScopedLock lock(m_rgb_mutex);
-    if (!m_new_rgb_frame)
-      return false;
-    buffer.swap(m_buffer_video);
-    m_new_rgb_frame = false;
-    return true;
-  }
+    void allocate(size_t new_width, size_t new_height)
+    {
+        width = new_width;
+        height = new_height;
+        size = height * width * bytes_per_pixel;
+        data = new unsigned char[size];
 
-  bool getDepth(std::vector<uint8_t> &buffer, cv::Mat &output) {
-    Mutex::ScopedLock lock(m_depth_mutex);
-    if (!m_new_depth_frame)
-      return false;
-    buffer.swap(m_buffer_depth);
-    if (capture_depth) {
-      depthMat.copyTo(output);
-      setCaptureDepth(false);
+        glGenTextures(1, &texture);
+        bindToUnit(GL_TEXTURE0);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_RECTANGLE, 0, FormatT::InternalFormat, width, height, 0, FormatT::Format, FormatT::Type, 0);
+				std::cout << FormatT::InternalFormat << " " << FormatT::Format << " " << FormatT::Type << "\n";
     }
-    m_new_depth_frame = false;
-    return true;
-  }
 
-  void setCaptureDepth(bool b) {
-      capture_depth = b;
-  }
+    void deallocate()
+    {
+        glDeleteTextures(1, &texture);
+        delete[] data;
+    }
 
-private:
-  std::vector<uint8_t> m_buffer_depth;
-  std::vector<uint8_t> m_buffer_video;
-  std::vector<uint16_t> m_gamma;
-  cv::Mat depthMat;
-  bool capture_depth;
-  Mutex m_rgb_mutex;
-  Mutex m_depth_mutex;
-  bool m_new_rgb_frame;
-  bool m_new_depth_frame;
+    void upload()
+    {
+        bindToUnit(GL_TEXTURE0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexSubImage2D(GL_TEXTURE_RECTANGLE, /*level*/0, /*xoffset*/0, /*yoffset*/0, width, height, FormatT::Format, FormatT::Type, data);
+    }
+
+    void download()
+    {
+        downloadToBuffer(data);
+    }
+
+    void downloadToBuffer(unsigned char *data)
+    {
+        glReadPixels(0, 0, width, height, FormatT::Format, FormatT::Type, data);
+    }
+
+    void flipY()
+    {
+        flipYBuffer(data);
+    }
+
+    void flipYBuffer(unsigned char *data)
+    {
+        typedef unsigned char type;
+
+        size_t linestep = width * bytes_per_pixel / sizeof(type);
+
+        type *first_line = reinterpret_cast<type *>(data), *last_line = reinterpret_cast<type *>(data) + (height - 1) * linestep;
+
+        for (size_t y = 0; y < height / 2; ++y)
+        {
+            for (size_t x = 0; x < linestep; ++x, ++first_line, ++last_line)
+            {
+                std::swap(*first_line, *last_line);
+            }
+            last_line -= 2 * linestep;
+        }
+    }
+
+    libfreenect2::Frame *downloadToNewFrame()
+    {
+        libfreenect2::Frame *f = new libfreenect2::Frame(width, height, bytes_per_pixel);
+        downloadToBuffer(f->data);
+        flipYBuffer(f->data);
+
+        return f;
+    }
 };
+
+//struct ShaderProgram : public WithOpenGLBindings
+//{
+//    GLuint program, vertex_shader, fragment_shader;
+//
+//    char error_buffer[2048];
+//
+//    ShaderProgram() :
+//        program(0),
+//        vertex_shader(0),
+//        fragment_shader(0)
+//    {
+//    }
+//
+//    void setVertexShader(const std::string& src)
+//    {
+//        const char* src_ = src.c_str();
+//        int length_ = src.length();
+//        vertex_shader = gl()->glCreateShader(GL_VERTEX_SHADER);
+//        gl()->glShaderSource(vertex_shader, 1, &src_, &length_);
+//    }
+//
+//    void setFragmentShader(const std::string& src)
+//    {
+//        const char* src_ = src.c_str();
+//        int length_ = src.length();
+//        fragment_shader = gl()->glCreateShader(GL_FRAGMENT_SHADER);
+//        gl()->glShaderSource(fragment_shader, 1, &src_, &length_);
+//    }
+//
+//    void build()
+//    {
+//        GLint status;
+//
+//        gl()->glCompileShader(vertex_shader);
+//        gl()->glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
+//
+//        if (status != GL_TRUE)
+//        {
+//            gl()->glGetShaderInfoLog(vertex_shader, sizeof(error_buffer), NULL, error_buffer);
+//
+//            std::cerr << "failed to compile vertex shader!" << std::endl << error_buffer << std::endl;
+//        }
+//
+//        gl()->glCompileShader(fragment_shader);
+//
+//        gl()->glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
+//        if (status != GL_TRUE)
+//        {
+//            gl()->glGetShaderInfoLog(fragment_shader, sizeof(error_buffer), NULL, error_buffer);
+//
+//            std::cerr << "failed to compile fragment shader!" << std::endl << error_buffer << std::endl;
+//        }
+//
+//        program = gl()->glCreateProgram();
+//        gl()->glAttachShader(program, vertex_shader);
+//        gl()->glAttachShader(program, fragment_shader);
+//
+//        gl()->glLinkProgram(program);
+//
+//        gl()->glGetProgramiv(program, GL_LINK_STATUS, &status);
+//
+//        if (status != GL_TRUE)
+//        {
+//            gl()->glGetProgramInfoLog(program, sizeof(error_buffer), NULL, error_buffer);
+//            std::cerr << "failed to link shader program!" << std::endl << error_buffer << std::endl;
+//        }
+//    }
+//
+//    GLint getAttributeLocation(const std::string& name)
+//    {
+//        return gl()->glGetAttribLocation(program, name.c_str());
+//    }
+//
+//    void setUniform(const std::string& name, GLint value)
+//    {
+//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
+//        if (idx == -1) return;
+//
+//        gl()->glUniform1i(idx, value);
+//    }
+//
+//    void setUniform(const std::string& name, GLfloat value)
+//    {
+//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
+//        if (idx == -1) return;
+//
+//        gl()->glUniform1f(idx, value);
+//    }
+//
+//    void setUniformVector3(const std::string& name, GLfloat value[3])
+//    {
+//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
+//        if (idx == -1) return;
+//
+//        gl()->glUniform3fv(idx, 1, value);
+//    }
+//
+//    void setUniformMatrix3(const std::string& name, GLfloat value[9])
+//    {
+//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
+//        if (idx == -1) return;
+//
+//        gl()->glUniformMatrix3fv(idx, 1, false, value);
+//    }
+//
+//    void use()
+//    {
+//        gl()->glUseProgram(program);
+//    }
+//};
 
 class KinectWidget : public QGLWidget {
 public:
@@ -192,15 +321,26 @@ public:
   void paintGL();
   void resizeGL(int w, int h);
   void timerEvent(QTimerEvent *);
-
+	Mesh generateMesh();
+	void addFrame(std::string id, libfreenect2::Frame *frame);
 public:
-  Freenect::Freenect freenect;
-  MyFreenectDevice *device;
-  // freenect_video_format requested_format(FREENECT_VIDEO_RGB);
+  libfreenect2::Freenect2 freenect2;
+  libfreenect2::Freenect2Device *dev = 0;
+  libfreenect2::PacketPipeline *pipeline = 0;
+
+  libfreenect2::SyncMultiFrameListener listener;
+  libfreenect2::FrameMap frames;
 
   GLuint gl_depth_tex;
   GLuint gl_rgb_tex;
 
+  std::string serial = "";
+
+  bool viewer_enabled = true;
+  bool enable_rgb = true;
+  bool enable_depth = true;
+  int deviceId = -1;
+  size_t framemax = -1;
   // double freenect_angle(0);
   int got_frames, window;
 
@@ -209,6 +349,10 @@ public:
   int width_, height_;
 
   cv::Mat depthMat;
+private:
+	Texture<F8C4> rgb;
+	Texture<F32C1> ir;
+	std::map<std::string,libfreenect2::Frame*> frames_;
 };
 
 #endif // KINECTWIDGET_H
