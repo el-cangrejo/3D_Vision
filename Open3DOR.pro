@@ -20,7 +20,7 @@ INCLUDEPATH += "/usr/local/include/pcl-1.8"\
 
 INCLUDEPATH += "usr/local/include/opencv2"\
                "usr/local/include/libfreenect2"\
-               "/usr/include/libusb-1.0"\
+							 "/usr/include/libusb-1.0"\
 
 SOURCES += src/main.cpp\
            src/mainwindow.cpp\
@@ -76,4 +76,4 @@ QMAKE_CXXFLAGS_DEBUG += -g
 
 QMAKE_CC=clang
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXX=clang++
+#QMAKE_CXX=clang++
