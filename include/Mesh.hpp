@@ -17,50 +17,54 @@
 
 class Mesh {
 public:
-  Mesh(void);
-
+	// Helper functions
+  Mesh();
 	int load (const std::string file_path);
-  void computeDualVertices(void);
-  void computeDualEdges(void);
-  void computeAdjacency(void);
-  void computeDualAdjacency(void);
-  void findNeighbors(void);
-  std::vector<int> findNearestNeighbors(int, float);
-  void computeNormals(void);
-  void computeFPFH(void);
-  void fittoUnitSphere(void);
-  void movetoCenter(void);
-  bool empty(void);
-  void clear(void);
-  Mesh gridFilter(void);
-  Mesh statoutFilter(void);
-  void printInfo(void);
-	void triangulate();
+  bool empty();
+  void clear();
+  void printInfo();
   ~Mesh();
 
+	// Processing functions
+	void preprocess();
+	void computeNormals();
+	void process();
+	float distanceTo(const Mesh &other);
+
+  Mesh gridFilter();
+  Mesh statoutFilter();
+	void triangulate();
+
+	// Data members
   Vertex centroid;
   Vertex max, min;
   std::vector<Vertex> vertices;
-  std::vector<cv::Vec3b> colors;
   std::vector<Triangle> triangles;
   std::vector<Vertex> normals;
+  std::vector<Vertex> trinormals;
   std::vector<std::vector<float>> fpfhist;
   std::vector<int> voxel_grid;
-
+  std::vector<cv::Vec3b> colors;
   float grid_size;
 
-  std::vector<Vertex> dvertices;
-  std::vector<Vertex> trinormals;
-  std::vector<Edge> edges;
-  std::vector<Edge> dedges;
-  std::vector<std::vector<int>> neighbors;
 private:
-  void computeNormals_PCA();
+	// Loading functions
 	int loadObj(const std::string file_path);
 	int loadOff(const std::string file_path);
 	int findType(const std::string line);
 
-	void preprocess();
+	// Preprocessing functions
+  void fitToUnitSphere();
+  void moveToCenter();
+
+	// Computing functions
+  void computeNormals_Tri();
+  void computeNormals_PCA();
+  void computeFPFH();
+
+	// Distance functions
+	float localDistanceTo(const Mesh &other);
+	float globalDistanceTo(const Mesh &other);
 };
 
 #endif // MESH_HPP
