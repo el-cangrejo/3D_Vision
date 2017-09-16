@@ -86,6 +86,7 @@ private slots:
   void setMedianKernel(int );
   void setNormalsRadius(int );
   void setEdgeRadius(int );
+  void setKernelRadius(int );
 
 private:
   Ui::MainWindow *ui;
@@ -96,7 +97,7 @@ private:
   float median_kernel;
   float normals_radius;
   float edge_radius;
-
+	float kernel_radius;
 };
 
 #endif // MAINWINDOW_H

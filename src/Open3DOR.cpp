@@ -125,13 +125,15 @@ void read_mesh(const std::string filepath, Mesh &mesh) {
     if (filepath.substr(filepath.size() - 3, 3) == "obj") {
       loadObj(filepath, mesh);
     } else if (filepath.substr(filepath.size() - 3, 3) == "off") {
-      std::cout << "Wrong file format!\n";
+      loadOff(filepath, mesh);
+    } else {
+			std::cout << "FIle format not supported (yet)\n";
       return;
-    }
+		}
 }
 
 int loadOff(const std::string filepath, Mesh &mesh) {
-    std::ifstream off_file;
+	std::ifstream off_file;
   std::string line;
   float maxdist(0.0);
 
@@ -377,3 +379,5 @@ void load_database(std::string db_path, std::vector<Mesh> &db_descr,
   }
   std::cout << "Files preprocessed in database : " << count << "\n";
 }
+
+

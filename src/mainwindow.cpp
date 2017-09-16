@@ -8,6 +8,8 @@
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <opencv2/imgcodecs.hpp>
 
+#include <libfreenect2/libfreenect2.hpp>
+
 #include <QFileDialog>
 #include <boost/filesystem.hpp>
 
@@ -127,6 +129,7 @@ void MainWindow::connectUI() {
   connect(ui->median_kernelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMedianKernel(int)));
   connect(ui->normal_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNormalsRadius(int)));
   connect(ui->edge_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEdgeRadius(int)));
+  connect(ui->KernelRadiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setKernelRadius(int)));
 
 }
 
@@ -209,19 +212,12 @@ void MainWindow::onActionQuit() {
 
 void MainWindow::onActionOpenMesh() {
   QStringList file_name = QFileDialog::getOpenFileNames(this);
-  if (!file_name.isEmpty() && file_name.at(0).endsWith(".obj")) {
-    if (!ui->widget->primary_mesh.vertices.empty()) {
-      ui->widget->filtered_mesh.clear();
-      ui->widget->primary_mesh.clear();
-      read_mesh(file_name.at(0).toStdString(), ui->widget->primary_mesh);
-    } else {
-      read_mesh(file_name.at(0).toStdString(), ui->widget->primary_mesh);
-    }
-    ui->widget->primary_mesh.movetoCenter();
-    ui->widget->primary_mesh.fittoUnitSphere();
-    ui->widget->primary_mesh.computeNormals();
-  }
-  ui->widget->updateGL();
+  if (!file_name.isEmpty()) {
+		ui->widget->primary_mesh.load(file_name.at(0).toStdString());
+		ui->widget->updateGL();
+  } else {
+		std::cout << "File name is empty\n";
+	}
 }
 
 void MainWindow::onActionOpenImage8U() {
@@ -250,15 +246,54 @@ void MainWindow::onActionOpenImage(int type) {
 }
 
 void MainWindow::onActionOpenKinect() {
-  if (ui->Kinect_Widget->freenect.deviceCount() == 0) {
-      std::cout << "No devices connected! \n";
+	if (ui->Kinect_Widget->kinect_initialized) {
+		ui->Kinect_Widget->dev->stop();
+		ui->Kinect_Widget->dev->close();
+		ui->Kinect_Widget->kinect_initialized = !ui->Kinect_Widget->kinect_initialized;
+		ui->action_OpenKinect->setText("Open &Kinect");
+		return;
+	}
+/// [discovery]
+  if(ui->Kinect_Widget->freenect2.enumerateDevices() == 0) {
+    std::cout << "No device connected!" << std::endl;
+    return;
+  }
+  if (ui->Kinect_Widget->serial == "") {
+    ui->Kinect_Widget->serial = ui->Kinect_Widget->freenect2.getDefaultDeviceSerialNumber();
+  }
+/// [discovery]
+
+  if(ui->Kinect_Widget->pipeline) {
+/// [open]
+    ui->Kinect_Widget->dev = ui->Kinect_Widget->freenect2.openDevice(ui->Kinect_Widget->serial, ui->Kinect_Widget->pipeline);
+/// [open]
+  } else {
+    ui->Kinect_Widget->dev = ui->Kinect_Widget->freenect2.openDevice(ui->Kinect_Widget->serial);
+  }
+
+  if(ui->Kinect_Widget->dev == nullptr) {
+    std::cout << "Failure opening device!" << std::endl;
+    return;
+  }
+
+/// [listeners]
+  ui->Kinect_Widget->dev->setColorFrameListener(&ui->Kinect_Widget->listener);
+  ui->Kinect_Widget->dev->setIrAndDepthFrameListener(&ui->Kinect_Widget->listener);
+/// [listeners]
+
+/// [start]
+  if (ui->Kinect_Widget->enable_rgb && ui->Kinect_Widget->enable_depth) {
+    if (!ui->Kinect_Widget->dev->start())
+      return;
+  } else {
+    if (!ui->Kinect_Widget->dev->startStreams(ui->Kinect_Widget->enable_rgb, ui->Kinect_Widget->enable_depth))
       return;
   }
 
-  ui->Kinect_Widget->device =
-      &ui->Kinect_Widget->freenect.createDevice<MyFreenectDevice>(0);
-  ui->Kinect_Widget->device->startVideo();
-  ui->Kinect_Widget->device->startDepth();
+  std::cout << "device serial: " << ui->Kinect_Widget->dev->getSerialNumber() << std::endl;
+  std::cout << "device firmware: " << ui->Kinect_Widget->dev->getFirmwareVersion() << std::endl;
+/// [start]
+
   ui->Kinect_Widget->startTimer(10);
   ui->Kinect_Widget->kinect_initialized = true;
   ui->action_OpenKinect->setText("Close &Kinect");
@@ -285,11 +320,15 @@ void MainWindow::onActionPreprocessDatabase() {
 }
 
 void MainWindow::onActionTakeSnapshot() {
-  if (ui->Kinect_Widget->freenect.deviceCount() == 0) {
-    std::cout << "No Kinect device connected!\n";
+  if (ui->Kinect_Widget->kinect_initialized = false) {
+    std::cout << "No Kinect device initialized!\n";
     return;
   }
-  ui->Kinect_Widget->device->setCaptureDepth(true);
+
+  std::cout << "Taking snapshot.. \n";
+
+	ui->Kinect_Widget->takeSnapshot();
+
   std::string filename("snapshot");
   std::string suffix(".png");
   std::ostringstream file;
@@ -379,7 +418,7 @@ void MainWindow::gridFilter() {
 }
 
 void MainWindow::onSegmentImg() {
-  ImgSegmenter segm(ui->SnapShot_Widget->getImg(), median_kernel, normals_radius, edge_radius);
+  ImgSegmenter segm(ui->SnapShot_Widget->getImg(), median_kernel, normals_radius, edge_radius, kernel_radius);
   segm.estimateNormals();
   segm.printNormals();
   segm.detectNormalEdges();
@@ -396,28 +435,31 @@ void MainWindow::onSegmentImg() {
 }
 
 void MainWindow::onGenerateMesh() {
-  ImgSegmenter segm(ui->SnapShot_Widget->getImg());
-  segm.estimateNormals();
 
-  cv::Mat depthMat(ui->SnapShot_Widget->getImg());
-  if (depthMat.empty()) {
-      std::cout << "There is no depth image! \n";
-      return;
-  }
+//  cv::Mat depthMat(ui->SnapShot_Widget->getImg());
+//  if (depthMat.empty()) {
+//      std::cout << "There is no depth image! \n";
+//      return;
+//  }
 
   if (!ui->widget->primary_mesh.empty()) {
     ui->widget->primary_mesh.clear();
   }
-
   if (ui->Colored_Widget->mask_bool) {
     std::cout << "Writing masked mesh!\n";
+		ImgSegmenter segm(ui->SnapShot_Widget->getImg());
+		segm.estimateNormals();
     segm.writetoMesh(ui->widget->primary_mesh, 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
     ui->Colored_Widget->mask_bool = false;
+		return;
   } else {
-    segm.writetoMesh(ui->widget->primary_mesh, 1);
+    //segm.writetoMesh(ui->widget->primary_mesh, 1);
+		ui->widget->primary_mesh = ui->Kinect_Widget->generateMesh();
+		ui->widget->primary_mesh.movetoCenter();
+		ui->widget->primary_mesh.fittoUnitSphere();
+		ui->widget->primary_mesh.printInfo();
+		ui->widget->updateGL();
   }
-  ui->widget->primary_mesh.printInfo();
-  ui->widget->updateGL();
 }
 
 void MainWindow::onDraw() {
@@ -471,3 +513,8 @@ void MainWindow::setNormalsRadius(int x) {
 void MainWindow::setEdgeRadius(int x) {
     edge_radius = x;
 }
+
+void MainWindow::setKernelRadius(int x) {
+    kernel_radius = x;
+}
+

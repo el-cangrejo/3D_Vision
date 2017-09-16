@@ -120,8 +120,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>171</width>
-         <height>598</height>
+         <width>167</width>
+         <height>333</height>
         </rect>
        </property>
        <attribute name="label">
@@ -227,8 +227,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>178</width>
-         <height>586</height>
+         <width>202</width>
+         <height>384</height>
         </rect>
        </property>
        <attribute name="label">
@@ -433,10 +433,10 @@
       <widget class="QWidget" name="Operations">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>-5</x>
          <y>0</y>
-         <width>228</width>
-         <height>586</height>
+         <width>260</width>
+         <height>585</height>
         </rect>
        </property>
        <attribute name="label">
@@ -615,6 +615,9 @@
               </property>
              </widget>
             </item>
+            <item row="7" column="1">
+             <widget class="QSpinBox" name="KernelRadiusSpinBox"/>
+            </item>
            </layout>
           </item>
           <item>
@@ -639,8 +642,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>171</width>
-         <height>598</height>
+         <width>175</width>
+         <height>177</height>
         </rect>
        </property>
        <attribute name="label">

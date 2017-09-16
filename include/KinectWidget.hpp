@@ -60,33 +60,6 @@
 
 #include "flextGL.h"
 
-struct Vertex_
-{
-    float x, y;
-    float u, v;
-};
-//
-//class WithOpenGLBindings
-//{
-//private:
-//    OpenGLBindings *bindings;
-//protected:
-//    WithOpenGLBindings() : bindings(0) {}
-//    virtual ~WithOpenGLBindings() {}
-//
-//    virtual void onOpenGLBindingsChanged(OpenGLBindings *b) { }
-//public:
-//    void gl(OpenGLBindings *bindings)
-//    {
-//        this->bindings = bindings;
-//        onOpenGLBindingsChanged(this->bindings);
-//    }
-//
-//    OpenGLBindings *gl()
-//    {
-//        return bindings;
-//    }
-//};
 
 template<size_t TBytesPerPixel, GLenum TInternalFormat, GLenum TFormat, GLenum TType>
 struct ImageFormat
@@ -201,116 +174,6 @@ public:
     }
 };
 
-//struct ShaderProgram : public WithOpenGLBindings
-//{
-//    GLuint program, vertex_shader, fragment_shader;
-//
-//    char error_buffer[2048];
-//
-//    ShaderProgram() :
-//        program(0),
-//        vertex_shader(0),
-//        fragment_shader(0)
-//    {
-//    }
-//
-//    void setVertexShader(const std::string& src)
-//    {
-//        const char* src_ = src.c_str();
-//        int length_ = src.length();
-//        vertex_shader = gl()->glCreateShader(GL_VERTEX_SHADER);
-//        gl()->glShaderSource(vertex_shader, 1, &src_, &length_);
-//    }
-//
-//    void setFragmentShader(const std::string& src)
-//    {
-//        const char* src_ = src.c_str();
-//        int length_ = src.length();
-//        fragment_shader = gl()->glCreateShader(GL_FRAGMENT_SHADER);
-//        gl()->glShaderSource(fragment_shader, 1, &src_, &length_);
-//    }
-//
-//    void build()
-//    {
-//        GLint status;
-//
-//        gl()->glCompileShader(vertex_shader);
-//        gl()->glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &status);
-//
-//        if (status != GL_TRUE)
-//        {
-//            gl()->glGetShaderInfoLog(vertex_shader, sizeof(error_buffer), NULL, error_buffer);
-//
-//            std::cerr << "failed to compile vertex shader!" << std::endl << error_buffer << std::endl;
-//        }
-//
-//        gl()->glCompileShader(fragment_shader);
-//
-//        gl()->glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &status);
-//        if (status != GL_TRUE)
-//        {
-//            gl()->glGetShaderInfoLog(fragment_shader, sizeof(error_buffer), NULL, error_buffer);
-//
-//            std::cerr << "failed to compile fragment shader!" << std::endl << error_buffer << std::endl;
-//        }
-//
-//        program = gl()->glCreateProgram();
-//        gl()->glAttachShader(program, vertex_shader);
-//        gl()->glAttachShader(program, fragment_shader);
-//
-//        gl()->glLinkProgram(program);
-//
-//        gl()->glGetProgramiv(program, GL_LINK_STATUS, &status);
-//
-//        if (status != GL_TRUE)
-//        {
-//            gl()->glGetProgramInfoLog(program, sizeof(error_buffer), NULL, error_buffer);
-//            std::cerr << "failed to link shader program!" << std::endl << error_buffer << std::endl;
-//        }
-//    }
-//
-//    GLint getAttributeLocation(const std::string& name)
-//    {
-//        return gl()->glGetAttribLocation(program, name.c_str());
-//    }
-//
-//    void setUniform(const std::string& name, GLint value)
-//    {
-//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
-//        if (idx == -1) return;
-//
-//        gl()->glUniform1i(idx, value);
-//    }
-//
-//    void setUniform(const std::string& name, GLfloat value)
-//    {
-//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
-//        if (idx == -1) return;
-//
-//        gl()->glUniform1f(idx, value);
-//    }
-//
-//    void setUniformVector3(const std::string& name, GLfloat value[3])
-//    {
-//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
-//        if (idx == -1) return;
-//
-//        gl()->glUniform3fv(idx, 1, value);
-//    }
-//
-//    void setUniformMatrix3(const std::string& name, GLfloat value[9])
-//    {
-//        GLint idx = gl()->glGetUniformLocation(program, name.c_str());
-//        if (idx == -1) return;
-//
-//        gl()->glUniformMatrix3fv(idx, 1, false, value);
-//    }
-//
-//    void use()
-//    {
-//        gl()->glUseProgram(program);
-//    }
-//};
 
 class KinectWidget : public QGLWidget {
 public:
@@ -323,6 +186,8 @@ public:
   void timerEvent(QTimerEvent *);
 	Mesh generateMesh();
 	void addFrame(std::string id, libfreenect2::Frame *frame);
+	void takeSnapshot();
+
 public:
   libfreenect2::Freenect2 freenect2;
   libfreenect2::Freenect2Device *dev = 0;
@@ -350,8 +215,6 @@ public:
 
   cv::Mat depthMat;
 private:
-	Texture<F8C4> rgb;
-	Texture<F32C1> ir;
 	std::map<std::string,libfreenect2::Frame*> frames_;
 };
 

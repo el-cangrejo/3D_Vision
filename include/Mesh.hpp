@@ -19,6 +19,7 @@ class Mesh {
 public:
   Mesh(void);
 
+	int load (const std::string file_path);
   void computeDualVertices(void);
   void computeDualEdges(void);
   void computeAdjacency(void);
@@ -55,6 +56,11 @@ public:
   std::vector<std::vector<int>> neighbors;
 private:
   void computeNormals_PCA();
+	int loadObj(const std::string file_path);
+	int loadOff(const std::string file_path);
+	int findType(const std::string line);
+
+	void preprocess();
 };
 
 #endif // MESH_HPP

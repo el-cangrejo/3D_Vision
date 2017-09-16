@@ -4,7 +4,7 @@ ImgSegmenter::ImgSegmenter() {}
 
 ImgSegmenter::ImgSegmenter(const cv::Mat &img)
     : image(img), median_kernel(3), normal_radius(3), normal_step(10),
-      edge_radius(5), num_regions(0) {
+      edge_radius(5), num_regions(0), kernel_radius(0) {
     if (image.type() == CV_16UC1) {
       image.convertTo(orig_img, CV_8UC1, 255.0 /  2048.0);
     } else {
@@ -20,7 +20,7 @@ ImgSegmenter::ImgSegmenter(const cv::Mat &img)
 
 ImgSegmenter::ImgSegmenter(cv::Mat &&img)
     : image(img), median_kernel(3), normal_radius(3), normal_step(10),
-      edge_radius(5), num_regions(0) {
+      edge_radius(5), num_regions(0), kernel_radius(0) {
     if (image.type() == CV_16UC1) {
       image.convertTo(orig_img, CV_8UC1, 255.0 /  2048.0);
     } else {
@@ -34,8 +34,8 @@ ImgSegmenter::ImgSegmenter(cv::Mat &&img)
     norm_bin_edge_img = orig_img.clone();
 }
 
-ImgSegmenter::ImgSegmenter(cv::Mat &&img, int mednkrnl, int normrds, int edgrds) : image(img),
-    normal_step(10),num_regions(0) {
+ImgSegmenter::ImgSegmenter(cv::Mat &&img, int mednkrnl, int normrds, int edgrds, int kernelrds) : image(img),
+    normal_step(10),num_regions(0), kernel_radius(kernelrds) {
     if (image.type() == CV_16UC1) {
       image.convertTo(orig_img, CV_8UC1, 255.0 /  2048.0);
     } else {
@@ -51,6 +51,7 @@ ImgSegmenter::ImgSegmenter(cv::Mat &&img, int mednkrnl, int normrds, int edgrds)
     median_kernel = mednkrnl;
     normal_radius = normrds;
     edge_radius = edgrds;
+		cout << "Kernel radius: " << kernel_radius << "\n";
 }
 
 void ImgSegmenter::estimateNormals(void) {
@@ -261,7 +262,7 @@ void ImgSegmenter::colorRegions(void) {
     }
   }
 
-  int ke = 7;
+  int ke = kernel_radius;
   for (int r = 0; r < colored_img.rows; ++r) {
     for (int c = 0; c < colored_img.cols; ++c) {
       if (colored_img.at<cv::Vec3b>(r, c) == cv::Vec3b(0, 0, 0)) {
@@ -305,6 +306,7 @@ void ImgSegmenter::colorRegions(void) {
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
   cout << "Region Growing end \n";
   cout << "Elapsed time: " << elapsed_secs << "\n";
+  cout << "Kernel radius: " << kernel_radius << "\n";
 }
 
 void ImgSegmenter::writetoFile(std::string filename) {
@@ -328,57 +330,55 @@ void ImgSegmenter::writetoFile(std::string filename) {
   myfile.close();
 }
 
+void ImgSegmenter::writetoMesh_impl(Mesh &m, int step) {
+    std::cout << "Starting writing mesh. \n";
+
+		float cx = 257.966;
+		float cy = 210.268;
+
+		float fx = 0.00273687;
+		float fy = 0.00273687;
+
+    for (int i = 0; i < image.rows; ++i) {
+      for (int j = 0; j < image.cols; ++j) {
+        Vertex v;
+
+				float depth_val = image.at<ushort>(i, j) / 1000.0f;
+
+				v.x = (i + 0.5 - cx) * fx * depth_val;
+				v.y = (j + 0.5 - cy) * fy * depth_val;
+				v.z = depth_val;
+				m.vertices.push_back(v);
+      }
+    }
+    m.printInfo();
+    std::cout << "Ended writing mesh. \n";
+}
+
 void ImgSegmenter::writetoMesh(Mesh &m, int step) {
     std::cout << "Starting writing mesh. \n";
 
-    double fx_d =  5.9421434211923247e+02;
-    double fy_d =  5.9104053696870778e+02;
-    double cx_d = 3.3930780975300314e+02;
-    double cy_d = 2.4273913761751615e+02;
+		float cx = 257.966;
+		float cy = 210.268;
 
-    for (int i = colored_img.rows - 1; i >= 0; i -= step) {
-      for (int j = colored_img.cols - 1; j >= 0; j -= step) {
-          Vertex v;
-          if (image.type() == CV_16UC1) {
-            int depthValue = median_img.at<ushort>(i, j);
-            float depth;
-            if (depthValue < 2040) {
-              depth = static_cast<float>(1.0 / ((static_cast<double>(depthValue) * (-0.0030711016)) + 3.3309495161));
-            } else {
-              continue;
-            }
+		float fx = 0.00273687;
+		float fy = 0.00273687;
 
-            float x = static_cast<float>((j - cy_d) * depth * fy_d);
-            float y = static_cast<float>((i - cx_d) * depth * fx_d);
-            float z = -static_cast<float>(depth);
-            v = Vertex(x, y, z);
+    for (int i = 0; i < colored_img.rows; ++i) {
+      for (int j = 0; j < colored_img.cols; ++j) {
+				Vertex v;
 
-          } else {
-              v = Vertex(-((image.cols / 2.0) - j) / image.cols,
-                        ((image.rows / 2.0) - i) / image.rows,
-                         median_img.at<uchar>(i, j) / 255.);
-          }
+				float depth_val = image.at<ushort>(i, j) / 1000.0f;
 
-        int index = i * (colored_img.cols + 2) + j + 2;
-        Vertex n(normals[index].x, normals[index].y, normals[index].z);
-        m.vertices.push_back(v);
-        //m.normals.push_back(n);
-        if (i < colored_img.rows - 1 && j < colored_img.cols - 1) {
-            Triangle t(i * colored_img.cols + j,
-                       i * colored_img.cols + j + 1,
-                       (i + 1) * colored_img.cols + j);
-            m.triangles.push_back(t);
-        }
-        if (i > 0 && j < colored_img.cols - 1) {
-            Triangle t(i * colored_img.cols + j,
-                       i * colored_img.cols + j + 1,
-                       (i - 1) * colored_img.cols + j);
-            m.triangles.push_back(t);
-        }
-        if (!colored_img.empty()) {
-          cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
-          m.colors.push_back(color);
-        }
+				v.y = -(i + 0.5 - cx) * fx * depth_val;
+				v.x = (j + 0.5 - cy) * fy * depth_val;
+				v.z = -depth_val;
+				m.vertices.push_back(v);
+
+				if (!colored_img.empty()) {
+					cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
+					m.colors.push_back(color);
+				}
       }
     }
     m.printInfo();
@@ -386,39 +386,35 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step) {
 }
 
 void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
-    double fx_d = 1.0 / 5.9421434211923247e+02;
-    double fy_d = 1.0 / 5.9104053696870778e+02;
-    double cx_d = 3.3930780975300314e+02;
-    double cy_d = 2.4273913761751615e+02;
 
-    for (int i = im.rows - 1; i >= 0; i -= step) {
-      for (int j = im.cols - 1; j >= 0; j -= step) {
-          if (im.at<cv::Vec3b>(i, j) != mask) continue;
-          Vertex v;
-          if (image.type() == CV_16UC1) {
-            int depthValue = static_cast<int>(image.at<ushort>(i, j));
-            float depth;
-            if (depthValue < 2040) {
-              depth = static_cast<float>(1.0 / ((static_cast<double>(depthValue) * (-0.0030711016)) + 3.3309495161));
-            } else {
-              continue;
-            }
+    std::cout << "Starting writing mesh. \n";
 
-            float x = static_cast<float>((j - cy_d) * depth * fy_d);
-            float y = -static_cast<float>((i - cx_d) * depth * fx_d);
-            float z = -static_cast<float>(depth);
-            v = Vertex(x, y, z);
+		float cx = 257.966;
+		float cy = 210.268;
 
-          } else {
-            v = Vertex(-((image.cols / 2.0) - j) / image.cols,
-                      ((image.rows / 2.0) - i) / image.rows,
-                      image.at<uchar>(i, j) / 255.);
-          }
-          m.vertices.push_back(v);
-          cv::Vec3b color(cv::Vec3b(im.at<cv::Vec3b>(i, j)));
-          m.colors.push_back(color);
+		float fx = 0.00273687;
+		float fy = 0.00273687;
+
+    for (int i = 0; i < im.rows; ++i) {
+      for (int j = 0; j < im.cols; ++j) {
+				if (im.at<cv::Vec3b>(i, j) != mask) continue;
+				Vertex v;
+
+				float depth_val = image.at<ushort>(i, j) / 1000.0f;
+
+				v.y = -(i + 0.5 - cx) * fx * depth_val;
+				v.x = (j + 0.5 - cy) * fy * depth_val;
+				v.z = -depth_val;
+				m.vertices.push_back(v);
+
+				if (!colored_img.empty()) {
+					cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
+					m.colors.push_back(color);
+				}
       }
     }
+    m.printInfo();
+    std::cout << "Ended writing mesh. \n";
 }
 
 cv::Scalar ImgSegmenter::getNextColor(int seed) {

@@ -26,7 +26,7 @@ public:
   ImgSegmenter(void);
   ImgSegmenter(const cv::Mat &img);
   ImgSegmenter(cv::Mat &&img);
-  ImgSegmenter(cv::Mat &&img, int, int, int);
+  ImgSegmenter(cv::Mat &&img, int, int, int, int);
 
   void estimateNormals(); // Estimates Normals for Every Point
   void printNormals();    // Prints Normals
@@ -34,6 +34,7 @@ public:
   void colorRegions(); // Colors the found Regions
   void writetoFile(std::string filename);
   void writetoMesh(Mesh &m, int step);
+  void writetoMesh_impl(Mesh &m, int step);
   void writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask);
 
   virtual ~ImgSegmenter();
@@ -55,6 +56,7 @@ private:
   int normal_step;   // Kernel to Print Normals
   int edge_radius;   // Radius of Surface Normal Edges Detection Window
   int num_regions;   // Number of regions found from color scheme
+	int kernel_radius;
 
   clock_t begin, end;
   double elapsed_secs;

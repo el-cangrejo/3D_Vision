@@ -1,12 +1,7 @@
-#include <Mesh.hpp>
+#include "Mesh.hpp"
 #include <pcl/search/impl/search.hpp>
 
-//#ifndef PCL_NO_PRECOMPILE
-//#include <pcl/impl/instantiate.hpp>
-//#include <pcl/point_types.h>
-//PCL_INSTANTIATE(Search, PCL_POINT_TYPES)
-//#endif // PCL_NO_PRECOMPILE
-Mesh::Mesh(void) {}
+Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0) {}
 
 Mesh::~Mesh() {}
 
@@ -243,25 +238,25 @@ void Mesh::computeFPFH(void) {
 }
 
 void Mesh::fittoUnitSphere(void) {
-  float max_dist(0.0);
-  for (const auto &v : vertices)
-    if (max_dist < v.L2Norm())
-      max_dist = v.L2Norm();
+  float max_dist = 0.0;
 
-  for (auto &v : vertices) {
-    v.x /= max_dist;
-    v.y /= max_dist;
-    v.z /= max_dist;
-  }
+  for (const auto &v : vertices) {
+    if (max_dist < v.L2Norm()) {
+      max_dist = v.L2Norm();
+		}
+	}
+
+	for (auto &v : vertices) {
+		v = v / max_dist;
+	} 
 }
 
 void Mesh::movetoCenter(void) {
-  if (centroid == Vertex(0, 0, 0)) {
-    for (auto &v : vertices) {
-      centroid = centroid + v;
-    }
-  }
-  centroid = centroid / vertices.size();
+	for (auto &v : vertices) {
+		centroid = centroid + v;
+	}
+  
+	centroid = centroid / vertices.size();
   for (auto &v : vertices) {
     v = v - centroid;
   }
@@ -441,9 +436,7 @@ void Mesh::printInfo(void) {
             << this->triangles.size() << " triangles \n"
             << this->edges.size() << " edges \n"
             << this->normals.size() << " normals \n"
-            << this->dvertices.size() << " dvertices \n"
-            << this->dedges.size() << " dedges \n"
-            << this->trinormals.size() << " trinormals \n";
+            << "Centroid : " << this->centroid.x << " " << this->centroid.y << " " << this->centroid.z << "\n";
 }
 
 void Mesh::triangulate() {
@@ -505,4 +498,197 @@ void Mesh::triangulate() {
 	//std::cout << triangles << "\n";
   // Finish
   return;
+}
+
+// Loading functions
+
+int Mesh::load(const std::string file_path) {
+  // Check if mesh is empty and if not clear it
+  if (!this->empty())
+    this->clear();
+
+  int success = 0;
+  // Check file ending to find file type
+  if (file_path.substr(file_path.size() - 3, 3) == "obj") {
+    success = loadObj(file_path);
+  } else if (file_path.substr(file_path.size() - 3, 3) == "off") {
+    success = loadOff(file_path);
+  } else {
+    std::cout << "Unsupported file format!\nFile not loaded\n";
+  }
+
+	this->preprocess();
+  return success;
+}
+
+int Mesh::loadObj(const std::string path) {
+  std::ifstream objfile;
+  std::string line;
+  int type(0);
+
+  std::vector<Vertex> std_normals;
+
+  // Reads .obj File
+  objfile.open(path);
+  if (objfile.is_open()) {
+    while (getline(objfile, line)) {
+      std::istringstream in(line);
+      std::string element;
+      in >> element;
+
+      if (element == "v") {
+        float x, y, z;
+        in >> x >> y >> z;
+        vertices.push_back(Vertex(x, y, z));
+
+      } else if (element == "vn" || element == "n") {
+        float nx, ny, nz;
+        in >> nx >> ny >> nz;
+        Vertex n = Vertex(nx, ny, nz);
+        std_normals.push_back(n.Normalize());
+      } else if (element == "f") {
+        if (type == 0 && !std_normals.empty())
+          normals.resize(vertices.size());
+        if (type == 0)
+          type = findType(line);
+        int v1, v2, v3;
+        int vn1, vn2, vn3;
+        int vt1, vt2, vt3;
+
+        switch (type) {
+        case 1: {
+          in >> v1 >> v2 >> v3;
+          break;
+        }
+        case 2: {
+          char c;
+          in >> v1 >> c >> vt1;
+          in >> v2 >> c >> vt2;
+          in >> v3 >> c >> vt3;
+          break;
+        }
+        case 3: {
+          char c;
+          in >> v1 >> c >> c >> vn1;
+          in >> v2 >> c >> c >> vn2;
+          in >> v3 >> c >> c >> vn3;
+          break;
+        }
+        case 4: {
+          char c;
+          in >> v1 >> c >> vt1 >> c >> vn1;
+          in >> v2 >> c >> vt2 >> c >> vn2;
+          in >> v3 >> c >> vt3 >> c >> vn3;
+          break;
+        }
+        default: {
+          std::cout << "No such type of .obj file!\nFile not loaded!\n";
+          return 0;
+          break;
+        }
+        }
+
+        if ((type == 3 || type == 4) && !std_normals.empty()) {
+          normals[v1 - 1] = std_normals[vn1 - 1];
+          normals[v2 - 1] = std_normals[vn2 - 1];
+          normals[v3 - 1] = std_normals[vn3 - 1];
+        } else if ((type == 1 || type == 2) && !std_normals.empty()) {
+          normals[v1 - 1] = std_normals[v1 - 1];
+          normals[v2 - 1] = std_normals[v2 - 1];
+          normals[v3 - 1] = std_normals[v3 - 1];
+        }
+        triangles.push_back(Triangle(v1 - 1, v2 - 1, v3 - 1));
+      }
+    }
+    objfile.close();
+    std::cout << "Loaded :" << path << "\n";
+  } else {
+    std::cout << "Unable to open file! \n";
+    return 0;
+  }
+
+  printInfo();
+  return 1;
+}
+
+int Mesh::loadOff(const std::string path) {
+  std::ifstream off_file;
+  std::string line;
+
+  std::vector<Vertex> std_normals;
+  off_file.open(path);
+
+  if (off_file.is_open()) {
+    getline(off_file, line);
+    getline(off_file, line);
+
+    std::istringstream in(line);
+    int v, f, e;
+    in >> v >> f >> e;
+		std::cout << "Num of Vertices " << v << "\n";
+
+    // Read vertices
+    for (int i = 0; i < v; ++i) {
+      getline(off_file, line);
+      std::istringstream in_v(line);
+      float x, y, z;
+      in_v >> x >> y >> z;
+      vertices.push_back(Vertex(x, y, z));
+    }
+
+		getline(off_file, line);
+    // Read faces
+    for (int i = 0; i < f; ++i) {
+      getline(off_file, line);
+      std::istringstream in_f(line);
+      int x, y, z;
+      int n;
+      in_f >> n;
+      in_f >> x >> y >> z;
+
+      triangles.push_back(Triangle(x, y, z));
+			//std::cout << "Triangle " << x << " " << y << " " << z << "\n";
+    }
+    off_file.close();
+    std::cout << "Loaded :" << path << "\n";
+  } else {
+    std::cout << "Unable to open file! \n";
+    return 0;
+  }
+
+  this->printInfo();
+  return 1;
+}
+
+int Mesh::findType(const std::string line) {
+  int count(0);
+
+  for (size_t i = 0; i < line.size(); ++i) {
+    if (line[i] == '/')
+      ++count;
+  }
+  if (count == 0)
+    return 1;
+  if (count == 3)
+    return 2;
+  for (size_t i = 0; i < line.size() - 1; ++i)
+    if ((line[i] == '/') && (line[i + 1]) == '/')
+      return 3;
+
+  return 4;
+}
+
+// Prerpocessing step
+void Mesh::preprocess () {
+  clock_t begin, end;
+  double elapsed_secs;
+  begin = clock();
+	this->movetoCenter ();
+	this->fittoUnitSphere ();
+	this->computeNormals ();
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	std::cout << "Preprocessing took : " << elapsed_secs << "\n";
+	std::cout << "Info after preprocessing : " << "\n";
+	printInfo ();
 }

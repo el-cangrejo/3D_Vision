@@ -27,6 +27,7 @@ public:
   Vertex &operator=(Vertex &&);
   Vertex operator-(const Vertex &);
   Vertex operator+(const Vertex &);
+  //Vertex &operator+=(const Vertex &);
   Vertex operator*(float);
   Vertex operator/(float);
 

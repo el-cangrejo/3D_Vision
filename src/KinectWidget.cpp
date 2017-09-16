@@ -2,7 +2,7 @@
 
 KinectWidget::KinectWidget(QWidget *parent)
     : QGLWidget(parent), kinect_initialized(false),
-      depthMat(cv::Size(640, 480), CV_16UC1), listener(libfreenect2::Frame::Color |
+      depthMat(cv::Size(512, 424), CV_16UC1), listener(libfreenect2::Frame::Color |
 				 	libfreenect2::Frame::Ir | libfreenect2::Frame::Depth) {
 }
 
@@ -17,8 +17,6 @@ void KinectWidget::initializeGL() {
 
   glGenTextures(1, &gl_depth_tex);
   glBindTexture(GL_TEXTURE_2D, gl_depth_tex);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -28,8 +26,6 @@ void KinectWidget::initializeGL() {
 
 	glGenTextures(1, &gl_rgb_tex);
   glBindTexture(GL_TEXTURE_2D, gl_rgb_tex);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -38,9 +34,6 @@ void KinectWidget::initializeGL() {
 }
 
 void KinectWidget::paintGL() {
-  //static std::vector<uint8_t> depth(640 * 480 * 4, 0);
-  //static std::vector<uint8_t> rgb(640 * 480 * 4, 0);
-
 	libfreenect2::Frame *rgb_ = nullptr;
 	libfreenect2::Frame *ir_ = nullptr;
 	libfreenect2::Frame *depth_ = nullptr;
@@ -62,12 +55,6 @@ void KinectWidget::paintGL() {
 		return;
 	}
 
-    // wipe the drawing surface clear
-  libfreenect2::Registration* registration = new libfreenect2::Registration(dev->getIrCameraParams(), dev->getColorCameraParams());
-	
-	libfreenect2::Frame undistorted(512, 424, 4);
-
-	registration->undistortDepth(depth_, &undistorted);
 	int depth_size = depth_->width * depth_->height * 4;
 	unsigned char * depth_data = new unsigned char[depth_size];
 	std::copy(depth_->data, depth_->data + depth_->width * depth_->height * 4, depth_data);
@@ -172,4 +159,22 @@ void KinectWidget::timerEvent(QTimerEvent *event) { updateGL(); }
 
 void KinectWidget::addFrame(std::string id, libfreenect2::Frame *frame) {
 	frames_[id] = frame;
+}
+
+void KinectWidget::takeSnapshot () {
+	if (!listener.waitForNewFrame(frames, 10*1000)) return; // 10 sconds
+  libfreenect2::Registration* registration = new libfreenect2::Registration(dev->getIrCameraParams(), dev->getColorCameraParams());
+	
+	libfreenect2::Frame undistorted(512, 424, 4);
+  libfreenect2::Frame *depth_ = frames[libfreenect2::Frame::Depth];
+
+	registration->undistortDepth(depth_, &undistorted);
+
+	int undistorted_size = undistorted.width * undistorted.height * 4;
+	unsigned char * undistorted_data = new unsigned char[undistorted_size];
+	std::copy(undistorted.data, undistorted.data + undistorted.width * undistorted.height * 4, undistorted_data);
+	this->depthMat.data = (uchar *)undistorted_data;
+
+	delete registration;
+	listener.release(frames);
 }

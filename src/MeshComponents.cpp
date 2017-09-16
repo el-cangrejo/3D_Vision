@@ -47,6 +47,10 @@ Vertex Vertex::operator-(const Vertex &other) {
 Vertex Vertex::operator+(const Vertex &other) {
   return Vertex(x + other.x, y + other.y, z + other.z);
 }
+
+//Vertex &Vertex::operator+=(const Vertex &other) {
+//  return Vertex(x + other.x, y + other.y, z + other.z);
+//}
 Vertex Vertex::operator*(const float num) {
   return Vertex(x * num, y * num, z * num);
 }

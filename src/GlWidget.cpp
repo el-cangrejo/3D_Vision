@@ -59,7 +59,7 @@ void GLWidget::paintGL() {
   }
   if (_showAxis) {
     glPushMatrix();
-    glTranslatef(-0.9, -0.9, -0.9);
+   // glTranslatef(-0.9, -0.9, -0.9);
     glScalef(scale_size, scale_size, scale_size);
     draw_axis();
     glPopMatrix();
@@ -165,6 +165,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
     glBegin(GL_TRIANGLES);
     glColor3f(_ModelColorR, _ModelColorG, _ModelColorB);
     for (const auto &t : mesh.triangles) {
+			//std::cout << "Triangle " << t.v1 << " " << t.v2 << " " << t.v3 << "\n";
       // glColor3f(0.9, 0.1, 0.1);
       glNormal3f(mesh.normals[t.v1].x, mesh.normals[t.v1].y,
                  mesh.normals[t.v1].z);
@@ -235,6 +236,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
                   v.val[2] / 255.);
       }
       glVertex3f((*it).x, (*it).y, (*it).z);
+			//std::cout << "Vertex " << (*it).x << " " << (*it).y << " " << (*it).z << "\n";
 
     }
     glEnd();
