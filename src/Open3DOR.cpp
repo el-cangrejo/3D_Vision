@@ -184,8 +184,7 @@ int loadOff(const std::string filepath, Mesh &mesh) {
 }
 
 void preprocess_mesh(Mesh &mesh) {
-  mesh.movetoCenter();
-  mesh.fittoUnitSphere();
+  mesh.preprocess();
 }
 
 float local_distance(const Mesh &query_mesh, const Mesh &target_mesh) {

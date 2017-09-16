@@ -194,8 +194,7 @@ void MainWindow::on_SearchinDBButton_clicked() {
 
   read_mesh(ui->widget->db_files[idx], ui->widget->target_mesh);
 
-  ui->widget->target_mesh.movetoCenter();
-  ui->widget->target_mesh.fittoUnitSphere();
+  ui->widget->target_mesh.preprocess();
   ui->widget->target_mesh.computeNormals();
 
   ui->widget->updateGL();
@@ -430,8 +429,7 @@ void MainWindow::onSegmentImg() {
   segm.writetoMesh(ui->widget->primary_mesh, 1);
 
   //ui->widget->primary_mesh.computeNormals();
-  ui->widget->primary_mesh.movetoCenter();
-  ui->widget->primary_mesh.fittoUnitSphere();
+  ui->widget->primary_mesh.preprocess();
 }
 
 void MainWindow::onGenerateMesh() {
@@ -455,8 +453,7 @@ void MainWindow::onGenerateMesh() {
   } else {
     //segm.writetoMesh(ui->widget->primary_mesh, 1);
 		ui->widget->primary_mesh = ui->Kinect_Widget->generateMesh();
-		ui->widget->primary_mesh.movetoCenter();
-		ui->widget->primary_mesh.fittoUnitSphere();
+		ui->widget->primary_mesh.preprocess();
 		ui->widget->primary_mesh.printInfo();
 		ui->widget->updateGL();
   }
