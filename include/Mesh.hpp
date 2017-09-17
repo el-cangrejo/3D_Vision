@@ -27,6 +27,9 @@ struct dFPFHSignature66 {
 	}
 };
 
+// Computes the L1 distance between two dFPFH signatures
+float l1(const dFPFHSignature66, const dFPFHSignature66);
+
 class Mesh {
 public:
 	// Helper functions

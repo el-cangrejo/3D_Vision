@@ -1,6 +1,14 @@
 #include "Mesh.hpp"
 #include <pcl/search/impl/search.hpp>
 
+float l1(const dFPFHSignature66 first, const dFPFHSignature66 second) {
+  float distance = 0.0;
+  for (int i = 0; i < first.descriptorSize(); ++i) {
+    distance += fabs(first.histogram[i] - second.histogram[i]);
+  }
+  return distance;
+}
+
 /** 
  *  Public
  */
@@ -728,6 +736,29 @@ void Mesh::calculatedFPFHSignatures(float radius, float inner_radius,
 }
 
 // Distance 
-float Mesh::localDistanceTo(const Mesh &other) {}
+float Mesh::localDistanceTo(const Mesh &other) {
+  if (dFPFHSignatures->points.size() != vertices.size()) {
+    std::cout << "dFPFH signatures not computed!\n";
+    return 0.0;
+  }
+
+  float localDistance = 0.0;
+
+  for (int i = 0; i < this->dFPFHSignatures->points.size(); ++i) {
+    float minDist = 10000.0;
+    for (int j = 0; j < other.dFPFHSignatures->points.size(); ++j) {
+      float dist = l1(this->dFPFHSignatures->points[i],
+                      other.dFPFHSignatures->points[j]);
+      if (minDist > dist) {
+        minDist = dist;
+      }
+    }
+    localDistance += minDist;
+  }
+
+  localDistance = localDistance / (float)this->dFPFHSignatures->points.size();
+  std::cout << "Local similarity: " << localDistance << "\n";
+  return localDistance;
+}
 
 float Mesh::globalDistanceTo(const Mesh &other) {}
