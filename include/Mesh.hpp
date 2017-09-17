@@ -15,6 +15,18 @@
 
 #include "MeshComponents.hpp"
 
+// Struct to hold the dFPFH signature of the point as a histogram
+struct dFPFHSignature66 {
+	float histogram[66];
+	static int descriptorSize () { return 66; }
+	void populate (pcl::FPFHSignature33 p, pcl::FPFHSignature33 outer, pcl::FPFHSignature33 inner) {
+		for (int i = 0; i < 33; ++i) {
+			histogram[i] = p.histogram[i];
+			histogram[i + 33] = outer.histogram[i] - inner.histogram[i];
+			}
+	}
+};
+
 class Mesh {
 public:
 	// Helper functions
