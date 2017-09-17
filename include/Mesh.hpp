@@ -73,6 +73,8 @@ private:
   void computeNormals_Tri();
   void computeNormals_PCA();
   void computeFPFH();
+	void calculatedFPFHSignatures(float radius, float inner_radius, float outer_radius);
+	void calculateFisherVectors();
 
 	// Distance functions
 	float localDistanceTo(const Mesh &other);
