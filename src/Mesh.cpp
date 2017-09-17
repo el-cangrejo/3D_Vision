@@ -94,7 +94,6 @@ void Mesh::passToPointCloud(
 }
 
 // Processing 
-
 void Mesh::preprocess () {
   clock_t begin, end;
   double elapsed_secs;
@@ -339,7 +338,6 @@ void Mesh::triangulate() {
  */
 
 // Loading functions
-
 int Mesh::loadObj(const std::string path) {
   std::ifstream objfile;
   std::string line;
@@ -498,7 +496,6 @@ int Mesh::findType(const std::string line) {
 }
 
 // Preprocessing
-
 void Mesh::fitToUnitSphere(void) {
   float max_dist = 0.0;
 
