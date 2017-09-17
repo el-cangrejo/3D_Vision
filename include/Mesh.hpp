@@ -77,6 +77,12 @@ private:
 	// Distance functions
 	float localDistanceTo(const Mesh &other);
 	float globalDistanceTo(const Mesh &other);
+
+	// Point cloud of dFPFH signature for every point in mesh	
+	pcl::PointCloud<dFPFHSignature66>::Ptr dFPFHSignatures;
+
+	// Array of Fisher vectors
+	float *fisherVectors;
 };
 
 #endif // MESH_HPP
