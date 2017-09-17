@@ -735,6 +735,60 @@ void Mesh::calculatedFPFHSignatures(float radius, float inner_radius,
             << this->dFPFHSignatures->points[1].descriptorSize() << "\n";
 }
 
+void Mesh::calculateFisherVectors() {
+  vl_size dataDim = 66;
+  vl_size numClusters = 10;
+  vl_size numData = dFPFHSignatures->points.size();
+
+  VlGMM *gmm = vl_gmm_new(VL_TYPE_FLOAT, dataDim, numClusters);
+  // float * data = vl_malloc(sizeof(float) * numData * dataDim);
+  float *data = new float[numData * dataDim];
+  this->fisherVectors = new float[2 * dataDim * numClusters];
+
+  std::cout << "Data size: " << sizeof(float) * numData * dataDim << "\n";
+
+  for (vl_size dataIdx = 0; dataIdx < numData; ++dataIdx) {
+    for (vl_size d = 0; d < dataDim; ++d) {
+      data[dataIdx * dataDim + d] =
+          (float)dFPFHSignatures->points[dataIdx].histogram[d];
+    }
+  }
+
+  // KMeans initialization parameters
+  vl_size maxiterKM = 5;
+  vl_size ntrees = 3;
+  vl_size maxComp = 20;
+
+  VlKMeans *kmeans = vl_kmeans_new(VL_TYPE_FLOAT, VlDistanceL2);
+  vl_kmeans_set_verbosity(kmeans, 0);
+  vl_kmeans_set_max_num_iterations(kmeans, maxiterKM);
+  vl_kmeans_set_max_num_comparisons(kmeans, maxComp);
+  vl_kmeans_set_num_trees(kmeans, ntrees);
+  vl_kmeans_set_algorithm(kmeans, VlKMeansLloyd);
+  vl_kmeans_set_initialization(kmeans, VlKMeansRandomSelection);
+  vl_gmm_set_initialization(gmm, VlGMMKMeans);
+  vl_gmm_set_kmeans_init_object(gmm, kmeans);
+
+  // GMM set parameters"
+  vl_size maxiter = 5;
+  vl_size maxrep = 1;
+
+  vl_gmm_set_max_num_iterations(gmm, maxiter);
+  vl_gmm_set_num_repetitions(gmm, maxrep);
+  vl_gmm_set_verbosity(gmm, 0);
+
+  vl_gmm_cluster(gmm, data, numData);
+
+  vl_fisher_encode(fisherVectors, VL_TYPE_FLOAT, vl_gmm_get_means(gmm), dataDim,
+                   numClusters, vl_gmm_get_covariances(gmm),
+                   vl_gmm_get_priors(gmm), data, numData,
+                   VL_FISHER_FLAG_IMPROVED);
+
+  delete[] data;
+  vl_gmm_delete(gmm);
+  vl_kmeans_delete(kmeans);
+}
+
 // Distance 
 float Mesh::localDistanceTo(const Mesh &other) {
   if (dFPFHSignatures->points.size() != vertices.size()) {
