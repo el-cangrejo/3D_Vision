@@ -35,6 +35,7 @@ public:
   bool empty();
   void clear();
   void printInfo();
+	void passToPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &, pcl::PointCloud<pcl::Normal>::Ptr &) const;
   ~Mesh();
 
 	// Processing functions
