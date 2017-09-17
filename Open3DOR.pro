@@ -16,6 +16,7 @@ CONFIG += c++14
 INCLUDEPATH += "/usr/local/include/pcl-1.8"\
                "/usr/include/eigen3"\
                "/usr/include/boost"\
+							 "/usr/include/vl"\
                "include"\
 
 INCLUDEPATH += "usr/local/include/opencv2"\
@@ -69,6 +70,8 @@ LIBS += -lopencv_core \
 LIBS += -lfreenect2
 
 LIBS += -lusb-1.0
+
+LIBS += -lvl
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter
 QMAKE_CXXFLAGS_DEBUG += -O1
