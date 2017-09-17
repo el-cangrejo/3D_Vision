@@ -15,6 +15,12 @@
 
 #include "MeshComponents.hpp"
 
+extern "C" {
+#include <vl/generic.h>
+#include <vl/gmm.h>
+#include <vl/fisher.h>
+}
+
 // Struct to hold the dFPFH signature of the point as a histogram
 struct dFPFHSignature66 {
 	float histogram[66];
