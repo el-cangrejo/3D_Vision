@@ -38,3 +38,7 @@ install_manifest.txt
 # MyFiles
 *.dtr
 *.png
+
+*.off
+build
+*.py
