@@ -319,7 +319,7 @@ void MainWindow::onActionPreprocessDatabase() {
 }
 
 void MainWindow::onActionTakeSnapshot() {
-  if (ui->Kinect_Widget->kinect_initialized = false) {
+  if (!ui->Kinect_Widget->kinect_initialized) {
     std::cout << "No Kinect device initialized!\n";
     return;
   }
