@@ -58,6 +58,33 @@ void Mesh::printInfo(void) {
             << "Centroid : " << this->centroid.x << " " << this->centroid.y << " " << this->centroid.z << "\n";
 }
 
+void Mesh::passToPointCloud(
+    pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+    pcl::PointCloud<pcl::Normal>::Ptr &normal_cloud) const {
+  if (vertices.empty()) {
+    std::cout << "Mesh with no vertices!\n";
+    exit(0);
+  }
+  if (normals.empty()) {
+    std::cout << "Mesh with no normals!\n";
+    exit(0);
+  }
+
+  std::cout << "Start passing to point cloud\n";
+
+  cloud->points.resize(vertices.size());
+  for (size_t i = 0; i < cloud->points.size(); ++i) {
+    cloud->points[i] =
+        pcl::PointXYZ(vertices[i].x, vertices[i].y, vertices[i].z);
+  }
+
+  normal_cloud->points.resize(normals.size());
+  for (size_t i = 0; i < normal_cloud->points.size(); ++i) {
+    normal_cloud->points[i] =
+        pcl::Normal(normals[i].x, normals[i].y, normals[i].z);
+  }
+}
+
 // Processing 
 
 void Mesh::preprocess () {
@@ -183,9 +210,9 @@ Mesh Mesh::gridFilter() {
         voxel_centroid_normal = voxel_centroid_normal.Normalize();
         fil_mesh.normals.push_back(voxel_centroid_normal);
         fil_mesh.fpfhist.push_back(hist);
-      }
-    }
-  }
+			}
+		}
+	}
 
   fil_mesh.moveToCenter();
   fil_mesh.fitToUnitSphere();
@@ -653,6 +680,51 @@ void Mesh::computeFPFH(void) {
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
   std::cout << "Calculating FPFH end : elapsed time: " << elapsed_secs << "\n";
   // std::cout << "Fpfhs size = " << fpfhs->points.size() << "\n";
+}
+
+void Mesh::calculatedFPFHSignatures(float radius, float inner_radius,
+                                    float outer_radius) {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>());
+
+  this->passToPointCloud(cloud, normal);
+
+  pcl::FPFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::FPFHSignature33> fpfh;
+  fpfh.setInputCloud(cloud);
+  fpfh.setInputNormals(normal);
+
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
+      new pcl::search::KdTree<pcl::PointXYZ>);
+
+  fpfh.setSearchMethod(tree);
+
+  pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs(
+      new pcl::PointCloud<pcl::FPFHSignature33>());
+  pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_inner(
+      new pcl::PointCloud<pcl::FPFHSignature33>());
+  pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_outer(
+      new pcl::PointCloud<pcl::FPFHSignature33>());
+
+  fpfh.setRadiusSearch(radius);
+  fpfh.compute(*fpfhs);
+
+  fpfh.setRadiusSearch(inner_radius);
+  fpfh.compute(*fpfhs_inner);
+
+  fpfh.setRadiusSearch(outer_radius);
+  fpfh.compute(*fpfhs_outer);
+
+  this->dFPFHSignatures = pcl::PointCloud<dFPFHSignature66>::Ptr(
+      new pcl::PointCloud<dFPFHSignature66>);
+  this->dFPFHSignatures->points.resize(fpfhs->points.size());
+  for (int i = 0; i < this->dFPFHSignatures->points.size(); ++i) {
+    this->dFPFHSignatures->points[i].populate(
+        fpfhs->points[i], fpfhs_outer->points[i], fpfhs_inner->points[i]);
+  }
+  std::cout << "Calculated dFPFHSignature : "
+            << this->dFPFHSignatures->points.size() << "\n";
+  std::cout << "Calculated dFPFHSignature : "
+            << this->dFPFHSignatures->points[1].descriptorSize() << "\n";
 }
 
 // Distance 
