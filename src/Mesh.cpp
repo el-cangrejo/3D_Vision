@@ -815,4 +815,13 @@ float Mesh::localDistanceTo(const Mesh &other) {
   return localDistance;
 }
 
-float Mesh::globalDistanceTo(const Mesh &other) {}
+float Mesh::globalDistanceTo(const Mesh &other) {
+  float globalDistance = 0.0;
+
+  vl_size dataDim = 66;
+  vl_size numClusters = 10;
+  for (int i = 0; i < numClusters * dataDim * 2; ++i) {
+    globalDistance += fabs(this->fisherVectors[i] - other.fisherVectors[i]);
+  }
+  return globalDistance;
+}
