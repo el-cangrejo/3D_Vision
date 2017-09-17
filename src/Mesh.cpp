@@ -115,6 +115,15 @@ void Mesh::computeNormals() {
 void Mesh::process() {}
 
 float Mesh::distanceTo(const Mesh &other) {
+  float globalDistance = 0.0;
+  float localDistance = 0.0;
+
+  localDistance = this->localDistanceTo(other);
+  globalDistance = this->globalDistanceTo(other);
+  std::cout << "Global distance :" << globalDistance << "\n";
+  float overallDistance = localDistance + globalDistance;
+
+  return overallDistance;
 }
 
 Mesh Mesh::gridFilter() {
