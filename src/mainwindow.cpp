@@ -232,15 +232,15 @@ void MainWindow::onActionOpenImage(int type) {
   cv::Mat image;
   if (!file_name.isEmpty() && file_name.endsWith(".png")) {
 
+		std::cout << "Opening image : " << file_name.toStdString() << "\n";
     if (type == CV_8UC1) {
         image = cv::imread(file_name.toStdString(), CV_8UC1);
-        std::cout << "Channels " << image.channels() << " CV_8UC1\n";
+        std::cout << "Number of channels: " << image.channels() << ", type: CV_8UC1\n";
     } else {
         image = cv::imread(file_name.toStdString(), CV_16UC1);
-        std::cout << "Channels " << image.channels() << " CV_16UC1\n";
+        std::cout << "Number of channels: " << image.channels() << ", type: CV_16UC1\n";
     }
   }
-  std::cout << "Open image : " << file_name.toStdString() << "\n";
   ui->SnapShot_Widget->setImg(std::move(image));
 }
 
