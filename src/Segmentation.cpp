@@ -257,7 +257,9 @@ void ImgSegmenter::colorRegions(void) {
       if (colored_img.at<cv::Vec3b>(i, j) == cv::Vec3b(255, 255, 255)) {
         ++num_regions;
         seed = cv::Point(j, i);
-        cv::floodFill(colored_img, seed, getNextColor(num_regions));
+        cv::Scalar color = getNextColor(num_regions);
+        colors.push_back(color);
+				cv::floodFill(colored_img, seed, color);
       }
     }
   }
@@ -415,6 +417,84 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
     }
     m.printInfo();
     std::cout << "Ended writing mesh. \n";
+}
+
+void ImgSegmenter::writetoMesh(std::vector<Mesh> &meshes, int step) {
+	std::cout << "Starting writing mesh. \n";
+	//meshes.reserve(colors.size());
+	float cx = 257.966;
+	float cy = 210.268;
+
+	float fx = 0.00273687;
+	float fy = 0.00273687;
+	std::cout << "About to write " << colors.size() << " meshes..\n";
+	
+	Mesh m;
+	for (int i = 0; i < colored_img.rows; ++i) {
+		for (int j = 0; j < colored_img.cols; ++j) {
+			Vertex v;
+
+			float depth_val = image.at<ushort>(i, j) / 1000.0f;
+
+			v.y = -(i + 0.5 - cx) * fx * depth_val;
+			v.x = (j + 0.5 - cy) * fy * depth_val;
+			v.z = -depth_val;
+			m.vertices.push_back(v);
+
+			if (!colored_img.empty()) {
+				cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
+				m.colors.push_back(color);
+			}
+		}
+	}
+	meshes.push_back(m);
+	m.clear();
+	for (int k = 0; k < colors.size(); ++k) {
+		cv::Vec3b color(colors[k][0], colors[k][1], colors[k][2]);
+		int points = 0;
+		for (int i = 0 ; i < colored_img.rows; ++i) {
+			for (int j = 0; j < colored_img.cols; ++j) {
+				if (colored_img.at<cv::Vec3b>(i, j) != color) continue;
+				++points;
+				Vertex v;
+				if (image.type() == CV_16UC1) {
+					int depthValue = median_img.at<ushort>(i, j);
+					if (depthValue > 2000) continue;
+
+					float depth = depthValue / 1000.0f;
+
+					float y = -(i + 0.5 - cx) * fx * depth;
+					float x = (j + 0.5 - cy) * fy * depth;
+					float z = -depth;
+					v = Vertex(x, y, z);
+
+				} else {
+						v = Vertex(-((image.cols / 2.0) - j) / image.cols,
+											((image.rows / 2.0) - i) / image.rows,
+											 median_img.at<uchar>(i, j) / 255.);
+				}
+				int index = i * (colored_img.cols + 2) + j + 2;
+				Vertex n(normals[index].x, normals[index].y, normals[index].z);
+				m.vertices.push_back(v);
+				//m.normals.push_back(n);
+				if (!colored_img.empty()) {
+					//cv::Vec3b color(cv::Vec3b(colored_img.at<cv::Vec3b>(i, j)));
+					m.colors.push_back(color);
+				}
+			}
+		}
+		if (points > 1000) {
+				meshes.push_back(m);
+	//			std::cout << "Wrote " << meshes.size() << " mesh\n";
+		}
+		m.clear();
+	}
+	
+	std::cout << "Wrote " << meshes.size() << "\n";
+//	for (int i = 0; i < meshes.size(); ++i) {
+//			meshes[i].printInfo();
+//			std::cout << "Ended writing mesh. \n";
+//	}
 }
 
 cv::Scalar ImgSegmenter::getNextColor(int seed) {
