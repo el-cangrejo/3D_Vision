@@ -50,7 +50,7 @@ public:
   void setShowTargetMesh(bool);
   void setModelLighting(bool);
   void setNormalsLighting(bool);
-
+	void setMultiMesh(bool);
   // Database Handling Functions
   void eraseDatabase();
 
@@ -66,6 +66,7 @@ public:
   bool _showAxis = true;
   bool _normalLighting = false;
   bool _modelLighting = false;
+	bool _showMultiMesh = false;
 
   float _BackgroundColorR = 0.0;
   float _BackgroundColorG = 0.0;
@@ -89,6 +90,7 @@ public:
   Mesh filtered_mesh;
   Mesh target_mesh;
 
+  std::vector<Mesh> primary_meshes;
   std::vector<Mesh> meshes;
   std::vector<Mesh> db_descriptors;
   std::vector<std::string> db_files;
