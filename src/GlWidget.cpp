@@ -31,32 +31,63 @@ void GLWidget::paintGL() {
 
   float scale_size(1 / 1.5);
 
-  {
+//  {
+//  }
+//  if (_showFilteredMesh && !filtered_mesh.empty()) {
+//    glPushMatrix();
+//    glTranslatef(-0.6, 0, 0);
+//    glScalef(scale_size, scale_size, scale_size);
+//    draw_mesh(filtered_mesh);
+//    glPopMatrix();
+//  }
+//  if (_showTargetMesh && !target_mesh.empty()) {
+//    glPushMatrix();
+//    glTranslatef(-0.6, 0.0, 0.0);
+//    glScalef(scale_size, scale_size, scale_size);
+//    draw_mesh(target_mesh);
+//    glPopMatrix();
+//  }
+	if (_showMultiMesh) {
+		int total_num = primary_meshes.size();
+		if (total_num < 5) {
+			for (int i = 1; i < total_num; ++i) {
+				glPushMatrix();
+				float trans_x = -0.5 + 0.1 + i * 1/ 5.;
+				//float trans_y = -0.5 + 1 / static_cast<float>(num_rows) / 2. + i * 1 / static_cast<float>(num_rows);
+				glTranslatef(trans_x, 0, 0);
+				glScalef(0.3, 0.3, 0.3);
+				draw_mesh(primary_meshes[i]);
+				glPopMatrix();
+			}
+		} else {
+			int num_rows = std::ceil(total_num / 5);
+			for (int j = 0; j < 5; ++j) {
+				for (int i = 0; i < num_rows; ++i) {
+					glPushMatrix();
+					float trans_x = -0.5 + 0.1 + j * 1/ 5.;
+					float trans_y = -0.5 + 1 / static_cast<float>(num_rows) / 2. + i * 1 / static_cast<float>(num_rows);
+					glTranslatef(trans_x, trans_y, 0);
+					glScalef(0.3, 0.3, 0.3);
+					if (i * 5 + j <= total_num)
+						draw_mesh(primary_meshes[i * 5 + j + 1]);
+					glPopMatrix();
+				}
+			}
+		}
+	} else {
     glPushMatrix();
     if ((_showFilteredMesh && !filtered_mesh.empty()) ||
         (_showTargetMesh && !target_mesh.empty())) {
       glTranslatef(0.6, 0, 0);
       glScalef(scale_size, scale_size, scale_size);
     }
-    draw_mesh(primary_mesh);
+		if (!primary_meshes.empty())
+			draw_mesh(primary_meshes[0]);
     if (_showGrid)
       draw_grid(primary_mesh);
     glPopMatrix();
-  }
-  if (_showFilteredMesh && !filtered_mesh.empty()) {
-    glPushMatrix();
-    glTranslatef(-0.6, 0, 0);
-    glScalef(scale_size, scale_size, scale_size);
-    draw_mesh(filtered_mesh);
-    glPopMatrix();
-  }
-  if (_showTargetMesh && !target_mesh.empty()) {
-    glPushMatrix();
-    glTranslatef(-0.6, 0.0, 0.0);
-    glScalef(scale_size, scale_size, scale_size);
-    draw_mesh(target_mesh);
-    glPopMatrix();
-  }
+	}
+
   if (_showAxis) {
     glPushMatrix();
    // glTranslatef(-0.9, -0.9, -0.9);
@@ -457,6 +488,11 @@ void GLWidget::setModelLighting(bool light) {
 void GLWidget::setNormalsLighting(bool light) {
   _normalLighting = light;
   updateGL();
+}
+
+void GLWidget::setMultiMesh(bool show) {
+	_showMultiMesh = show;
+	updateGL();
 }
 
 /*
