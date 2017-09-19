@@ -37,6 +37,7 @@ void MainWindow::inititializeUI() {
   ui->ShowVerticesCheckBox->setChecked(ui->widget->_showVerts);
   ui->ShowNormalsCheckBox->setChecked(ui->widget->_showNormals);
   ui->ShowWireCheckBox->setChecked(ui->widget->_showWire);
+	ui->MultiMeshCheckBox->setChecked(ui->widget->_showMultiMesh);
 
   // Sliders Initializers
   ui->ModelColorBSlider->setSliderPosition(
@@ -113,7 +114,8 @@ void MainWindow::connectUI() {
           SLOT(setNormalsLighting(bool)));
   connect(ui->ShowSolidCheckBox, SIGNAL(clicked(bool)), this,
             SLOT(setShowSolid(bool)));
-
+	connect(ui->MultiMeshCheckBox, SIGNAL(clicked(bool)), this, 
+						SLOT(setMultiMesh(bool)));
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
   connect(ui->SegmentatImgButton, SIGNAL(clicked()), this,
@@ -212,7 +214,11 @@ void MainWindow::onActionQuit() {
 void MainWindow::onActionOpenMesh() {
   QStringList file_name = QFileDialog::getOpenFileNames(this);
   if (!file_name.isEmpty()) {
-		ui->widget->primary_mesh.load(file_name.at(0).toStdString());
+		Mesh m;
+		m.load(file_name.at(0).toStdString());
+		m.computeNormals();
+		ui->widget->primary_meshes.clear();
+		ui->widget->primary_meshes.push_back(m);
 		ui->widget->updateGL();
   } else {
 		std::cout << "File name is empty\n";
@@ -400,6 +406,10 @@ void MainWindow::setShowFilteredMesh(bool show) {
   ui->widget->setShowFilteredMesh(show);
 }
 
+void MainWindow::setMultiMesh(bool show) {
+	ui->widget->setMultiMesh(show);
+}
+
 void MainWindow::setModelLighting(bool light) {
   ui->widget->setModelLighting(light);
 }
@@ -417,6 +427,7 @@ void MainWindow::gridFilter() {
 }
 
 void MainWindow::onSegmentImg() {
+	std::cout << "\n\n\e[1mDepth Image Segmentation begins..\e[0m\n";
   ImgSegmenter segm(ui->SnapShot_Widget->getImg(), median_kernel, normals_radius, edge_radius, kernel_radius);
   segm.estimateNormals();
   segm.printNormals();
@@ -426,10 +437,12 @@ void MainWindow::onSegmentImg() {
   ui->Normals_Widget->setImg(segm.norm_img);
   ui->Colored_Widget->setImg(segm.colored_img);
   ui->Binarized_Widget->setImg(segm.norm_bin_edge_img);
-  segm.writetoMesh(ui->widget->primary_mesh, 1);
+  segm.writetoMesh(ui->widget->primary_meshes, 1);
+  //segm.writetoMesh(ui->widget->primary_mesh, 1);
 
   //ui->widget->primary_mesh.computeNormals();
-  ui->widget->primary_mesh.preprocess();
+  //ui->widget->primary_mesh.preprocess();
+	std::cout << "\n\n\e[1mDepth Image Segmentation ends..\e[0m\n";
 }
 
 void MainWindow::onGenerateMesh() {
@@ -468,6 +481,7 @@ void MainWindow::onDraw() {
 
 void MainWindow::onClearAll() {
   ui->widget->primary_mesh.clear();
+	ui->widget->primary_meshes.clear();
   ui->widget->updateGL();
   ui->Colored_Widget->clearImg();
   ui->Colored_Widget->updateGL();
