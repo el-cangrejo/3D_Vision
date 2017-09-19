@@ -71,6 +71,7 @@ private slots:
   void setShowTargetMesh(bool);
   void setModelLighting(bool);
   void setNormalsLighting(bool);
+	void setMultiMesh(bool);
 
   void onSegmentImg();
   void onGenerateMesh();
