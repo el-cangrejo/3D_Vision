@@ -36,8 +36,9 @@ public:
   void writetoMesh(Mesh &m, int step);
   void writetoMesh_impl(Mesh &m, int step);
   void writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask);
-
-  virtual ~ImgSegmenter();
+	void writetoMesh(std::vector<Mesh> &meshes, int step);
+  
+	virtual ~ImgSegmenter();
 
   cv::Mat orig_img;          // Original Input Image
   cv::Mat image;
@@ -65,6 +66,8 @@ private:
   std::vector<cv::Point3f> normals; // Vector of Normals for every Point
 
   cv::Scalar getNextColor(int);
+
+	std::vector<cv::Scalar> colors;
 };
 
 #endif // SEGMENTATION_HPP
