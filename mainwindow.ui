@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1293</width>
+    <width>1252</width>
     <height>765</height>
    </rect>
   </property>
@@ -113,15 +113,15 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>167</width>
-         <height>333</height>
+         <width>166</width>
+         <height>587</height>
         </rect>
        </property>
        <attribute name="label">
@@ -228,7 +228,7 @@
          <x>0</x>
          <y>0</y>
          <width>202</width>
-         <height>384</height>
+         <height>587</height>
         </rect>
        </property>
        <attribute name="label">
@@ -433,10 +433,10 @@
       <widget class="QWidget" name="Operations">
        <property name="geometry">
         <rect>
-         <x>-5</x>
+         <x>0</x>
          <y>0</y>
-         <width>260</width>
-         <height>585</height>
+         <width>264</width>
+         <height>587</height>
         </rect>
        </property>
        <attribute name="label">
@@ -618,6 +618,13 @@
             <item row="7" column="1">
              <widget class="QSpinBox" name="KernelRadiusSpinBox"/>
             </item>
+            <item row="8" column="1">
+             <widget class="QCheckBox" name="MultiMeshCheckBox">
+              <property name="text">
+               <string>Multi Mesh</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -642,8 +649,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>175</width>
-         <height>177</height>
+         <width>174</width>
+         <height>587</height>
         </rect>
        </property>
        <attribute name="label">
@@ -728,8 +735,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1293</width>
-     <height>25</height>
+     <width>1252</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
