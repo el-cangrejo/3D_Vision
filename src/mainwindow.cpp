@@ -142,7 +142,7 @@ void MainWindow::on_StatOutFIlter_clicked() {
 }
 
 void MainWindow::on_GridSize_valueChanged(double arg1) {
-  ui->widget->primary_mesh.grid_size = arg1;
+  ui->widget->primary_meshes[0].grid_size = arg1;
   std::cout << "Mesh's grid size set to " << arg1 << "\n";
 }
 
@@ -423,7 +423,7 @@ void MainWindow::setNormalsLighting(bool light) {
  * */
 
 void MainWindow::gridFilter() {
-  ui->widget->filtered_mesh = ui->widget->primary_mesh.gridFilter();
+  ui->widget->filtered_mesh = ui->widget->primary_meshes[0].gridFilter();
 }
 
 void MainWindow::onSegmentImg() {
@@ -442,7 +442,7 @@ void MainWindow::onSegmentImg() {
 
   //ui->widget->primary_mesh.computeNormals();
   //ui->widget->primary_mesh.preprocess();
-	std::cout << "\n\n\e[1mDepth Image Segmentation ends..\e[0m\n";
+	std::cout << "\e[1mDepth Image Segmentation ends..\e[0m\n";
 }
 
 void MainWindow::onGenerateMesh() {
@@ -453,14 +453,14 @@ void MainWindow::onGenerateMesh() {
 //      return;
 //  }
 
-  if (!ui->widget->primary_mesh.empty()) {
-    ui->widget->primary_mesh.clear();
+  if (!ui->widget->primary_meshes[0].empty()) {
+    ui->widget->primary_meshes[0].clear();
   }
   if (ui->Colored_Widget->mask_bool) {
     std::cout << "Writing masked mesh!\n";
 		ImgSegmenter segm(ui->SnapShot_Widget->getImg());
 		segm.estimateNormals();
-    segm.writetoMesh(ui->widget->primary_mesh, 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
+    segm.writetoMesh(ui->widget->primary_meshes[0], 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
     ui->Colored_Widget->mask_bool = false;
 		return;
   } else {
