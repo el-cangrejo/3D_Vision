@@ -31,6 +31,7 @@ int Mesh::load(const std::string file_path) {
     success = loadOff(file_path);
   } else {
     std::cout << "Unsupported file format!\nFile not loaded\n";
+		return success;
   }
 
 	this->preprocess();
@@ -127,7 +128,7 @@ float Mesh::distanceTo(const Mesh &other) {
 
 Mesh Mesh::gridFilter() {
   std::cout << "Start grid filtering.." << std::endl;
-
+	std::cout << "Starting with " << this->vertices.size() << " vertices and grid " << grid_size << "\n";
   clock_t begin, end;
   double elapsed_secs;
   begin = clock();
