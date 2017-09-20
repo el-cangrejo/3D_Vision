@@ -31,22 +31,20 @@ void GLWidget::paintGL() {
 
   float scale_size(1 / 1.5);
 
-//  {
-//  }
-//  if (_showFilteredMesh && !filtered_mesh.empty()) {
-//    glPushMatrix();
-//    glTranslatef(-0.6, 0, 0);
-//    glScalef(scale_size, scale_size, scale_size);
-//    draw_mesh(filtered_mesh);
-//    glPopMatrix();
-//  }
-//  if (_showTargetMesh && !target_mesh.empty()) {
-//    glPushMatrix();
-//    glTranslatef(-0.6, 0.0, 0.0);
-//    glScalef(scale_size, scale_size, scale_size);
-//    draw_mesh(target_mesh);
-//    glPopMatrix();
-//  }
+  if (_showFilteredMesh && !filtered_mesh.empty()) {
+    glPushMatrix();
+    glTranslatef(-0.6, 0, 0);
+    glScalef(scale_size, scale_size, scale_size);
+    draw_mesh(filtered_mesh);
+    glPopMatrix();
+  }
+  if (_showTargetMesh && !target_mesh.empty()) {
+    glPushMatrix();
+    glTranslatef(-0.6, 0.0, 0.0);
+    glScalef(scale_size, scale_size, scale_size);
+    draw_mesh(target_mesh);
+    glPopMatrix();
+  }
 	if (_showMultiMesh) {
 		int total_num = primary_meshes.size();
 		if (total_num < 5) {
@@ -84,7 +82,7 @@ void GLWidget::paintGL() {
 		if (!primary_meshes.empty())
 			draw_mesh(primary_meshes[0]);
     if (_showGrid)
-      draw_grid(primary_mesh);
+      draw_grid(primary_meshes[0]);
     glPopMatrix();
 	}
 
