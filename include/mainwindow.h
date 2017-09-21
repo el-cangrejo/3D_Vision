@@ -38,7 +38,6 @@ private slots:
   void onActionOpenImage16U();
   void onActionOpenImage(int type);
   void onActionOpenKinect();
-  void onActionDisplayDatabase();
   void onActionLoadDatabase();
   void onActionPreprocessDatabase();
   void onActionTakeSnapshot();
