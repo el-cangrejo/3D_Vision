@@ -45,31 +45,31 @@ void GLWidget::paintGL() {
     draw_mesh(target_mesh);
     glPopMatrix();
   }
+	
+
 	if (_showMultiMesh) {
-		int total_num = primary_meshes.size();
-		if (total_num < 5) {
-			for (int i = 1; i < total_num; ++i) {
-				glPushMatrix();
-				float trans_x = -0.5 + 0.1 + i * 1/ 5.;
-				//float trans_y = -0.5 + 1 / static_cast<float>(num_rows) / 2. + i * 1 / static_cast<float>(num_rows);
-				glTranslatef(trans_x, 0, 0);
-				glScalef(0.3, 0.3, 0.3);
-				draw_mesh(primary_meshes[i]);
-				glPopMatrix();
-			}
+		std::vector<Mesh> meshes_to_render;
+		if (_showDatabase) {
+			meshes_to_render = database_meshes; 
 		} else {
-			int num_rows = std::ceil(total_num / 5);
-			for (int j = 0; j < 5; ++j) {
-				for (int i = 0; i < num_rows; ++i) {
-					glPushMatrix();
-					float trans_x = -0.5 + 0.1 + j * 1/ 5.;
-					float trans_y = -0.5 + 1 / static_cast<float>(num_rows) / 2. + i * 1 / static_cast<float>(num_rows);
-					glTranslatef(trans_x, trans_y, 0);
-					glScalef(0.3, 0.3, 0.3);
-					if (i * 5 + j <= total_num)
-						draw_mesh(primary_meshes[i * 5 + j + 1]);
-					glPopMatrix();
+			meshes_to_render = primary_meshes;
+		}	
+		int total_num = meshes_to_render.size();
+		int num_rows = std::ceil(total_num / 5.);
+		//std::cout << "Rows : " << num_rows << "\n";
+		for (int j = 0; j < 5; ++j) {
+			for (int i = 1; i < num_rows + 1; ++i) {
+				glPushMatrix();
+				float trans_x = -3 + j * 1.5;
+				float trans_y = 3 - (i - 1) * 1.5;
+				//std::cout << "X: " << trans_x << " Υ: " << trans_y << "\n";
+				glTranslatef(trans_x, trans_y, 0);
+				glScalef(0.6, 0.6, 0.6);
+				if ((i - 1) * 5 + j < total_num) {
+					//std::cout << "Idx : " << (i - 1) * 5 + j << " Total : " << total_num << "\n";
+					draw_mesh(meshes_to_render[(i - 1) * 5 + j]);
 				}
+				glPopMatrix();
 			}
 		}
 	} else {
@@ -490,6 +490,11 @@ void GLWidget::setNormalsLighting(bool light) {
 
 void GLWidget::setMultiMesh(bool show) {
 	_showMultiMesh = show;
+	updateGL();
+}
+
+void GLWidget::setShowDatabase(bool show) {
+	_showDatabase = show;
 	updateGL();
 }
 
