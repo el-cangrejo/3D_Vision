@@ -1,7 +1,13 @@
 #include "Database.hpp"
 
 void loadDB(std::string db_path, std::vector<Mesh> &meshes) {
-  boost::filesystem::path p(db_path);
+	std::cout << "\e[1;34mStart loading Database: " << db_path << "\n";
+
+  clock_t begin, end;
+  double elapsed_secs;
+  begin = clock();
+
+	boost::filesystem::path p(db_path);
 
   for (boost::filesystem::directory_iterator dir(p);
        dir != boost::filesystem::directory_iterator(); dir++) {
@@ -14,9 +20,30 @@ void loadDB(std::string db_path, std::vector<Mesh> &meshes) {
     Mesh m;
 		m.load(db_entry);
 		m.preprocess();
-		if (!m.triangles.empty()) m.computeNormals();
+		m.computeNormals();
 
 		meshes.push_back(m);
   }
-	std::cout << "\e[1mMeshes load to database for display : " << meshes.size() << "\e[0m\n";
+
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	std::cout << "\e[1;34mMeshes loaded to database: " << meshes.size() << "\n";
+  std::cout << "End loading Database\nElapsed time: " << elapsed_secs
+            << "\e[0m\n";
+}
+
+void preprocessDB(std::vector<Mesh> &meshes) {
+	std::cout << "\e[1;34mStart preprocessing Database\n";
+
+  clock_t begin, end;
+  double elapsed_secs;
+  begin = clock();
+
+	for (auto &m : meshes)
+		m.process();
+
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  std::cout << "End preprocessing Database\nElapsed time: " << elapsed_secs
+            << "\e[0m\n";
 }
