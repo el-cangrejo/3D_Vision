@@ -2,6 +2,7 @@
 #include "Segmentation.hpp"
 #include "GlWidget.hpp"
 #include "ui_mainwindow.h"
+#include "Database.hpp"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -69,6 +70,8 @@ void MainWindow::connectUI() {
   connect(ui->action_OpenKinect, SIGNAL(triggered()), this,
           SLOT(onActionOpenKinect()));
   connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(onActionQuit()));
+	
+	// Database Actions
   connect(ui->action_Load_Database, SIGNAL(triggered()), this,
           SLOT(onActionLoadDatabase()));
   connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this,
@@ -116,6 +119,9 @@ void MainWindow::connectUI() {
             SLOT(setShowSolid(bool)));
 	connect(ui->MultiMeshCheckBox, SIGNAL(clicked(bool)), this, 
 						SLOT(setMultiMesh(bool)));
+	connect(ui->ShowDatabaseCheckBox, SIGNAL(clicked(bool)), this, 
+						SLOT(setShowDatabase(bool)));
+
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
   connect(ui->SegmentatImgButton, SIGNAL(clicked()), this,
@@ -125,9 +131,8 @@ void MainWindow::connectUI() {
   connect(ui->ClearAllButton, SIGNAL(clicked()), this, SLOT(onClearAll()));
   connect(ui->ZoomImgWidgetButton, SIGNAL(clicked()), this, SLOT(onZoomImgWidget()));
 
-  /*
-   * Segmetnai
-   * */
+  
+  // Segmenation
   connect(ui->median_kernelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMedianKernel(int)));
   connect(ui->normal_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNormalsRadius(int)));
   connect(ui->edge_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEdgeRadius(int)));
@@ -307,21 +312,19 @@ void MainWindow::onActionOpenKinect() {
 void MainWindow::onActionLoadDatabase() {
   QString directory_name = QFileDialog::getExistingDirectory(this);
   if (!directory_name.isEmpty()) {
-    std::cout << "Given database to preprocess "
-              << " : " << directory_name.toStdString() << "\n";
-    load_database(directory_name.toStdString(), ui->widget->db_descriptors,
-                  ui->widget->db_files);
-    ui->widget->database = directory_name.toStdString();
+    std::cout << "Loading for display database : " << directory_name.toStdString() << "\n";
+		loadDB(directory_name.toStdString(), ui->widget->database_meshes);
+		ui->widget->setMultiMesh(true);
   }
 }
 
 void MainWindow::onActionPreprocessDatabase() {
-  QString directory_name = QFileDialog::getExistingDirectory(this);
-  if (!directory_name.isEmpty()) {
-    std::cout << "Given database to preprocess "
-              << " : " << directory_name.toStdString() << "\n";
-    preprocess_database(directory_name.toStdString());
-  }
+	if (ui->widget->database_meshes.empty()) {
+		std::cout << "\e[1;31mNo Database meshes loaded!\nPlease use action Load Database and try again!\e[0m\n";
+		return;
+	}
+
+	preprocessDB(ui->widget->database_meshes);
 }
 
 void MainWindow::onActionTakeSnapshot() {
@@ -397,6 +400,8 @@ void MainWindow::setShowGrid(bool show) { ui->widget->setShowGrid(show); }
 void MainWindow::setShowSolid(bool show) { ui->widget->setShowSolid(show); }
 
 void MainWindow::setShowAxis(bool show) { ui->widget->setShowAxis(show); }
+
+void MainWindow::setShowDatabase(bool show) { ui->widget->setShowDatabase(show); }
 
 void MainWindow::setShowTargetMesh(bool show) {
   ui->widget->setShowTargetMesh(show);
