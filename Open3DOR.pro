@@ -23,18 +23,20 @@ INCLUDEPATH += "usr/local/include/opencv2"\
                "usr/local/include/libfreenect2"\
 							 "/usr/include/libusb-1.0"\
 
-SOURCES += src/main.cpp\
-           src/mainwindow.cpp\
-           src/GlWidget.cpp\
-           src/Open3DOR.cpp\
-           src/Segmentation.cpp\
-           src/KinectWidget.cpp\
+SOURCES += src/main.cpp \
+           src/Database.cpp \
+					 src/mainwindow.cpp \
+           src/GlWidget.cpp \
+           src/Open3DOR.cpp \
+           src/Segmentation.cpp \
+           src/KinectWidget.cpp \
            src/ImgViewerWidget.cpp \
            src/MeshComponents.cpp \
            src/Mesh.cpp \
 
-HEADERS +=	include/mainwindow.h \
-            include/GlWidget.hpp \
+HEADERS +=	include/Database.hpp \ 
+					  include/mainwindow.h \	
+						include/GlWidget.hpp \
             include/Open3DOR.hpp \
             include/Segmentation.hpp \
             include/KinectWidget.hpp \
