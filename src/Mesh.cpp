@@ -60,11 +60,12 @@ void Mesh::clear() {
 
 void Mesh::printInfo(void) {
   // Prints Information about the mesh
-  std::cout << "Object size : \n"
-            << this->vertices.size() << " vertices \n"
-            << this->triangles.size() << " triangles \n"
-            << this->normals.size() << " normals \n"
-            << "Centroid : " << this->centroid.x << " " << this->centroid.y << " " << this->centroid.z << "\n";
+  std::cout << "\e[1;31;43mObject size : \e[0m \e[1;33m\n"
+            << "Vertices: " << this->vertices.size() << "\n"
+            << "Triangles: " << this->triangles.size() << "\n"
+            << "Normals: " << this->normals.size() << "\n"
+            << "Centroid: (" << this->centroid.x << ", " << this->centroid.y << ", "
+					 	<< this->centroid.z << ")\e[0m\n";
 }
 
 void Mesh::passToPointCloud(
@@ -109,10 +110,31 @@ void Mesh::preprocess () {
 }
 
 void Mesh::computeNormals() {
-	this->computeNormals_Tri();
+  if (this->normals.size() == this->vertices.size()) {
+    std::cout << "\e[1;33mNormals already exist!\e[0m\n";
+    return;
+  }
+
+  clock_t begin, end;
+  double elapsed_secs;
+  begin = clock();
+  std::cout << "\e[1;34mCalculating normals begin\n";
+
+	if (!this->triangles.empty()) {
+		this->computeNormals_Tri();
+	} else {
+		this->computeNormals_PCA();
+	}
+
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  std::cout << "Calculating normals end \nElapsed time: " << elapsed_secs
+            << "\e[0m\n";
 }
 
-void Mesh::process() {}
+void Mesh::process() {
+	std::cout << "Processing mesh!\nCalculating dFPFH signatures!\nCalculating Fisher Vectors\n";
+}
 
 float Mesh::distanceTo(const Mesh &other) {
   float globalDistance = 0.0;
@@ -127,7 +149,7 @@ float Mesh::distanceTo(const Mesh &other) {
 }
 
 Mesh Mesh::gridFilter() {
-  std::cout << "Start grid filtering.." << std::endl;
+  std::cout << "\e[1;35mStart grid filtering" << std::endl;
 	std::cout << "Starting with " << this->vertices.size() << " vertices and grid " << grid_size << "\n";
   clock_t begin, end;
   double elapsed_secs;
@@ -235,8 +257,9 @@ Mesh Mesh::gridFilter() {
   fil_mesh.fitToUnitSphere();
   end = clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  std::cout << "Finished filtering..\nElaspsed time : " << elapsed_secs << "\n";
-  std::cout << "Filtered mesh size " << fil_mesh.vertices.size() << "\n";
+  std::cout << "Finished filtering\nElaspsed time : " << elapsed_secs << "\n";
+  std::cout << "Filtered mesh info\e[0m\n";
+	fil_mesh.printInfo();
   return fil_mesh;
 }
 
@@ -524,23 +547,7 @@ void Mesh::moveToCenter(void) {
 
 // Computing
 void Mesh::computeNormals_Tri() {
-  if (normals.size() == vertices.size()) {
-    std::cout << "Normals already exist!"
-              << "\n";
-    return;
-  }
-  if (this->triangles.empty()) {
-    //computeNormals_PCA();
-    return;
-  }
-
-  clock_t begin, end;
-  double elapsed_secs;
-  begin = clock();
-  std::cout << "Calculating normals begin\n";
-
   std::vector<Vertex> norms(vertices.size());
-
   for (auto &t : triangles) {
     Vertex pa, pb, pc;
     Vertex diff1, diff2;
@@ -569,11 +576,6 @@ void Mesh::computeNormals_Tri() {
     Vertex v = n.Normalize();
     normals.push_back(v);
   }
-
-  end = clock();
-  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-  std::cout << "Calculating normals end : elapsed time: " << elapsed_secs
-            << "\n";
 }
 
 void Mesh::computeNormals_PCA() {
