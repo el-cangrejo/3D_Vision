@@ -9,4 +9,9 @@
 
 void loadDB(std::string db_path, std::vector<Mesh> &meshes);
 
+void preprocessDB(std::vector<Mesh> &meshes);
+
+void writeDBDescriptors(std::vector<Mesh> &meshes);
+
+void readDBDescriptors(std::vector<Mesh> &meshes);
 #endif //DATABASE_HPP
