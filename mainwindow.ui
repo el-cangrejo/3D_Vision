@@ -120,8 +120,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>166</width>
+         <height>321</height>
         </rect>
        </property>
        <attribute name="label">
@@ -227,8 +227,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>202</width>
+         <height>300</height>
         </rect>
        </property>
        <attribute name="label">
@@ -656,8 +656,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>174</width>
+         <height>181</height>
         </rect>
        </property>
        <attribute name="label">
@@ -762,7 +762,6 @@
     <property name="title">
      <string>&amp;Database</string>
     </property>
-    <addaction name="action_Display_Database"/>
     <addaction name="action_Load_Database"/>
     <addaction name="action_Preprocess_Database"/>
    </widget>
