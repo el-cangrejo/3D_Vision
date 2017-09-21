@@ -38,6 +38,7 @@ private slots:
   void onActionOpenImage16U();
   void onActionOpenImage(int type);
   void onActionOpenKinect();
+  void onActionDisplayDatabase();
   void onActionLoadDatabase();
   void onActionPreprocessDatabase();
   void onActionTakeSnapshot();
@@ -72,6 +73,7 @@ private slots:
   void setModelLighting(bool);
   void setNormalsLighting(bool);
 	void setMultiMesh(bool);
+	void setShowDatabase(bool);
 
   void onSegmentImg();
   void onGenerateMesh();
