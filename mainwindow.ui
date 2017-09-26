@@ -113,15 +113,15 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>166</width>
-         <height>321</height>
+         <width>332</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -212,6 +212,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="MultiMeshCheckBox">
+            <property name="text">
+             <string>Multi Mesh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="ShowAxisCheckBox">
             <property name="text">
              <string>Axis</string>
@@ -227,8 +234,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>202</width>
-         <height>300</height>
+         <width>332</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -430,17 +437,17 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="Operations">
+      <widget class="QWidget" name="SegmentationOps">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
          <width>332</width>
-         <height>600</height>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
-        <string>Operations</string>
+        <string>Segmentation Operations</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
@@ -457,72 +464,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Grid size :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="GridSize"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="GridFilter">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Voxel Grid</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_13" stretch="1,0,0,0,0,0">
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Mean K :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Std Dev Multiplier :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
-          </item>
+         <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0">
           <item>
            <layout class="QFormLayout" name="formLayout_2">
             <property name="sizeConstraint">
@@ -592,6 +534,9 @@
               </property>
              </widget>
             </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="median_kernelSpinBox"/>
+            </item>
             <item row="5" column="0">
              <widget class="QLabel" name="normal_radius">
               <property name="text">
@@ -599,14 +544,8 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QSpinBox" name="median_kernelSpinBox"/>
-            </item>
             <item row="5" column="1">
              <widget class="QSpinBox" name="normal_radiusSpinBox"/>
-            </item>
-            <item row="6" column="1">
-             <widget class="QSpinBox" name="edge_radiusSpinBox"/>
             </item>
             <item row="6" column="0">
              <widget class="QLabel" name="edge_radius">
@@ -615,17 +554,13 @@
               </property>
              </widget>
             </item>
+            <item row="6" column="1">
+             <widget class="QSpinBox" name="edge_radiusSpinBox"/>
+            </item>
             <item row="7" column="1">
              <widget class="QSpinBox" name="KernelRadiusSpinBox"/>
             </item>
             <item row="8" column="1">
-             <widget class="QCheckBox" name="MultiMeshCheckBox">
-              <property name="text">
-               <string>Multi Mesh</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
              <widget class="QCheckBox" name="ShowDatabaseCheckBox">
               <property name="text">
                <string>Show Database</string>
@@ -634,30 +569,119 @@
             </item>
            </layout>
           </item>
-          <item>
-           <widget class="QPushButton" name="StatOutFIlter">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>1</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Statistical Outlier</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="MeshOps">
+       <attribute name="label">
+        <string>Mesh Operations</string>
+       </attribute>
+       <widget class="QWidget" name="verticalLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>9</y>
+          <width>301</width>
+          <height>481</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_16">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Grid size :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="GridSize"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="GridFilter">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Voxel Grid</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Std Dev Multiplier :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="StdDevMul"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Mean K :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="StatOutFIlter">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>1</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Statistical Outlier</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_2">
+             <property name="text">
+              <string>Compute descriptors</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QWidget" name="Search">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>174</width>
-         <height>181</height>
+         <width>332</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
