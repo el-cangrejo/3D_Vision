@@ -52,6 +52,7 @@ public:
   void setNormalsLighting(bool);
 	void setMultiMesh(bool);
 	void setShowDatabase(bool);
+
   // Database Handling Functions
   void eraseDatabase();
 
