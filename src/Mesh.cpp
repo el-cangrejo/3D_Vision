@@ -34,7 +34,6 @@ int Mesh::load(const std::string file_path) {
 		return success;
   }
 
-	this->preprocess();
   return success;
 }
 
