@@ -141,8 +141,8 @@ void MainWindow::connectUI() {
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
-  ui->widget->primary_mesh = ui->widget->primary_mesh.statoutFilter();
-  preprocess_mesh(ui->widget->primary_mesh);
+  ui->widget->primary_meshes[0] = ui->widget->primary_meshes[0].statoutFilter();
+  ui->widget->primary_meshes[0].preprocess(); 
   ui->widget->updateGL();
 }
 
@@ -221,6 +221,7 @@ void MainWindow::onActionOpenMesh() {
   if (!file_name.isEmpty()) {
 		Mesh m;
 		m.load(file_name.at(0).toStdString());
+		m.preprocess();
 		m.computeNormals();
 		ui->widget->primary_meshes.clear();
 		ui->widget->primary_meshes.push_back(m);
