@@ -269,7 +269,7 @@ void ImgSegmenter::colorRegions(void) {
     for (int c = 0; c < colored_img.cols; ++c) {
       if (colored_img.at<cv::Vec3b>(r, c) == cv::Vec3b(0, 0, 0)) {
         cv::Point min_distp = cv::Point(0, 0);
-        float min_dist = 3;
+        float min_dist = 5;
         for (int i = -ke / 2; i <= ke / 2; ++i) {
           for (int j = -ke / 2; j < ke / 2; ++j) {
             int image_r =
