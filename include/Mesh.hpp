@@ -45,13 +45,14 @@ public:
   void clear();
   void printInfo();
 	void passToPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr &, pcl::PointCloud<pcl::Normal>::Ptr &) const;
+	void setGridSize(float);
   ~Mesh();
 
 	// Processing functions
 	void preprocess();
 	void computeNormals();
 	void process();
-	float distanceTo(const Mesh &other);
+	float distanceTo(Mesh &other);
 
   Mesh gridFilter();
   Mesh statoutFilter();
@@ -68,6 +69,7 @@ public:
   std::vector<int> voxel_grid;
   std::vector<cv::Vec3b> colors;
   float grid_size;
+	float overall_distance;
 
 private:
 	// Loading functions
