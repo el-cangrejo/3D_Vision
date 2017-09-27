@@ -107,8 +107,6 @@ void MainWindow::connectUI() {
           SLOT(setShowGrid(bool)));
   connect(ui->ShowAxisCheckBox, SIGNAL(clicked(bool)), this,
           SLOT(setShowAxis(bool)));
-  connect(ui->ShowTargetMeshCheckBox, SIGNAL(clicked(bool)), this,
-          SLOT(setShowTargetMesh(bool)));
   connect(ui->ShowFilteredMesh, SIGNAL(clicked(bool)), this,
           SLOT(setShowFilteredMesh(bool)));
   connect(ui->ModelLightingCheckBox, SIGNAL(clicked(bool)), this,
@@ -130,7 +128,8 @@ void MainWindow::connectUI() {
   connect(ui->DrawButton, SIGNAL(clicked()), this, SLOT(onDraw()));
   connect(ui->ClearAllButton, SIGNAL(clicked()), this, SLOT(onClearAll()));
   connect(ui->ZoomImgWidgetButton, SIGNAL(clicked()), this, SLOT(onZoomImgWidget()));
-
+  connect(ui->ComputeDescriptorsButton, SIGNAL(clicked()), this, SLOT(onComputeDescriptors()));
+  connect(ui->RetrievalButton, SIGNAL(clicked()), this, SLOT(onRetrieve()));
   
   // Segmenation
   connect(ui->median_kernelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMedianKernel(int)));
@@ -147,8 +146,7 @@ void MainWindow::on_StatOutFIlter_clicked() {
 }
 
 void MainWindow::on_GridSize_valueChanged(double arg1) {
-  ui->widget->primary_meshes[0].grid_size = arg1;
-  std::cout << "Mesh's grid size set to " << arg1 << "\n";
+  ui->widget->primary_meshes[0].setGridSize(arg1);
 }
 
 void MainWindow::on_NormalsLengthSlider_valueChanged(int value) {
@@ -205,6 +203,64 @@ void MainWindow::on_SearchinDBButton_clicked() {
   ui->widget->target_mesh.computeNormals();
 
   ui->widget->updateGL();
+}
+
+void MainWindow::onComputeDescriptors() {
+	if (ui->widget->primary_meshes.empty()) {
+		std::cout << "\e[1;31mNo mesh loaded!\nPlease load mesh first and then try to compute desriptors!\e[0m\n";
+		return;
+	}
+
+	std::cout << "Begin computing descriptors!\n";
+
+	if (!ui->widget->filtered_mesh.empty()) {
+		std::cout << "Using filtered mesh!\n";
+		ui->widget->filtered_mesh.process();
+	} else {
+		std::cout << "Using primary mesh!\n";
+		ui->widget->primary_meshes[0].process();
+	}
+}
+
+void MainWindow::onRetrieve() {
+	if (ui->widget->filtered_mesh.empty()) {
+		std::cout << "\e[1;31mNo mesh loaded for query!\e[0m\n";
+		return;
+	}
+	if (ui->widget->database_meshes.empty()) {
+		std::cout << "\e[1;31mNo database loaded to retrieve from!\e[0m\n";
+		return;
+	}
+
+	std::cout << "\e[1;32mBegin searching in DB!\n";
+	
+	float min_dist = 1000000;
+	int idx = 0;
+
+	for (int i = 0; i < ui->widget->database_meshes.size(); ++i) {
+		float dist = ui->widget->filtered_mesh.distanceTo(ui->widget->database_meshes[i]);
+		std::cout << "Overall distance :" << ui->widget->database_meshes[i].overall_distance << "\n";
+		if (dist < min_dist) {
+			min_dist = dist;
+			idx = i;
+		}
+		std::cout << "\n";
+	}
+	std::cout << "Index : " << idx << "\n";
+	ui->widget->primary_meshes[0] = ui->widget->database_meshes[idx];
+
+	for (const auto &m : ui->widget->database_meshes) {
+		std::cout << "overall DISTANCE :" << m.overall_distance << "\n";
+	}
+
+	std::sort(ui->widget->database_meshes.begin(), ui->widget->database_meshes.end(), 
+			[](const Mesh &a, const Mesh &b) -> bool { 
+			std::cout << "OVERALL distances: " << a.overall_distance << " " << b.overall_distance << "\n";
+			return a.overall_distance < b.overall_distance;});
+	
+	for (const auto &m : ui->widget->database_meshes) {
+		std::cout << "OVERALL distance :" << m.overall_distance << "\n";
+	}
 }
 
 /*
