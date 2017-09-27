@@ -80,6 +80,8 @@ private slots:
   void onClearAll();
   void onZoomImgWidget();
   void gridFilter();
+	void onComputeDescriptors();
+	void onRetrieve();
 
   /*
    * Segmentation Parameters
