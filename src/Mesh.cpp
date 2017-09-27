@@ -14,7 +14,7 @@ float l1(const dFPFHSignature66 first, const dFPFHSignature66 second) {
  */
 
 // Helper
-Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0) {}
+Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0), overall_distance(0) {}
 
 Mesh::~Mesh() {}
 
@@ -79,8 +79,6 @@ void Mesh::passToPointCloud(
     exit(0);
   }
 
-  std::cout << "Start passing to point cloud\n";
-
   cloud->points.resize(vertices.size());
   for (size_t i = 0; i < cloud->points.size(); ++i) {
     cloud->points[i] =
@@ -92,6 +90,13 @@ void Mesh::passToPointCloud(
     normal_cloud->points[i] =
         pcl::Normal(normals[i].x, normals[i].y, normals[i].z);
   }
+
+  std::cout << "Passed to point cloud\n";
+}
+
+void Mesh::setGridSize(float x) {
+	this->grid_size = x;
+	std::cout << "Grid size is : " << this->grid_size << "\n";
 }
 
 // Processing 
@@ -132,17 +137,24 @@ void Mesh::computeNormals() {
 }
 
 void Mesh::process() {
-	std::cout << "Processing mesh!\nCalculating dFPFH signatures!\nCalculating Fisher Vectors\n";
+	float radius = 0.03;
+	float inner_radius = 0.12;
+	float outer_radius = 0.13;
+
+  this->calculatedFPFHSignatures(radius, inner_radius, outer_radius);
+  this->calculateFisherVectors();
 }
 
-float Mesh::distanceTo(const Mesh &other) {
+float Mesh::distanceTo(Mesh &other) {
   float globalDistance = 0.0;
   float localDistance = 0.0;
 
   localDistance = this->localDistanceTo(other);
   globalDistance = this->globalDistanceTo(other);
-  std::cout << "Global distance :" << globalDistance << "\n";
   float overallDistance = localDistance + globalDistance;
+
+	other.overall_distance = overallDistance;
+  std::cout << "Overall distance :" << other.overall_distance << "\n";
 
   return overallDistance;
 }
@@ -739,8 +751,6 @@ void Mesh::calculatedFPFHSignatures(float radius, float inner_radius,
   }
   std::cout << "Calculated dFPFHSignature : "
             << this->dFPFHSignatures->points.size() << "\n";
-  std::cout << "Calculated dFPFHSignature : "
-            << this->dFPFHSignatures->points[1].descriptorSize() << "\n";
 }
 
 void Mesh::calculateFisherVectors() {
@@ -831,5 +841,6 @@ float Mesh::globalDistanceTo(const Mesh &other) {
   for (int i = 0; i < numClusters * dataDim * 2; ++i) {
     globalDistance += fabs(this->fisherVectors[i] - other.fisherVectors[i]);
   }
+  std::cout << "Global similarity: " << globalDistance << "\n";
   return globalDistance;
 }
