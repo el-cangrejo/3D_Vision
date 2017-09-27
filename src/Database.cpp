@@ -39,8 +39,15 @@ void preprocessDB(std::vector<Mesh> &meshes) {
   double elapsed_secs;
   begin = clock();
 
-	for (auto &m : meshes)
-		m.process();
+	std::vector<Mesh> processed_meshes;
+
+	for (int i = 0; i < meshes.size(); ++i) {
+		meshes[i].setGridSize(0.05);
+		processed_meshes.push_back(meshes[i].gridFilter());
+		processed_meshes[i].process();
+	}
+	
+	meshes = processed_meshes;
 
   end = clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
