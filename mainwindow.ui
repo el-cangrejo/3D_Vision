@@ -121,7 +121,7 @@
          <x>0</x>
          <y>0</y>
          <width>332</width>
-         <height>569</height>
+         <height>600</height>
         </rect>
        </property>
        <attribute name="label">
@@ -234,8 +234,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>569</height>
+         <width>202</width>
+         <height>300</height>
         </rect>
        </property>
        <attribute name="label">
@@ -442,8 +442,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>569</height>
+         <width>274</width>
+         <height>310</height>
         </rect>
        </property>
        <attribute name="label">
@@ -574,6 +574,14 @@
        </layout>
       </widget>
       <widget class="QWidget" name="MeshOps">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>332</width>
+         <height>600</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Mesh Operations</string>
        </attribute>
@@ -664,9 +672,16 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_2">
+            <widget class="QPushButton" name="ComputeDescriptorsButton">
              <property name="text">
               <string>Compute descriptors</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="RetrievalButton">
+             <property name="text">
+              <string>Retrieve from DB</string>
              </property>
             </widget>
            </item>
@@ -674,88 +689,6 @@
          </item>
         </layout>
        </widget>
-      </widget>
-      <widget class="QWidget" name="Search">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>332</width>
-         <height>569</height>
-        </rect>
-       </property>
-       <attribute name="label">
-        <string>Search</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_12">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <property name="sizeConstraint">
-           <enum>QLayout::SetFixedSize</enum>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Descriptors :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>dFPFH :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Fisher Vectors :</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="SearchinDBButton">
-            <property name="text">
-             <string>Search in Database</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="ShowTargetMeshCheckBox">
-            <property name="text">
-             <string>Show Target Mesh</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="EraseDatabseButton">
-            <property name="text">
-             <string>Erase Database</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
       </widget>
      </widget>
     </item>
