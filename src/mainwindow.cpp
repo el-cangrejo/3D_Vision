@@ -56,7 +56,7 @@ void MainWindow::inititializeUI() {
                                                 99.);
 
   ui->RotFactorSlider->setSliderPosition(ui->widget->_rotFactor * 999.);
-  ui->ZoomFactSlider->setSliderPosition(ui->widget->_zoomStep * 99.);
+  ui->ZoomFactSlider->setSliderPosition(ui->widget->_zoomStep * 799.);
 }
 
 void MainWindow::connectUI() {
@@ -239,7 +239,7 @@ void MainWindow::onRetrieve() {
 
 	for (int i = 0; i < ui->widget->database_meshes.size(); ++i) {
 		float dist = ui->widget->filtered_mesh.distanceTo(ui->widget->database_meshes[i]);
-		std::cout << "Overall distance :" << ui->widget->database_meshes[i].overall_distance << "\n";
+//		std::cout << "Overall distance :" << ui->widget->database_meshes[i].overall_distance << "\n";
 		if (dist < min_dist) {
 			min_dist = dist;
 			idx = i;
@@ -247,20 +247,20 @@ void MainWindow::onRetrieve() {
 		std::cout << "\n";
 	}
 	std::cout << "Index : " << idx << "\n";
-	ui->widget->primary_meshes[0] = ui->widget->database_meshes[idx];
+	//ui->widget->primary_meshes[0] = ui->widget->database_meshes[idx];
 
-	for (const auto &m : ui->widget->database_meshes) {
-		std::cout << "overall DISTANCE :" << m.overall_distance << "\n";
-	}
+//	for (const auto &m : ui->widget->database_meshes) {
+//		std::cout << "overall DISTANCE :" << m.overall_distance << "\n";
+//	}
 
 	std::sort(ui->widget->database_meshes.begin(), ui->widget->database_meshes.end(), 
 			[](const Mesh &a, const Mesh &b) -> bool { 
-			std::cout << "OVERALL distances: " << a.overall_distance << " " << b.overall_distance << "\n";
+//			std::cout << "OVERALL distances: " << a.overall_distance << " " << b.overall_distance << "\n";
 			return a.overall_distance < b.overall_distance;});
 	
-	for (const auto &m : ui->widget->database_meshes) {
-		std::cout << "OVERALL distance :" << m.overall_distance << "\n";
-	}
+//	for (const auto &m : ui->widget->database_meshes) {
+//		std::cout << "OVERALL distance :" << m.overall_distance << "\n";
+//	}
 }
 
 /*
@@ -371,7 +371,6 @@ void MainWindow::onActionLoadDatabase() {
   if (!directory_name.isEmpty()) {
     std::cout << "Loading for display database : " << directory_name.toStdString() << "\n";
 		loadDB(directory_name.toStdString(), ui->widget->database_meshes);
-		ui->widget->setMultiMesh(true);
   }
 }
 
@@ -408,31 +407,37 @@ void MainWindow::onActionTakeSnapshot() {
 
 void MainWindow::setModelColorR(int color) {
   float RColor = color / 99.;
+	//std::cout << "R: " << RColor << "\n";
   ui->widget->setModelColorR(RColor);
 }
 
 void MainWindow::setModelColorG(int color) {
   float GColor = color / 99.;
+	//std::cout << "G: " << GColor << "\n";
   ui->widget->setModelColorG(GColor);
 }
 
 void MainWindow::setModelColorB(int color) {
   float BColor = color / 99.;
+	//std::cout << "B: " << BColor << "\n";
   ui->widget->setModelColorB(BColor);
 }
 
 void MainWindow::setBackgroundColorR(int color) {
   float RColor = color / 99.;
+	//std::cout << "R: " << RColor << "\n";
   ui->widget->setBackgroundColorR(RColor);
 }
 
 void MainWindow::setBackgroundColorB(int color) {
   float BColor = color / 99.;
+	//std::cout << "B: " << BColor << "\n";
   ui->widget->setBackgroundColorB(BColor);
 }
 
 void MainWindow::setBackgroundColorG(int color) {
   float GColor = color / 99.;
+	//std::cout << "G: " << GColor << "\n";
   ui->widget->setBackgroundColorG(GColor);
 }
 
