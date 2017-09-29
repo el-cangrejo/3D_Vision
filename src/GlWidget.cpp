@@ -66,14 +66,14 @@ void GLWidget::paintGL() {
 				glTranslatef(trans_x, trans_y, 0);
 				glScalef(0.6, 0.6, 0.6);
 				if ((i - 1) * 5 + j < total_num) {
-					std::cout << "Idx : " << (i - 1) * 5 + j << "\n";
-					std::cout << "Distance : " << meshes_to_render[(i - 1) * 5 + j].overall_distance << "\n";
+					//std::cout << "Idx : " << (i - 1) * 5 + j << "\n";
+					//std::cout << "Distance : " << meshes_to_render[(i - 1) * 5 + j].overall_distance << "\n";
 					draw_mesh(meshes_to_render[(i - 1) * 5 + j]);
 				}
 				glPopMatrix();
 			}
 		}
-		std::cout << "\n";
+		//std::cout << "\n";
 	} else {
     glPushMatrix();
     if ((_showFilteredMesh && !filtered_mesh.empty()) ||
