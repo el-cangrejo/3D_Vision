@@ -90,6 +90,7 @@ private:
 
 	// Distance functions
 	float localDistanceTo(const Mesh &other);
+	float localDistanceToImproved(const Mesh &other);
 	float globalDistanceTo(const Mesh &other);
 
 	// Point cloud of dFPFH signature for every point in mesh	
