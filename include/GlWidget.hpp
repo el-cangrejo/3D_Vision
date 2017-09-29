@@ -71,13 +71,13 @@ public:
 	bool _showMultiMesh = false;
 	bool _showDatabase = false; 
 
-  float _BackgroundColorR = 0.0;
-  float _BackgroundColorG = 0.0;
-  float _BackgroundColorB = 0.3;
+  float _BackgroundColorR = 0.13;
+  float _BackgroundColorG = 0.7;
+  float _BackgroundColorB = 0.77;
 
-  float _ModelColorR = 0.1;
-  float _ModelColorG = 0.0;
-  float _ModelColorB = 1.0;
+  float _ModelColorR = 0.8;
+  float _ModelColorG = 0.76;
+  float _ModelColorB = 0.78;
 
   float _NormalsLength = 0.0;
   float _zoomStep = 0.1;
