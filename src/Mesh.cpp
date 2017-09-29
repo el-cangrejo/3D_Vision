@@ -149,8 +149,24 @@ float Mesh::distanceTo(Mesh &other) {
   float globalDistance = 0.0;
   float localDistance = 0.0;
 
-  localDistance = this->localDistanceTo(other);
+  clock_t begin, end;
+  double elapsed_secs, total_secs(0);
+
+  begin = clock();
+  localDistance = this->localDistanceToImproved(other);
+	end =  clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	std::cout << "Time for local distance: " << elapsed_secs << "\n";
+	total_secs += elapsed_secs;
+
+  begin = clock();
   globalDistance = this->globalDistanceTo(other);
+	end =  clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	std::cout << "Time for global distance: " << elapsed_secs << "\n";
+	total_secs += elapsed_secs;
+
+	std::cout << "Total time: " << total_secs << "\n";
   float overallDistance = localDistance + globalDistance;
 
 	other.overall_distance = overallDistance;
@@ -809,7 +825,7 @@ void Mesh::calculateFisherVectors() {
 
 // Distance 
 float Mesh::localDistanceTo(const Mesh &other) {
-  if (dFPFHSignatures->points.size() != vertices.size()) {
+  if (this->dFPFHSignatures->empty() || other.dFPFHSignatures->empty()) {
     std::cout << "dFPFH signatures not computed!\n";
     return 0.0;
   }
@@ -826,6 +842,34 @@ float Mesh::localDistanceTo(const Mesh &other) {
       }
     }
     localDistance += minDist;
+  }
+
+  localDistance = localDistance / (float)this->dFPFHSignatures->points.size();
+  std::cout << "Local similarity: " << localDistance << "\n";
+  return localDistance;
+}
+
+float Mesh::localDistanceToImproved(const Mesh &other) {
+  if (this->dFPFHSignatures->empty() || other.dFPFHSignatures->empty()) {
+    std::cout << "dFPFH signatures not computed!\n";
+    return 0.0;
+  }
+
+  float localDistance = 0.0;
+
+  for (int i = 0; i < this->dFPFHSignatures->points.size(); ++i) {
+		std::vector<float> distances;
+		distances.reserve(other.dFPFHSignatures->points.size());
+
+    for (int j = 0; j < other.dFPFHSignatures->points.size(); ++j) {
+      float dist = l1(this->dFPFHSignatures->points[i],
+                      other.dFPFHSignatures->points[j]);
+			distances.push_back(dist);
+    }
+		std::sort(distances.begin(), distances.end());
+		for (int k = 0; k < 2; ++k) {
+			localDistance += (1 - k / 3.0) * distances[k];
+		}
   }
 
   localDistance = localDistance / (float)this->dFPFHSignatures->points.size();
