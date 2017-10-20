@@ -1,6 +1,10 @@
 #include "Mesh.hpp"
 #include <pcl/search/impl/search.hpp>
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 float l1(const dFPFHSignature66 first, const dFPFHSignature66 second) {
   float distance = 0.0;
   for (int i = 0; i < first.descriptorSize(); ++i) {
@@ -137,9 +141,9 @@ void Mesh::computeNormals() {
 }
 
 void Mesh::process() {
-	float radius = 0.03;
-	float inner_radius = 0.12;
-	float outer_radius = 0.13;
+	float radius = 0.04;
+	float inner_radius = 0.10;
+	float outer_radius = 0.12;
 
   this->calculatedFPFHSignatures(radius, inner_radius, outer_radius);
   this->calculateFisherVectors();
@@ -167,7 +171,7 @@ float Mesh::distanceTo(Mesh &other) {
 	total_secs += elapsed_secs;
 
 	std::cout << "Total time: " << total_secs << "\n";
-  float overallDistance = localDistance + globalDistance;
+  float overallDistance = 0.4 * localDistance + globalDistance;
 
 	other.overall_distance = overallDistance;
   std::cout << "Overall distance :" << other.overall_distance << "\n";
@@ -817,11 +821,36 @@ void Mesh::calculateFisherVectors() {
                    numClusters, vl_gmm_get_covariances(gmm),
                    vl_gmm_get_priors(gmm), data, numData,
                    VL_FISHER_FLAG_IMPROVED);
+	
+	postProcessFisherVectors();
 
   delete[] data;
   vl_gmm_delete(gmm);
   vl_kmeans_delete(kmeans);
 }
+
+void Mesh::postProcessFisherVectors() {
+	int num_of_elem = 1320;
+
+	// Signed square root function
+	for (int i = 0; i < num_of_elem; ++i) {
+		this->fisherVectors[i] = sgn(this->fisherVectors[i]) * sqrt(fabs(this->fisherVectors[i]));
+	}
+
+	// L2 Normalization
+	float l2_norm = 0.0;
+
+	for (int i = 0; i < num_of_elem; ++i) {
+		l2_norm += fabs(this->fisherVectors[i]);
+	}
+	
+	l2_norm = sqrt(l2_norm);
+
+	for (int i = 0; i < num_of_elem; ++i) {
+		this->fisherVectors[i] /= l2_norm;
+	}
+}
+
 
 // Distance 
 float Mesh::localDistanceTo(const Mesh &other) {
