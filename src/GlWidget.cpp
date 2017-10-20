@@ -33,7 +33,7 @@ void GLWidget::paintGL() {
 
   if (_showFilteredMesh && !filtered_mesh.empty()) {
     glPushMatrix();
-    glTranslatef(-0.6, 0, 0);
+    glTranslatef(-4.5, 0, 0);
     glScalef(scale_size, scale_size, scale_size);
     draw_mesh(filtered_mesh);
     glPopMatrix();
