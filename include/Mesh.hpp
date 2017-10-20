@@ -33,6 +33,8 @@ struct dFPFHSignature66 {
 	}
 };
 
+template <typename T> int sgn(T val);
+
 // Computes the L1 distance between two dFPFH signatures
 float l1(const dFPFHSignature66, const dFPFHSignature66);
 
@@ -87,6 +89,7 @@ private:
   void computeFPFH();
 	void calculatedFPFHSignatures(float radius, float inner_radius, float outer_radius);
 	void calculateFisherVectors();
+	void postProcessFisherVectors();
 
 	// Distance functions
 	float localDistanceTo(const Mesh &other);
