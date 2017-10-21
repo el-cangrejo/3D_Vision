@@ -44,6 +44,7 @@ void preprocessDB(std::vector<Mesh> &meshes) {
 	for (int i = 0; i < meshes.size(); ++i) {
 		meshes[i].setGridSize(0.05);
 		processed_meshes.push_back(meshes[i].gridFilter());
+		//processed_meshes.push_back(meshes[i]);
 		processed_meshes[i].process();
 	}
 	
