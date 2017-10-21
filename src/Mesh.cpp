@@ -822,7 +822,7 @@ void Mesh::calculateFisherVectors() {
                    vl_gmm_get_priors(gmm), data, numData,
                    VL_FISHER_FLAG_IMPROVED);
 	
-	postProcessFisherVectors();
+//	postProcessFisherVectors();
 
   delete[] data;
   vl_gmm_delete(gmm);
