@@ -31,66 +31,32 @@ void GLWidget::paintGL() {
 
   float scale_size(1 / 1.5);
 
+
+	glPushMatrix();
+	if (_showFilteredMesh && !filtered_mesh.empty()) {
+		glTranslatef(0.6, 0, 0);
+		glScalef(scale_size, scale_size, scale_size);
+	}
+	if (!primary_meshes.empty()) {
+		//glTranslatef(primary_meshes[0].vertices[100].x, primary_meshes[0].vertices[100].y, primary_meshes[0].vertices[100].z);
+		//glutWireSphere(1, 15, 15);
+		glTranslatef(0, 0, 0);
+		draw_mesh(primary_meshes[0]);
+	}
+	if (_showGrid)
+		draw_grid(primary_meshes[0]);
+	glPopMatrix();
+
   if (_showFilteredMesh && !filtered_mesh.empty()) {
     glPushMatrix();
-    glTranslatef(-4.5, 0, 0);
+    glTranslatef(-0.5, 0, 0);
     glScalef(scale_size, scale_size, scale_size);
     draw_mesh(filtered_mesh);
     glPopMatrix();
   }
-  if (_showTargetMesh && !target_mesh.empty()) {
-    glPushMatrix();
-    glTranslatef(-0.6, 0.0, 0.0);
-    glScalef(scale_size, scale_size, scale_size);
-    draw_mesh(target_mesh);
-    glPopMatrix();
-  }
-	
-
-	if (_showMultiMesh) {
-		std::vector<Mesh> meshes_to_render;
-		if (_showDatabase) {
-			meshes_to_render = database_meshes; 
-		} else {
-			meshes_to_render = primary_meshes;
-		}	
-		int total_num = meshes_to_render.size();
-		int num_rows = std::ceil(total_num / 5.);
-		//std::cout << "Rows : " << num_rows << "\n";
-		for (int j = 0; j < 5; ++j) {
-			for (int i = 1; i < num_rows + 1; ++i) {
-				glPushMatrix();
-				float trans_x = -3 + j * 1.5;
-				float trans_y = 3 - (i - 1) * 1.5;
-				//std::cout << "X: " << trans_x << " Υ: " << trans_y << "\n";
-				glTranslatef(trans_x, trans_y, 0);
-				glScalef(0.6, 0.6, 0.6);
-				if ((i - 1) * 5 + j < total_num) {
-					//std::cout << "Idx : " << (i - 1) * 5 + j << "\n";
-					//std::cout << "Distance : " << meshes_to_render[(i - 1) * 5 + j].overall_distance << "\n";
-					draw_mesh(meshes_to_render[(i - 1) * 5 + j]);
-				}
-				glPopMatrix();
-			}
-		}
-		//std::cout << "\n";
-	} else {
-    glPushMatrix();
-    if ((_showFilteredMesh && !filtered_mesh.empty()) ||
-        (_showTargetMesh && !target_mesh.empty())) {
-      glTranslatef(0.6, 0, 0);
-      glScalef(scale_size, scale_size, scale_size);
-    }
-		if (!primary_meshes.empty())
-			draw_mesh(primary_meshes[0]);
-    if (_showGrid)
-      draw_grid(primary_meshes[0]);
-    glPopMatrix();
-	}
 
   if (_showAxis) {
     glPushMatrix();
-   // glTranslatef(-0.9, -0.9, -0.9);
     glScalef(scale_size, scale_size, scale_size);
     draw_axis();
     glPopMatrix();
@@ -215,6 +181,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
     }
     glEnd();
   }
+
   if (_showWire && !mesh.triangles.empty()) {
     glBegin(GL_LINES);
     glColor3f(0.8, 0.0, 0.0);
@@ -248,6 +215,7 @@ void GLWidget::draw_mesh(Mesh &mesh) {
     }
     glEnd();
   }
+
   if (_showVerts && !mesh.vertices.empty()) {
     glColor3f(0.9, 0.1, 0.1);
     glBegin(GL_POINTS);
@@ -267,11 +235,15 @@ void GLWidget::draw_mesh(Mesh &mesh) {
                   v.val[2] / 255.);
       }
       glVertex3f((*it).x, (*it).y, (*it).z);
+			//glTranslatef((*it).x, (*it).y, (*it).z);
+			//glutSolidSphere(0.06, 5, 5);
+			//glTranslatef(-(*it).x, -(*it).y, -(*it).z);
 			//std::cout << "Vertex " << (*it).x << " " << (*it).y << " " << (*it).z << "\n";
 
     }
     glEnd();
   }
+
   if (_showNormals && !mesh.normals.empty()) {
     if (!_normalLighting)
       glDisable(GL_LIGHTING);
@@ -316,7 +288,7 @@ void GLWidget::draw_grid(Mesh &mesh) {
           glColor3f((float)3 / grid_x, (float)3 / grid_y, (float)3 / grid_z);
           glTranslatef(grid_x * mesh.grid_size, grid_y * mesh.grid_size,
                        grid_z * mesh.grid_size);
-          glutWireCube(mesh.grid_size);
+          glutSolidCube(mesh.grid_size);
           glPopMatrix();
         }
         v_idx++;
@@ -493,26 +465,4 @@ void GLWidget::setNormalsLighting(bool light) {
 void GLWidget::setMultiMesh(bool show) {
 	_showMultiMesh = show;
 	updateGL();
-}
-
-void GLWidget::setShowDatabase(bool show) {
-	_showDatabase = show;
-	updateGL();
-}
-
-/*
- * Database Handling Functions
- * */
-
-void GLWidget::eraseDatabase() {
-  std::cout << "Erasing contents of the database.. \n";
-  db_descriptors.clear();
-  db_descriptors.shrink_to_fit();
-
-  db_files.clear();
-  db_files.shrink_to_fit();
-
-  database.clear();
-  database.shrink_to_fit();
-  std::cout << "Database is now empty!\n";
 }
