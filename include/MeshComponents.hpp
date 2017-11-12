@@ -9,7 +9,7 @@
  */
 class Vertex {
 public:
-  Vertex(void);
+  Vertex();
   Vertex(float, float, float);
   Vertex(Vertex &&);
   Vertex(const Vertex &);
@@ -33,9 +33,9 @@ public:
 
   virtual ~Vertex();
 
-  float x;
-  float y;
-  float z;
+  float x = 0.0;
+  float y = 0.0;
+  float z = 0.0;
 };
 
 class Edge {
