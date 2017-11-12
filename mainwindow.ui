@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2101</width>
+    <width>1948</width>
     <height>765</height>
    </rect>
   </property>
@@ -31,6 +31,9 @@
           <height>300</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
        </widget>
       </item>
       <item>
@@ -49,6 +52,9 @@
             <height>150</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
          </widget>
         </item>
         <item row="0" column="1">
@@ -59,6 +65,9 @@
             <height>150</height>
            </size>
           </property>
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
          </widget>
         </item>
         <item row="1" column="0">
@@ -68,6 +77,9 @@
             <width>200</width>
             <height>150</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
           </property>
          </widget>
         </item>
@@ -84,6 +96,9 @@
             <width>200</width>
             <height>150</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
           </property>
          </widget>
         </item>
@@ -102,7 +117,19 @@
       <property name="focusPolicy">
        <enum>Qt::ClickFocus</enum>
       </property>
-      <zorder>Properties</zorder>
+     </widget>
+    </item>
+    <item>
+     <widget class="DBWidget" name="dbwidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>4</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -113,16 +140,19 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>167</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -237,13 +267,113 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="Database">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>167</width>
+         <height>569</height>
+        </rect>
+       </property>
+       <attribute name="label">
+        <string>Database</string>
+       </attribute>
+       <widget class="QWidget" name="verticalLayoutWidget_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>9</y>
+          <width>161</width>
+          <height>181</height>
+         </rect>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_11">
+         <item>
+          <widget class="QCheckBox" name="ShowDBVertices">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="text">
+            <string>Vertices</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ShowDBTriangles">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="text">
+            <string>Triangles</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ShowDBFiltered">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="text">
+            <string>Filtered</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="DeleteDB">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="text">
+            <string>Delete DB</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="verticalLayoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>200</y>
+          <width>163</width>
+          <height>181</height>
+         </rect>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="text">
+            <string>Grid size for DB meshes</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="GridSizeDB">
+           <property name="focusPolicy">
+            <enum>Qt::ClickFocus</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
       <widget class="QWidget" name="Enviroment">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>202</width>
+         <height>556</height>
         </rect>
        </property>
        <attribute name="label">
@@ -450,8 +580,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>264</width>
+         <height>556</height>
         </rect>
        </property>
        <attribute name="label">
@@ -579,8 +709,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>332</width>
-         <height>600</height>
+         <width>167</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -591,8 +721,8 @@
          <rect>
           <x>9</x>
           <y>9</y>
-          <width>301</width>
-          <height>481</height>
+          <width>167</width>
+          <height>492</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -673,6 +803,51 @@
             </widget>
            </item>
            <item>
+            <layout class="QVBoxLayout" name="verticalLayout_17">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_18">
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="text">
+                  <string>S_d</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="S_dSpinBox"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>S_n</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="S_nSpinBox"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="BilateralFilterButton">
+                 <property name="text">
+                  <string>Bilateral Filter</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="MultilateralFilterButton">
+                 <property name="text">
+                  <string>Multilateral Filter</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
             <widget class="QPushButton" name="ComputeDescriptorsButton">
              <property name="text">
               <string>Compute descriptors</string>
@@ -700,7 +875,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2101</width>
+     <width>1948</width>
      <height>23</height>
     </rect>
    </property>
@@ -722,6 +897,7 @@
     </property>
     <addaction name="action_Load_Database"/>
     <addaction name="action_Preprocess_Database"/>
+    <addaction name="action_Load_Classes"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Database"/>
@@ -774,6 +950,11 @@
     <string>&amp;Display Database</string>
    </property>
   </action>
+  <action name="action_Load_Classes">
+   <property name="text">
+    <string>Load Classes</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -793,6 +974,12 @@
    <class>ImgViewerWidget</class>
    <extends>QWidget</extends>
    <header>ImgViewerWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DBWidget</class>
+   <extends>QWidget</extends>
+   <header>DBWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
