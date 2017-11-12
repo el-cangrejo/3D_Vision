@@ -12,7 +12,9 @@
 #include <libfreenect2/libfreenect2.hpp>
 
 #include <QFileDialog>
+#include <QUrl>
 #include <boost/filesystem.hpp>
+#include <thread>
 
 extern Mesh filtered_mesh;
 
@@ -30,7 +32,26 @@ MainWindow::~MainWindow() { delete ui; }
  *  Initialize Functions
  * */
 
+void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *e) {
+    foreach (const QUrl &url, e->mimeData()->urls()) {
+        QString fileName = url.toLocalFile();
+				std::cout << "Dropped file:" << fileName.toStdString() << "\n";
+				if (fileName.endsWith("obj") || fileName.endsWith("off")) {
+					OpenMesh(fileName);
+				} else {
+					OpenImage(fileName, CV_16UC1);
+				}
+		}
+}
+
 void MainWindow::inititializeUI() {
+	setAcceptDrops(true);
   // CheckBox Initializers
   ui->ShowTrianglesCheckBox->setChecked(ui->widget->_showTriangles);
   ui->ShowSolidCheckBox->setChecked(ui->widget->_showSolid);
@@ -76,6 +97,9 @@ void MainWindow::connectUI() {
           SLOT(onActionLoadDatabase()));
   connect(ui->action_Preprocess_Database, SIGNAL(triggered()), this,
           SLOT(onActionPreprocessDatabase()));
+  connect(ui->action_Load_Classes, SIGNAL(triggered()), this,
+          SLOT(onActionLoadClasses()));
+
   connect(ui->action_TakeSnapshot, SIGNAL(triggered()), this,
           SLOT(onActionTakeSnapshot()));
 
@@ -119,6 +143,12 @@ void MainWindow::connectUI() {
 						SLOT(setMultiMesh(bool)));
 	connect(ui->ShowDatabaseCheckBox, SIGNAL(clicked(bool)), this, 
 						SLOT(setShowDatabase(bool)));
+  connect(ui->ShowDBVertices, SIGNAL(clicked(bool)), this,
+          SLOT(setShowDBVertices(bool)));
+  connect(ui->ShowDBTriangles, SIGNAL(clicked(bool)), this,
+          SLOT(setShowDBTriangles(bool)));
+  connect(ui->ShowDBFiltered, SIGNAL(clicked(bool)), this,
+          SLOT(setShowDBFiltered(bool)));
 
   // Connect Buttons
   connect(ui->GridFilter, SIGNAL(clicked()), this, SLOT(gridFilter()));
@@ -130,6 +160,9 @@ void MainWindow::connectUI() {
   connect(ui->ZoomImgWidgetButton, SIGNAL(clicked()), this, SLOT(onZoomImgWidget()));
   connect(ui->ComputeDescriptorsButton, SIGNAL(clicked()), this, SLOT(onComputeDescriptors()));
   connect(ui->RetrievalButton, SIGNAL(clicked()), this, SLOT(onRetrieve()));
+  connect(ui->DeleteDB, SIGNAL(clicked()), this, SLOT(onDeleteDB()));
+  connect(ui->BilateralFilterButton, SIGNAL(clicked()), this, SLOT(onBilateralFilter()));
+  connect(ui->MultilateralFilterButton, SIGNAL(clicked()), this, SLOT(onMultilateralFilter()));
   
   // Segmenation
   connect(ui->median_kernelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setMedianKernel(int)));
@@ -137,11 +170,24 @@ void MainWindow::connectUI() {
   connect(ui->edge_radiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setEdgeRadius(int)));
   connect(ui->KernelRadiusSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setKernelRadius(int)));
 
+	// Database
+  connect(ui->GridSizeDB, SIGNAL(valueChanged(double)), this, SLOT(setGridSizeDB(double)));
+
+	// Mesh operations
+	connect(ui->S_dSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSdBF(double)));
+	connect(ui->S_nSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSnBF(double)));
+
+	ui->GridSize->setDecimals(4);
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
   ui->widget->primary_meshes[0] = ui->widget->primary_meshes[0].statoutFilter();
   ui->widget->primary_meshes[0].preprocess(); 
+	ui->widget->primary_meshes[0].computeNormals();
+	ui->widget->primary_meshes[0].triangulate();
+	//ui->widget->primary_meshes[0].bilateralFilter();
+	ui->widget->primary_meshes[0].printInfo();
+
   ui->widget->updateGL();
 }
 
@@ -160,49 +206,6 @@ void MainWindow::on_ZoomFactSlider_sliderMoved(int position) {
 
 void MainWindow::on_RotFactorSlider_sliderMoved(int position) {
   ui->widget->_rotFactor = position / 999.;
-}
-
-void MainWindow::on_SearchinDBButton_clicked() {
-  if (ui->widget->db_descriptors.empty()) {
-    std::cout << "No ldatabase loaded!\n";
-    return;
-  }
-
-  Mesh *query;
-
-  if (!ui->widget->filtered_mesh.empty()) {
-    //ui->widget->filtered_mesh.computeFPFH();
-    std::cout << "Query mesh fpfh size : "
-              << ui->widget->filtered_mesh.fpfhist.size() << "\n";
-    query = &ui->widget->filtered_mesh;
-  } else if (!ui->widget->primary_mesh.empty()) {
-    //ui->widget->primary_mesh.computeFPFH();
-    std::cout << "Query mesh fpfh size : "
-              << ui->widget->primary_mesh.fpfhist.size() << "\n";
-    query = &ui->widget->primary_mesh;
-  } else {
-    std::cout << "No mesh to use as query!\n";
-    return;
-  }
-
-  float dist(10000000.0);
-  int idx(0);
-
-  for (size_t i = 0; i < ui->widget->db_descriptors.size(); ++i) {
-    float new_dist = local_distance(*query, ui->widget->db_descriptors[i]);
-    if (new_dist < dist) {
-      dist = new_dist;
-      idx = i;
-    }
-  }
-  std::cout << "Target mesh : " << idx << "\n";
-
-  read_mesh(ui->widget->db_files[idx], ui->widget->target_mesh);
-
-  ui->widget->target_mesh.preprocess();
-  ui->widget->target_mesh.computeNormals();
-
-  ui->widget->updateGL();
 }
 
 void MainWindow::onComputeDescriptors() {
@@ -227,40 +230,51 @@ void MainWindow::onRetrieve() {
 		std::cout << "\e[1;31mNo mesh loaded for query!\e[0m\n";
 		return;
 	}
-	if (ui->widget->database_meshes.empty()) {
+	if (ui->dbwidget->database_meshes.empty()) {
 		std::cout << "\e[1;31mNo database loaded to retrieve from!\e[0m\n";
 		return;
 	}
 
 	std::cout << "\e[1;32mBegin searching in DB!\n";
 	
-	float min_dist = 1000000;
-	int idx = 0;
+  clock_t begin, end;
+  double elapsed_secs;
+	
+  begin = clock();
+	for (int i = 0; i < ui->dbwidget->processed_database_meshes.size(); ++i)
+		float dist = ui->widget->filtered_mesh.distanceTo(ui->dbwidget->processed_database_meshes[i]);
+	end = clock();
+  double elapsed_secs_s = double(end - begin) / CLOCKS_PER_SEC;
 
-	for (int i = 0; i < ui->widget->database_meshes.size(); ++i) {
-		float dist = ui->widget->filtered_mesh.distanceTo(ui->widget->database_meshes[i]);
-//		std::cout << "Overall distance :" << ui->widget->database_meshes[i].overall_distance << "\n";
-		if (dist < min_dist) {
-			min_dist = dist;
-			idx = i;
-		}
-		std::cout << "\n";
+	for (int i = 0; i < ui->dbwidget->processed_database_meshes.size(); ++i) {
+		ui->dbwidget->database_meshes[i].overall_distance = 
+			ui->dbwidget->processed_database_meshes[i].overall_distance;
 	}
-	std::cout << "Index : " << idx << "\n";
-	//ui->widget->primary_meshes[0] = ui->widget->database_meshes[idx];
-
-//	for (const auto &m : ui->widget->database_meshes) {
-//		std::cout << "overall DISTANCE :" << m.overall_distance << "\n";
-//	}
-
-	std::sort(ui->widget->database_meshes.begin(), ui->widget->database_meshes.end(), 
+	
+	std::sort(ui->dbwidget->processed_database_meshes.begin(), ui->dbwidget->processed_database_meshes.end(), 
 			[](const Mesh &a, const Mesh &b) -> bool { 
-//			std::cout << "OVERALL distances: " << a.overall_distance << " " << b.overall_distance << "\n";
+			return a.overall_distance < b.overall_distance;});
+
+	std::sort(ui->dbwidget->database_meshes.begin(), ui->dbwidget->database_meshes.end(), 
+			[](const Mesh &a, const Mesh &b) -> bool { 
 			return a.overall_distance < b.overall_distance;});
 	
-//	for (const auto &m : ui->widget->database_meshes) {
-//		std::cout << "OVERALL distance :" << m.overall_distance << "\n";
-//	}
+	for (const auto &m : ui->dbwidget->database_meshes) 
+		std::cout << "Distance :" << m.overall_distance << "\n";
+
+	ui->dbwidget->updateGL();
+}
+
+void MainWindow::onDeleteDB() {
+	if (!ui->dbwidget->database_meshes.empty()) {
+		ui->dbwidget->database_meshes.clear();
+		ui->dbwidget->database_meshes.shrink_to_fit();
+	}
+	if (!ui->dbwidget->processed_database_meshes.empty()) {
+		ui->dbwidget->processed_database_meshes.clear();
+		ui->dbwidget->processed_database_meshes.shrink_to_fit();
+	}
+	ui->dbwidget->updateGL();
 }
 
 /*
@@ -272,40 +286,48 @@ void MainWindow::onActionQuit() {
   QApplication::quit();
 }
 
-void MainWindow::onActionOpenMesh() {
-  QStringList file_name = QFileDialog::getOpenFileNames(this);
-  if (!file_name.isEmpty()) {
+void MainWindow::OpenMesh(QString fileName) {
+  if (!fileName.isEmpty()) {
 		Mesh m;
-		m.load(file_name.at(0).toStdString());
-		m.preprocess();
-		m.computeNormals();
-		ui->widget->primary_meshes.clear();
-		ui->widget->primary_meshes.push_back(m);
-		ui->widget->updateGL();
+		if (m.load(fileName.toStdString()) != 0) {
+			m.preprocess();
+			m.computeNormals();
+			ui->widget->primary_meshes.clear();
+			ui->widget->primary_meshes.push_back(m);
+			//std::cout << "Primary meshes : " << ui->widget->primary_meshes.size() << "\n";
+			//std::cout << "Primary mesh  triangle std : " << ui->widget->primary_meshes[0].trianglesAreaStd() << "\n";
+			//ui->widget->primary_meshes[0].resample();
+			ui->widget->updateGL();
+		}
   } else {
 		std::cout << "File name is empty\n";
 	}
 }
 
+void MainWindow::onActionOpenMesh() {
+  QString fileName = QFileDialog::getOpenFileName(this);
+	OpenMesh(fileName);
+}
+
 void MainWindow::onActionOpenImage8U() {
-  onActionOpenImage(CV_8UC1);
+  QString fileName = QFileDialog::getOpenFileName(this);
+  OpenImage(fileName, CV_8UC1);
 }
 
 void MainWindow::onActionOpenImage16U() {
-  onActionOpenImage(CV_16UC1);
+  QString fileName = QFileDialog::getOpenFileName(this);
+  OpenImage(fileName, CV_16UC1);
 }
 
-void MainWindow::onActionOpenImage(int type) {
-  QString file_name = QFileDialog::getOpenFileName(this);
+void MainWindow::OpenImage(QString fileName, int type) {
   cv::Mat image;
-  if (!file_name.isEmpty() && file_name.endsWith(".png")) {
-
-		std::cout << "Opening image : " << file_name.toStdString() << "\n";
+  if (!fileName.isEmpty() && fileName.endsWith(".png")) {
+		std::cout << "Opening image : " << fileName.toStdString() << "\n";
     if (type == CV_8UC1) {
-        image = cv::imread(file_name.toStdString(), CV_8UC1);
+        image = cv::imread(fileName.toStdString(), CV_8UC1);
         std::cout << "Number of channels: " << image.channels() << ", type: CV_8UC1\n";
     } else {
-        image = cv::imread(file_name.toStdString(), CV_16UC1);
+        image = cv::imread(fileName.toStdString(), CV_16UC1);
         std::cout << "Number of channels: " << image.channels() << ", type: CV_16UC1\n";
     }
   }
@@ -370,17 +392,29 @@ void MainWindow::onActionLoadDatabase() {
   QString directory_name = QFileDialog::getExistingDirectory(this);
   if (!directory_name.isEmpty()) {
     std::cout << "Loading for display database : " << directory_name.toStdString() << "\n";
-		loadDB(directory_name.toStdString(), ui->widget->database_meshes);
+		loadDB(directory_name.toStdString(), ui->dbwidget->database_meshes);
+		ui->widget->updateGL();
   }
 }
 
 void MainWindow::onActionPreprocessDatabase() {
-	if (ui->widget->database_meshes.empty()) {
+	if (ui->dbwidget->database_meshes.empty()) {
 		std::cout << "\e[1;31mNo Database meshes loaded!\nPlease use action Load Database and try again!\e[0m\n";
 		return;
 	}
 
-	preprocessDB(ui->widget->database_meshes);
+	preprocessDB(ui->dbwidget->database_meshes, ui->dbwidget->processed_database_meshes);
+}
+
+void MainWindow::onActionLoadClasses() {
+  QStringList file_name = QFileDialog::getOpenFileNames(this);
+  if (file_name.isEmpty()) {
+		std::cout << "Empty file!\nDatabase classes not loaded!\n";
+		return;
+	}
+
+	std::cout << "Loading database classes!\n";
+	readObjectClasses(file_name.at(0).toStdString(), ui->dbwidget->database_meshes);
 }
 
 void MainWindow::onActionTakeSnapshot() {
@@ -463,7 +497,19 @@ void MainWindow::setShowSolid(bool show) { ui->widget->setShowSolid(show); }
 
 void MainWindow::setShowAxis(bool show) { ui->widget->setShowAxis(show); }
 
-void MainWindow::setShowDatabase(bool show) { ui->widget->setShowDatabase(show); }
+void MainWindow::setShowDatabase(bool show) { ui->dbwidget->setShowDatabase(show); }
+
+void MainWindow::setShowDBVertices(bool show) {
+  ui->dbwidget->setShowVertices(show);
+}
+
+void MainWindow::setShowDBTriangles(bool show) {
+  ui->dbwidget->setShowTriangles(show);
+}
+
+void MainWindow::setShowDBFiltered(bool show) {
+  ui->dbwidget->setShowFiltered(show);
+}
 
 void MainWindow::setShowTargetMesh(bool show) {
   ui->widget->setShowTargetMesh(show);
@@ -491,6 +537,7 @@ void MainWindow::setNormalsLighting(bool light) {
 
 void MainWindow::gridFilter() {
   ui->widget->filtered_mesh = ui->widget->primary_meshes[0].gridFilter();
+	ui->widget->updateGL();
 }
 
 void MainWindow::onSegmentImg() {
@@ -505,6 +552,7 @@ void MainWindow::onSegmentImg() {
   ui->Colored_Widget->setImg(segm.colored_img);
   ui->Binarized_Widget->setImg(segm.norm_bin_edge_img);
   segm.writetoMesh(ui->widget->primary_meshes, 1);
+	//ui->widget->primary_meshes[0].triangulate();
   //segm.writetoMesh(ui->widget->primary_mesh, 1);
 
   //ui->widget->primary_mesh.computeNormals();
@@ -529,7 +577,8 @@ void MainWindow::onGenerateMesh() {
 		segm.estimateNormals();
     segm.writetoMesh(ui->widget->primary_meshes[0], 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
     ui->Colored_Widget->mask_bool = false;
-		return;
+		ui->widget->primary_meshes[0].preprocess();
+		ui->widget->updateGL();
   } else {
     //segm.writetoMesh(ui->widget->primary_mesh, 1);
 		ui->widget->primary_mesh = ui->Kinect_Widget->generateMesh();
@@ -549,6 +598,7 @@ void MainWindow::onDraw() {
 void MainWindow::onClearAll() {
   ui->widget->primary_mesh.clear();
 	ui->widget->primary_meshes.clear();
+	ui->widget->filtered_mesh.clear();
   ui->widget->updateGL();
   ui->Colored_Widget->clearImg();
   ui->Colored_Widget->updateGL();
@@ -556,6 +606,22 @@ void MainWindow::onClearAll() {
   ui->Binarized_Widget->updateGL();
   ui->Normals_Widget->clearImg();
   ui->Normals_Widget->updateGL();
+}
+
+void MainWindow::onBilateralFilter() {
+	if (ui->widget->filtered_mesh.empty())
+		ui->widget->filtered_mesh = ui->widget->primary_meshes[0].bilateralFilter(sd_bf, sn_bf);
+	else 
+		ui->widget->filtered_mesh = ui->widget->filtered_mesh.bilateralFilter(sd_bf, sn_bf);
+	ui->widget->updateGL();
+}
+
+void MainWindow::onMultilateralFilter() {
+	if (ui->widget->filtered_mesh.empty())
+		ui->widget->filtered_mesh = ui->widget->primary_meshes[0].multilateralFilter();
+	else 
+		ui->widget->filtered_mesh = ui->widget->filtered_mesh.multilateralFilter();
+	ui->widget->updateGL();
 }
 
 void MainWindow::onZoomImgWidget() {
@@ -596,3 +662,15 @@ void MainWindow::setKernelRadius(int x) {
     kernel_radius = x;
 }
 
+void MainWindow::setGridSizeDB(double grid_size) {
+	for (auto &m : ui->dbwidget->database_meshes)
+		m.setGridSize(grid_size);
+}
+
+void MainWindow::setSdBF(double x) {
+	sd_bf = x;
+}
+
+void MainWindow::setSnBF(double x) {
+	sn_bf = x;
+}
