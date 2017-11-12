@@ -1,9 +1,10 @@
 #include "MeshComponents.hpp"
 
 Vertex::Vertex(float x, float y, float z) : x(x), y(y), z(z) {}
-Vertex::Vertex(void) : x(0.0), y(0.0), z(0.0) {}
+Vertex::Vertex() {}
 Vertex::Vertex(Vertex &&other) = default;
 Vertex::Vertex(const Vertex &other) = default;
+
 float Vertex::L2Norm(void) const {
   return sqrt((pow(x, 2) + pow(y, 2) + pow(z, 2)));
 }
