@@ -16,7 +16,10 @@ public:
   ~MainWindow();
 
 private slots:
-  void on_StatOutFIlter_clicked();
+  void dragEnterEvent(QDragEnterEvent *e);
+	void dropEvent(QDropEvent *e);
+
+	void on_StatOutFIlter_clicked();
 
   void on_GridSize_valueChanged(double arg1);
 
@@ -26,8 +29,6 @@ private slots:
 
   void on_RotFactorSlider_sliderMoved(int position);
 
-  void on_SearchinDBButton_clicked();
-
   /*
    * Menu Actions
    * */
@@ -36,11 +37,13 @@ private slots:
   void onActionOpenMesh();
   void onActionOpenImage8U();
   void onActionOpenImage16U();
-  void onActionOpenImage(int type);
   void onActionOpenKinect();
+
   void onActionLoadDatabase();
   void onActionPreprocessDatabase();
-  void onActionTakeSnapshot();
+  void onActionLoadClasses();
+
+	void onActionTakeSnapshot();
 
   /*
    * Color Setting Functions
@@ -73,6 +76,9 @@ private slots:
   void setNormalsLighting(bool);
 	void setMultiMesh(bool);
 	void setShowDatabase(bool);
+  void setShowDBVertices(bool);
+  void setShowDBTriangles(bool);
+  void setShowDBFiltered(bool);
 
   void onSegmentImg();
   void onGenerateMesh();
@@ -82,16 +88,26 @@ private slots:
   void gridFilter();
 	void onComputeDescriptors();
 	void onRetrieve();
+	void onDeleteDB();
+	void onBilateralFilter();
+	void onMultilateralFilter();
 
   /*
    * Segmentation Parameters
    * */
 
-  void setMedianKernel(int );
-  void setNormalsRadius(int );
-  void setEdgeRadius(int );
-  void setKernelRadius(int );
+  void setMedianKernel(int);
+  void setNormalsRadius(int);
+  void setEdgeRadius(int);
+  void setKernelRadius(int);
 
+	void setGridSizeDB(double);
+
+	void setSdBF(double);
+	void setSnBF(double);
+
+	void OpenMesh(QString);
+  void OpenImage(QString, int);
 private:
   Ui::MainWindow *ui;
 
@@ -102,6 +118,9 @@ private:
   float normals_radius;
   float edge_radius;
 	float kernel_radius;
+
+	float sd_bf;
+	float sn_bf;
 };
 
 #endif // MAINWINDOW_H
