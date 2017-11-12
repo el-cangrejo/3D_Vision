@@ -388,8 +388,8 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step) {
 }
 
 void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
-
     std::cout << "Starting writing mesh. \n";
+		m.clear();
 
 		float cx = 257.966;
 		float cy = 210.268;
@@ -407,6 +407,8 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
 				v.y = -(i + 0.5 - cx) * fx * depth_val;
 				v.x = (j + 0.5 - cy) * fy * depth_val;
 				v.z = -depth_val;
+				//std::cout << "Vertex : " << v.x << " " << v.y << " " << v.z << "\n";
+				if (v.x == 0 && v.y == 0 && v.z == 0) continue;
 				m.vertices.push_back(v);
 
 				if (!colored_img.empty()) {
@@ -421,7 +423,9 @@ void ImgSegmenter::writetoMesh(Mesh &m, int step, cv::Mat im, cv::Vec3b mask) {
 
 void ImgSegmenter::writetoMesh(std::vector<Mesh> &meshes, int step) {
 	std::cout << "Starting writing mesh. \n";
-	//meshes.reserve(colors.size());
+	meshes.clear();
+	meshes.shrink_to_fit();
+
 	float cx = 257.966;
 	float cy = 210.268;
 
@@ -432,6 +436,7 @@ void ImgSegmenter::writetoMesh(std::vector<Mesh> &meshes, int step) {
 	Mesh m;
 	for (int i = 0; i < colored_img.rows; ++i) {
 		for (int j = 0; j < colored_img.cols; ++j) {
+			if (colored_img.at<cv::Vec3b>(i, j) == cv::Vec3b(0, 0, 0)) continue;
 			Vertex v;
 
 			float depth_val = image.at<ushort>(i, j) / 1000.0f;
@@ -439,6 +444,7 @@ void ImgSegmenter::writetoMesh(std::vector<Mesh> &meshes, int step) {
 			v.y = -(i + 0.5 - cx) * fx * depth_val;
 			v.x = (j + 0.5 - cy) * fy * depth_val;
 			v.z = -depth_val;
+			if (v.x == 0 && v.y == 0 && v.z == 0) continue;
 			m.vertices.push_back(v);
 
 			if (!colored_img.empty()) {
@@ -447,8 +453,10 @@ void ImgSegmenter::writetoMesh(std::vector<Mesh> &meshes, int step) {
 			}
 		}
 	}
+	m.preprocess();
 	meshes.push_back(m);
 	m.clear();
+
 	for (int k = 0; k < colors.size(); ++k) {
 		cv::Vec3b color(colors[k][0], colors[k][1], colors[k][2]);
 		int points = 0;
