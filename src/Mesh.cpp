@@ -20,7 +20,24 @@ float l1(const dFPFHSignature66 first, const dFPFHSignature66 second) {
 // Helper
 Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0), overall_distance(0) {}
 
-Mesh::~Mesh() {}
+Mesh::~Mesh() { 
+	if (fisherVectors)
+		std::cout << "Deleting fisher vectors\n";
+		delete[] fisherVectors;
+}
+
+int Mesh::getID() const {
+	return _id;
+}
+
+void Mesh::setID(int id) {
+	_id = id;
+}
+
+bool is_number(const std::string& s) {
+	return !s.empty() && std::find_if(s.begin(), 
+			s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
+}
 
 int Mesh::load(const std::string file_path) {
   // Check if mesh is empty and if not clear it
@@ -29,6 +46,15 @@ int Mesh::load(const std::string file_path) {
 
   int success = 0;
   // Check file ending to find file type
+	std::cout << "Whole path: " << file_path << "\n";
+	auto pos = file_path.find_last_of('/');
+	auto file_name = file_path.substr(pos + 1);
+	file_name = file_name.substr(0, file_name.size() - 4);
+	std::cout << "File name: " << file_name << "\n";
+	
+	if (is_number(file_name))
+		this->setID(std::stoi(file_name));
+
   if (file_path.substr(file_path.size() - 3, 3) == "obj") {
     success = loadObj(file_path);
   } else if (file_path.substr(file_path.size() - 3, 3) == "off") {
@@ -63,6 +89,7 @@ void Mesh::clear() {
 
 void Mesh::printInfo(void) {
   // Prints Information about the mesh
+  std::cout << "\e[1;31;43mObject ID : " << _id << " \e[0m\n";
   std::cout << "\e[1;31;43mObject size : \e[0m \e[1;33m\n"
             << "Vertices: " << this->vertices.size() << "\n"
             << "Triangles: " << this->triangles.size() << "\n"
@@ -277,8 +304,10 @@ Mesh Mesh::gridFilter() {
 
         voxel_centroid = voxel_centroid / pointIdxRadiusSearch.size();
         fil_mesh.vertices.push_back(voxel_centroid);
-        voxel_centroid_normal = voxel_centroid_normal.Normalize();
+        
+				voxel_centroid_normal = voxel_centroid_normal.Normalize();
         fil_mesh.normals.push_back(voxel_centroid_normal);
+
         fil_mesh.fpfhist.push_back(hist);
 			}
 		}
@@ -329,7 +358,6 @@ Mesh Mesh::statoutFilter(void) {
 
 void Mesh::triangulate() {
 // Load input file into a PointCloud<T> with an appropriate type
-	std::cout << "Start triangulation!\n";
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
   cloud->points.resize(vertices.size());
   for (size_t i = 0; i < cloud->points.size(); ++i) {
@@ -343,14 +371,13 @@ void Mesh::triangulate() {
   pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud (cloud);
-	std::cout << "Start triangulation!\n";
   n.setInputCloud (cloud);
   n.setSearchMethod (tree);
-  n.setRadiusSearch (0.08);
+	n.setKSearch(25);
+	n.setViewPoint(0, 0, 3.5);
   n.compute (*normals);
   //* normals should not contain the point normals + surface curvatures
 
-	std::cout << "Start triangulation!\n";
   // Concatenate the XYZ and normal fields*
   pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
   pcl::concatenateFields (*cloud, *normals, *cloud_with_normals);
@@ -363,7 +390,7 @@ void Mesh::triangulate() {
 
   // Initialize objects
   pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
-  pcl::PolygonMesh triangles;
+  pcl::PolygonMesh tri;
 
   // Set the maximum distance between connected points (maximum edge length)
   gp3.setSearchRadius (0.15);
@@ -380,12 +407,112 @@ void Mesh::triangulate() {
   // Get result
   gp3.setInputCloud (cloud_with_normals);
   gp3.setSearchMethod (tree2);
-  gp3.reconstruct (triangles);
+  gp3.reconstruct (tri);
 
   // Additional vertex information
 	//std::cout << triangles << "\n";
   // Finish
+	for (int i = 0; i < tri.polygons.size(); ++i)
+		this->triangles.push_back(Triangle(tri.polygons[i].vertices[0],
+																			 tri.polygons[i].vertices[1], 
+																			 tri.polygons[i].vertices[2]));
   return;
+}
+
+Mesh Mesh::bilateralFilter(float s_d, float s_n) {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  cloud->points.resize(vertices.size());
+  for (size_t i = 0; i < cloud->points.size(); ++i) {
+    cloud->points[i] =
+        pcl::PointXYZ(vertices[i].x, vertices[i].y, vertices[i].z);
+  }
+  
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+	kdtree.setInputCloud(cloud);
+
+	float r = 0.04;
+
+	Mesh m(*this);
+
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		std::vector<int> pointIdx;
+		std::vector<float> pointDist;
+		int neighbors = kdtree.radiusSearch(cloud->points[i], r, pointIdx, pointDist);
+		if (!(neighbors > 0)) continue;
+
+		float sum = 0;
+		float d_p =  0.0;
+
+		for (int j = 0; j < neighbors; ++j) {
+			float d_d = vertices[pointIdx[j]].L2Norm(vertices[i]);
+			float d_n = (vertices[pointIdx[j]] - vertices[i]).Dot(normals[i]);
+
+			float w = std::exp(- std::pow(d_d, 2) / (2 * std::pow(s_d, 2))) * 
+								std::exp(- std::pow(d_n, 2) / (2 * std::pow(s_n, 2)));
+			if (std::isnan(w)) continue;
+			//std::cout << "W : " << w << "\n";
+			d_p += w * d_n;
+			sum += w;
+		}
+		//std::cout << d_p << " " << sum << "\n";
+		//std::cout << "Vertex before : " << m.vertices[i].x  << " " << m.vertices[i].y << " " << m.vertices[i].z << "\n";
+		Vertex v = vertices[i] + normals[i] * (d_p / sum);
+		if (std::isnan(v.x) || std::isnan(v.y) || std::isnan(v.z)) {
+			m.vertices[i] = vertices[i];
+			continue;
+		}
+
+		m.vertices[i] = v;
+		//std::cout << "Vertex after : " << m.vertices[i].x  << " " << m.vertices[i].y << " " << m.vertices[i].z << "\n";
+	}
+	if (m.vertices.size() != this->vertices.size()) {std::cout << "Error BF!\n";}
+	m.preprocess();
+	m.printInfo();
+	return m;
+}
+
+Mesh Mesh::multilateralFilter() {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  cloud->points.resize(vertices.size());
+  for (size_t i = 0; i < cloud->points.size(); ++i) {
+    cloud->points[i] =
+        pcl::PointXYZ(vertices[i].x, vertices[i].y, vertices[i].z);
+  }
+  
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+	kdtree.setInputCloud(cloud);
+
+	float r = 0.09;
+
+	Mesh m(*this);
+
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		std::vector<int> pointIdx;
+		std::vector<float> pointDist;
+		int neighbors = kdtree.radiusSearch(cloud->points[i], r, pointIdx, pointDist);
+		if (!(neighbors > 0)) continue;
+
+		float normalization = 0;
+		Vertex v;
+
+		for (int j = 0; j < neighbors; ++j) {
+			float dist_term = std::exp((vertices[pointIdx[j]] - vertices[i]).L2Norm());
+			float norm_term = std::exp((normals[pointIdx[j]] - normals[i]).L2Norm());
+			//float dist_term = std::exp(vertices[j].L2Norm(vertices[i]));
+			//float norm_term = std::exp(normals[j].L2Norm(normals[i]));
+			float w = dist_term * norm_term;
+			//std::cout << "W : " << w << "\n";
+			v = v + (vertices[pointIdx[j]] * w);
+			normalization += w;
+		}
+
+		m.vertices[i] = v / normalization;
+		//std::cout << "Normalization : " << normalization << "\n";
+	}
+	if (m.vertices.size() != this->vertices.size()) {std::cout << "Error BF!\n";}
+	m.preprocess();
+	m.printInfo();
+	return m;
 }
 
 /**
@@ -560,20 +687,29 @@ void Mesh::fitToUnitSphere(void) {
 		}
 	}
 
+	std::cout << "Max distance : " << max_dist << "\n";
+	//if (max_dist < 1.0) max_dist *= max_dist;
+
 	for (auto &v : vertices) {
 		v = v / max_dist;
 	} 
 }
 
 void Mesh::moveToCenter(void) {
-	for (auto &v : vertices) {
+	calculateCentroid();
+
+  for (auto &v : vertices)
+    v = v - centroid;
+}
+
+void Mesh::calculateCentroid() {
+	centroid = Vertex(0, 0, 0);
+	for (const auto &v : vertices) {
 		centroid = centroid + v;
 	}
-  
+
 	centroid = centroid / vertices.size();
-  for (auto &v : vertices) {
-    v = v - centroid;
-  }
+	std::cout << "Centroid : " << centroid.x << ", " << centroid.y << ", " << centroid.z << "\n";
 }
 
 // Computing
@@ -630,15 +766,17 @@ void Mesh::computeNormals_PCA() {
 
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 
-    ne.setRadiusSearch (0.03);
+    ne.setKSearch (25);
+    //ne.setRadiusSearch (0.2);
     ne.setViewPoint(0, 0, 3.5);
     ne.compute (*cloud_normals);
 
     normals.resize(cloud_normals->points.size());
     for (size_t i = 0; i < cloud_normals->points.size(); ++i) {
-      normals[i] = Vertex(cloud_normals->points[0].normal_x,
-                          cloud_normals->points[0].normal_y,
-                          cloud_normals->points[0].normal_z);
+      normals[i] = Vertex(cloud_normals->points[i].normal_x,
+                          cloud_normals->points[i].normal_y,
+                          cloud_normals->points[i].normal_z);
+			//std::cout << "(x, y, z) = " << normals[i].x << ", " << normals[i].y << ", " << normals[i].z << "\n";
 //      normals[i].x = cloud_normals->points[0].x;
 //      normals[i].y = cloud_normals->points[0].y;
 //      normals[i].z = cloud_normals->points[0].z;
@@ -916,4 +1054,65 @@ float Mesh::globalDistanceTo(const Mesh &other) {
   }
   std::cout << "Global similarity: " << globalDistance << "\n";
   return globalDistance;
+}
+
+// Resampling
+float Mesh::trianglesAreaStd() {
+	float mean_area{0.0};
+	float std{0.0};
+
+	for (auto &t : this->triangles) 
+		mean_area += t.Area(this->vertices);
+
+	mean_area /= this->triangles.size();
+
+	for (auto &t : this->triangles)
+		std += std::pow(mean_area - t.Area(this->vertices), 2);
+
+	std /= this->triangles.size() - 1;
+
+	std::cout << "Triangles std : " << std::sqrt(std) << "\n";
+	return std::sqrt(std);
+}
+
+std::vector<std::pair<float, int>> Mesh::findMaxAreaTriangles() {
+	std::vector<std::pair<float, int>> areas_idxs;
+
+	for (int i = 0; i < this->triangles.size(); ++i)
+		areas_idxs.push_back(std::make_pair(this->triangles[i].Area(this->vertices), i));
+	
+	std::sort(areas_idxs.begin(), areas_idxs.end(), 
+			[](const std::pair<float, int> &a, const std::pair<float, int> &b) -> bool { 
+			return a.first < b.first;});
+	return areas_idxs;
+}
+
+void Mesh::resample() {
+	while (this->trianglesAreaStd() > 0.002) {
+		std::vector<std::pair<float, int>> areas_idxs = this->findMaxAreaTriangles();
+		
+		for (int i = 0; i < 10; ++i) {
+			int t_idx = areas_idxs[i].second;
+			Vertex n_v = (vertices[triangles[t_idx].v1] + 
+										vertices[triangles[t_idx].v2] + 
+										vertices[triangles[t_idx].v3]) / 3.0;
+			std::cout << "Triangle " << t_idx << "\n";
+			std::cout << "New vertex : " << n_v.x << " " << n_v.y << " " << n_v.z << "\n";
+			vertices.push_back(n_v);
+			triangles.push_back(Triangle(triangles[t_idx].v1, triangles[t_idx].v2, vertices.size()));
+			triangles.push_back(Triangle(triangles[t_idx].v2, triangles[t_idx].v3, vertices.size()));
+			triangles.push_back(Triangle(triangles[t_idx].v1, triangles[t_idx].v3, vertices.size()));
+
+			triangles.erase(triangles.begin() + t_idx);
+		}
+		std::cout << "Vertices : " << vertices.size() << "\n";
+	}
+}
+
+void Mesh::setClass(int _class) {
+	this->obj_class = _class;
+}
+
+int Mesh::getClass() {
+	return this->obj_class;
 }
