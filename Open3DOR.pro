@@ -27,6 +27,7 @@ SOURCES += src/main.cpp \
            src/Database.cpp \
 					 src/mainwindow.cpp \
            src/GlWidget.cpp \
+           src/DBWidget.cpp \
            src/Open3DOR.cpp \
            src/Segmentation.cpp \
            src/KinectWidget.cpp \
@@ -37,6 +38,7 @@ SOURCES += src/main.cpp \
 HEADERS +=	include/Database.hpp \ 
 					  include/mainwindow.h \	
 						include/GlWidget.hpp \
+						include/DBWidget.hpp \
             include/Open3DOR.hpp \
             include/Segmentation.hpp \
             include/KinectWidget.hpp \
@@ -80,5 +82,5 @@ QMAKE_CXXFLAGS_DEBUG += -O1
 QMAKE_CXXFLAGS_DEBUG += -g
 
 QMAKE_CC=clang
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wshadow -Wno-sign-compare -g #-Werror
 #QMAKE_CXX=clang++
