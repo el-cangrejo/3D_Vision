@@ -51,10 +51,6 @@ public:
   void setModelLighting(bool);
   void setNormalsLighting(bool);
 	void setMultiMesh(bool);
-	void setShowDatabase(bool);
-
-  // Database Handling Functions
-  void eraseDatabase();
 
   // Rendering Options
   bool _showVerts = true;
@@ -69,7 +65,6 @@ public:
   bool _normalLighting = false;
   bool _modelLighting = false;
 	bool _showMultiMesh = false;
-	bool _showDatabase = false; 
 
   float _BackgroundColorR = 0.13;
   float _BackgroundColorG = 0.7;
@@ -91,14 +86,9 @@ public:
 
   Mesh primary_mesh;
   Mesh filtered_mesh;
-  Mesh target_mesh;
 
   std::vector<Mesh> primary_meshes;
-  std::vector<Mesh> database_meshes;
   std::vector<Mesh> meshes;
-  std::vector<Mesh> db_descriptors;
-  std::vector<std::string> db_files;
-  std::string database;
 
 private:
   // Camera Variables
