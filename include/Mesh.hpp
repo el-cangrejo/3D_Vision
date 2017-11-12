@@ -8,10 +8,10 @@
 #include <pcl/search/search.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/fast_bilateral.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/surface/gp3.h>
-
 
 #include "MeshComponents.hpp"
 
@@ -59,9 +59,11 @@ public:
   Mesh gridFilter();
   Mesh statoutFilter();
 	void triangulate();
+	Mesh bilateralFilter(float, float);
+	Mesh multilateralFilter();
 
 	// Data members
-  Vertex centroid;
+  Vertex centroid = Vertex(0, 0, 0);
   Vertex max, min;
   std::vector<Vertex> vertices;
   std::vector<Triangle> triangles;
@@ -73,6 +75,14 @@ public:
   float grid_size;
 	float overall_distance;
 
+	float trianglesAreaStd();
+	std::vector<std::pair<float, int>> findMaxAreaTriangles();
+	void resample();
+
+	void setClass(int );
+	int getClass();
+	int getID() const;
+	void setID(int);
 private:
 	// Loading functions
 	int loadObj(const std::string file_path);
@@ -82,6 +92,7 @@ private:
 	// Preprocessing functions
   void fitToUnitSphere();
   void moveToCenter();
+	void calculateCentroid();
 
 	// Computing functions
   void computeNormals_Tri();
@@ -100,7 +111,10 @@ private:
 	pcl::PointCloud<dFPFHSignature66>::Ptr dFPFHSignatures;
 
 	// Array of Fisher vectors
-	float *fisherVectors;
+	float *fisherVectors = nullptr;
+
+	int obj_class;
+	int _id = 0;
 };
 
 #endif // MESH_HPP
