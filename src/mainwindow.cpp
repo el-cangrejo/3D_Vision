@@ -178,6 +178,16 @@ void MainWindow::connectUI() {
 	connect(ui->S_nSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSnBF(double)));
 
 	ui->GridSize->setDecimals(4);
+
+	connect(ui->ChoosePointSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setChosenVertex(int)));
+}
+
+void MainWindow::setChosenVertex(int v) {
+	ui->widget->chosen = v;
+	ui->widget->vertex_chosen = true;
+	ui->widget->updateGL();
+
+//	ui->widget->primary_meshes[0].printSignatureHistogram(v); 
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -185,6 +195,7 @@ void MainWindow::on_StatOutFIlter_clicked() {
   ui->widget->primary_meshes[0].preprocess(); 
 	ui->widget->primary_meshes[0].computeNormals();
 	ui->widget->primary_meshes[0].triangulate();
+	//ui->widget->primary_meshes[0].computeNormals();
 	//ui->widget->primary_meshes[0].bilateralFilter();
 	ui->widget->primary_meshes[0].printInfo();
 
@@ -219,6 +230,7 @@ void MainWindow::onComputeDescriptors() {
 	if (!ui->widget->filtered_mesh.empty()) {
 		std::cout << "Using filtered mesh!\n";
 		ui->widget->filtered_mesh.process();
+		ui->widget->primary_meshes[0].process();
 	} else {
 		std::cout << "Using primary mesh!\n";
 		ui->widget->primary_meshes[0].process();
@@ -292,6 +304,8 @@ void MainWindow::OpenMesh(QString fileName) {
 		if (m.load(fileName.toStdString()) != 0) {
 			m.preprocess();
 			m.computeNormals();
+			ui->NumOfPointsLabel->setText(QString::fromStdString("Num of Points : " + std::to_string(m.vertices.size())));
+			ui->ChoosePointSpinBox->setMaximum(m.vertices.size());
 			ui->widget->primary_meshes.clear();
 			ui->widget->primary_meshes.push_back(m);
 			//std::cout << "Primary meshes : " << ui->widget->primary_meshes.size() << "\n";
@@ -578,6 +592,7 @@ void MainWindow::onGenerateMesh() {
     segm.writetoMesh(ui->widget->primary_meshes[0], 1, ui->Colored_Widget->getImg(), ui->Colored_Widget->mask);
     ui->Colored_Widget->mask_bool = false;
 		ui->widget->primary_meshes[0].preprocess();
+		ui->ChoosePointSpinBox->setMaximum(ui->widget->primary_meshes[0].vertices.size());
 		ui->widget->updateGL();
   } else {
     //segm.writetoMesh(ui->widget->primary_mesh, 1);
@@ -599,6 +614,7 @@ void MainWindow::onClearAll() {
   ui->widget->primary_mesh.clear();
 	ui->widget->primary_meshes.clear();
 	ui->widget->filtered_mesh.clear();
+	ui->widget->vertex_chosen = false;
   ui->widget->updateGL();
   ui->Colored_Widget->clearImg();
   ui->Colored_Widget->updateGL();
@@ -618,10 +634,11 @@ void MainWindow::onBilateralFilter() {
 
 void MainWindow::onMultilateralFilter() {
 	if (ui->widget->filtered_mesh.empty())
-		ui->widget->filtered_mesh = ui->widget->primary_meshes[0].multilateralFilter();
+		ui->widget->filtered_mesh = ui->widget->primary_meshes[0].multilateralFilter(0.03);
 	else 
-		ui->widget->filtered_mesh = ui->widget->filtered_mesh.multilateralFilter();
+		ui->widget->filtered_mesh = ui->widget->filtered_mesh.multilateralFilter(0.03);
 	ui->widget->updateGL();
+	ui->widget->filtered_mesh.computeNormals(1);
 }
 
 void MainWindow::onZoomImgWidget() {
