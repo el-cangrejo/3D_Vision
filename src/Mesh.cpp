@@ -23,7 +23,7 @@ Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0), overall_distance(0) {}
 Mesh::~Mesh() { 
 	if (fisherVectors)
 		std::cout << "Deleting fisher vectors\n";
-		delete[] fisherVectors;
+		//delete[] fisherVectors;
 }
 
 int Mesh::getID() const {
@@ -147,8 +147,9 @@ void Mesh::preprocess () {
 void Mesh::computeNormals() {
   if (this->normals.size() == this->vertices.size()) {
     std::cout << "\e[1;33mNormals already exist!\e[0m\n";
-    return;
+    //return;
   }
+	this->normals.clear();
 
   clock_t begin, end;
   double elapsed_secs;
@@ -156,6 +157,27 @@ void Mesh::computeNormals() {
   std::cout << "\e[1;34mCalculating normals begin\n";
 
 	if (!this->triangles.empty()) {
+		//this->computeNormals_PCA();
+		this->computeNormals_Tri();
+	} else {
+		this->computeNormals_PCA();
+	}
+
+  end = clock();
+  elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+  std::cout << "Calculating normals end \nElapsed time: " << elapsed_secs
+            << "\e[0m\n";
+}
+
+void Mesh::computeNormals(int method) {
+	this->normals.clear();
+
+  clock_t begin, end;
+  double elapsed_secs;
+  begin = clock();
+  std::cout << "\e[1;34mCalculating normals begin\n";
+
+	if (method == 0) {
 		this->computeNormals_Tri();
 	} else {
 		this->computeNormals_PCA();
@@ -168,9 +190,9 @@ void Mesh::computeNormals() {
 }
 
 void Mesh::process() {
-	float radius = 0.04;
-	float inner_radius = 0.10;
-	float outer_radius = 0.12;
+	float radius = 0.05;
+	float inner_radius = 0.14;
+	float outer_radius = 0.18;
 
   this->calculatedFPFHSignatures(radius, inner_radius, outer_radius);
   this->calculateFisherVectors();
@@ -214,6 +236,7 @@ Mesh Mesh::gridFilter() {
   begin = clock();
 
   Mesh fil_mesh;
+	fil_mesh.setID(this->getID());
 
   max = Vertex(0., 0., 0.);
   min = Vertex(1., 1., 1.);
@@ -471,7 +494,7 @@ Mesh Mesh::bilateralFilter(float s_d, float s_n) {
 	return m;
 }
 
-Mesh Mesh::multilateralFilter() {
+Mesh Mesh::multilateralFilter(float r) {
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
   cloud->points.resize(vertices.size());
   for (size_t i = 0; i < cloud->points.size(); ++i) {
@@ -481,8 +504,6 @@ Mesh Mesh::multilateralFilter() {
   
 	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
 	kdtree.setInputCloud(cloud);
-
-	float r = 0.09;
 
 	Mesh m(*this);
 
@@ -1115,4 +1136,35 @@ void Mesh::setClass(int _class) {
 
 int Mesh::getClass() {
 	return this->obj_class;
+}
+
+void Mesh::printSignatureHistogram (int idx) {
+	if (dFPFHSignatures->empty()) {
+		std::cout << "No dFPFHSignatures computed!\n";
+		return;
+	}
+
+	std::cout << "\e[1;31343mHistogram of Point : " << idx << "\n";
+	std::cout << "\e[1;31;43m";
+	for (int i = 0; i < 33; ++i) {
+		std::cout << i << ": ";
+		for (int j = 0; j < dFPFHSignatures->points[idx].histogram[i]; ++j)
+			std::cout << "*";
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+	for (int i = 0; i < 33; ++i) {
+		std::cout << i << ": ";
+		for (int j = 0; j < dFPFHSignatures->points[idx].inner_histogram[i]; ++j)
+			std::cout << "*";
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+	for (int i = 0; i < 33; ++i) {
+		std::cout << i << ": ";
+		for (int j = 0; j < dFPFHSignatures->points[idx].outer_histogram[i]; ++j)
+			std::cout << "*";
+		std::cout << "\n";
+	}
+	std::cout << "\e[0m";
 }
