@@ -52,7 +52,7 @@ void preprocessDB(std::vector<Mesh> &meshes, std::vector<Mesh> &processed_meshes
 
 	for (int i = 0; i < meshes.size(); ++i) {
 		//meshes[i].setGridSize(0.08);
-		processed_meshes.push_back(meshes[i].gridFilter());
+		processed_meshes.push_back(std::move(meshes[i].gridFilter()));
 		//processed_meshes.push_back(meshes[i]);
 		processed_meshes[i].process();
 	}
@@ -84,6 +84,22 @@ void readObjectClasses(std::string path, std::vector<Mesh> &meshes) {
 		}
 	}
 	class_file.close();
+	printClassesHistogram(meshes);
 }
 
+void printClassesHistogram(std::vector<Mesh> &meshes) {
+	std::vector<int> histogram(6, 0);
 
+	for (auto &m : meshes) 
+		histogram[m.getClass() - 1]++;
+
+	for (int i = 0; i < histogram.size(); ++i)
+		std::cout << "Class " << i + 1 << " has " << histogram[i] << " objects\n";
+
+	for (auto i : histogram) {
+		std::cout << "\e[1;31;43m";
+		for (auto j : std::vector<int>(i))
+			std::cout << " ";
+		std::cout << "\e[0m\n";
+	}
+}
