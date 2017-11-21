@@ -26,8 +26,10 @@ public:
 
   // Rendering Functions
   void draw_mesh(Mesh &);
+  void draw_mesh_test(Mesh &);
   void draw_grid(Mesh &);
   void draw_axis();
+	void drawSphereOnVertex(int , float);
 
   // Color Setting Functions
   void setModelColorR(float);
@@ -90,6 +92,8 @@ public:
   std::vector<Mesh> primary_meshes;
   std::vector<Mesh> meshes;
 
+	int chosen;
+	bool vertex_chosen = false;
 private:
   // Camera Variables
   float cdist = 3.5;
