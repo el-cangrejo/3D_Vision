@@ -42,10 +42,19 @@ void GLWidget::paintGL() {
 		//glutWireSphere(1, 15, 15);
 		glTranslatef(0, 0, 0);
 		draw_mesh(primary_meshes[0]);
+		//draw_mesh_test(primary_meshes[0]);
 	}
 	if (_showGrid)
 		draw_grid(primary_meshes[0]);
 	glPopMatrix();
+
+	//*
+	if (vertex_chosen) {
+		drawSphereOnVertex(chosen, 0.05);
+		drawSphereOnVertex(chosen, 0.14);
+		drawSphereOnVertex(chosen, 0.18);
+	}
+	//*/
 
   if (_showFilteredMesh && !filtered_mesh.empty()) {
     glPushMatrix();
@@ -61,6 +70,16 @@ void GLWidget::paintGL() {
     draw_axis();
     glPopMatrix();
   }
+
+}
+
+void GLWidget::drawSphereOnVertex(int idx, float radius) {
+	glPushMatrix();
+	glTranslatef(primary_meshes[0].vertices[idx].x, 
+							 primary_meshes[0].vertices[idx].y, 
+							 primary_meshes[0].vertices[idx].z);
+	glutWireSphere(radius, 15, 15);
+	glPopMatrix();
 }
 
 void GLWidget::resizeGL(int w, int h) {
@@ -150,7 +169,6 @@ void GLWidget::keyPressEvent(QKeyEvent *qevent) {
  * */
 
 void GLWidget::draw_mesh(Mesh &mesh) {
-  glPushMatrix();
   if (_showTriangles && !mesh.triangles.empty()) {
     if (!_showSolid)
       glDisable(GL_DEPTH_TEST);
@@ -219,29 +237,22 @@ void GLWidget::draw_mesh(Mesh &mesh) {
   if (_showVerts && !mesh.vertices.empty()) {
     glColor3f(0.9, 0.1, 0.1);
     glBegin(GL_POINTS);
-    auto start = mesh.vertices.begin();
-    auto end = mesh.vertices.end();
-    auto it = mesh.vertices.begin();
-    for (; it != end; ++it) {
+    for (int i = 0; i < mesh.vertices.size(); ++i) {
+			glVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
       if (!mesh.normals.empty()) {
-        glNormal3f(mesh.normals[std::distance(start, it)].x,
-                   mesh.normals[std::distance(start, it)].y,
-                   mesh.normals[std::distance(start, it)].z);
+        glNormal3f(mesh.normals[i].x,
+                   mesh.normals[i].y,
+                   mesh.normals[i].z);
       }
       if (!mesh.colors.empty()) {
-        auto v = mesh.colors[std::distance(start, it)];
+        auto v = mesh.colors[i];
         glColor3f(v.val[0] / 255.,
                   v.val[1] / 255.,
                   v.val[2] / 255.);
       }
-      glVertex3f((*it).x, (*it).y, (*it).z);
-			//glTranslatef((*it).x, (*it).y, (*it).z);
-			//glutSolidSphere(0.06, 5, 5);
-			//glTranslatef(-(*it).x, -(*it).y, -(*it).z);
-			//std::cout << "Vertex " << (*it).x << " " << (*it).y << " " << (*it).z << "\n";
-
     }
-    glEnd();
+
+		glEnd();
   }
 
   if (_showNormals && !mesh.normals.empty()) {
@@ -261,7 +272,26 @@ void GLWidget::draw_mesh(Mesh &mesh) {
     if (!_normalLighting)
       glEnable(GL_LIGHTING);
   }
-  glPopMatrix();
+}
+
+void GLWidget::draw_mesh_test(Mesh &mesh) {
+	glColor3f(0.9, 0.1, 0.1);
+
+	for (int i = 0; i < mesh.vertices.size(); ++i) {
+	glBegin(GL_POINTS);
+		glVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+	glEnd();
+
+		if (i == chosen) {
+	//glBegin(GL_POINTS);
+			glPushMatrix();
+			glTranslatef(mesh.vertices[chosen].x, mesh.vertices[chosen].y, mesh.vertices[chosen].z);
+			glutSolidSphere(0.06, 15, 15);
+			glPopMatrix();
+	//glEnd();
+		}
+	}
+
 }
 
 void GLWidget::draw_grid(Mesh &mesh) {
