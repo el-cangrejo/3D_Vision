@@ -16,4 +16,6 @@ void writeDBDescriptors(std::vector<Mesh> &meshes);
 void readDBDescriptors(std::vector<Mesh> &meshes);
 
 void readObjectClasses(std::string path, std::vector<Mesh> &meshes);
+
+void printClassesHistogram(std::vector<Mesh> &);
 #endif //DATABASE_HPP
