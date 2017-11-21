@@ -24,11 +24,15 @@ extern "C" {
 // Struct to hold the dFPFH signature of the point as a histogram
 struct dFPFHSignature66 {
 	float histogram[66];
+	float outer_histogram[33];
+	float inner_histogram[33];
 	static int descriptorSize () { return 66; }
 	void populate (pcl::FPFHSignature33 p, pcl::FPFHSignature33 outer, pcl::FPFHSignature33 inner) {
 		for (int i = 0; i < 33; ++i) {
 			histogram[i] = p.histogram[i];
-			histogram[i + 33] = outer.histogram[i] - inner.histogram[i];
+			histogram[i + 33] = fabs(outer.histogram[i] - inner.histogram[i]);
+			outer_histogram[i] = outer.histogram[i];
+			inner_histogram[i] = inner.histogram[i];
 			}
 	}
 };
@@ -53,6 +57,7 @@ public:
 	// Processing functions
 	void preprocess();
 	void computeNormals();
+	void computeNormals(int);
 	void process();
 	float distanceTo(Mesh &other);
 
@@ -60,7 +65,7 @@ public:
   Mesh statoutFilter();
 	void triangulate();
 	Mesh bilateralFilter(float, float);
-	Mesh multilateralFilter();
+	Mesh multilateralFilter(float);
 
 	// Data members
   Vertex centroid = Vertex(0, 0, 0);
@@ -83,6 +88,8 @@ public:
 	int getClass();
 	int getID() const;
 	void setID(int);
+
+	void printSignatureHistogram (int idx);
 private:
 	// Loading functions
 	int loadObj(const std::string file_path);
