@@ -108,6 +108,8 @@ private slots:
 
 	void OpenMesh(QString);
   void OpenImage(QString, int);
+
+	void setChosenVertex(int);
 private:
   Ui::MainWindow *ui;
 
