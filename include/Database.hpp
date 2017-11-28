@@ -18,4 +18,6 @@ void readDBDescriptors(std::vector<Mesh> &meshes);
 void readObjectClasses(std::string path, std::vector<Mesh> &meshes);
 
 void printClassesHistogram(std::vector<Mesh> &);
+
+void takePartialView(std::vector<Mesh> &, float);
 #endif //DATABASE_HPP
