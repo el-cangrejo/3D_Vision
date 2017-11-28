@@ -161,6 +161,7 @@ void MainWindow::connectUI() {
   connect(ui->ComputeDescriptorsButton, SIGNAL(clicked()), this, SLOT(onComputeDescriptors()));
   connect(ui->RetrievalButton, SIGNAL(clicked()), this, SLOT(onRetrieve()));
   connect(ui->DeleteDB, SIGNAL(clicked()), this, SLOT(onDeleteDB()));
+  connect(ui->PartialViewButton, SIGNAL(clicked()), this, SLOT(onPartialView()));
   connect(ui->BilateralFilterButton, SIGNAL(clicked()), this, SLOT(onBilateralFilter()));
   connect(ui->MultilateralFilterButton, SIGNAL(clicked()), this, SLOT(onMultilateralFilter()));
   
@@ -187,7 +188,7 @@ void MainWindow::setChosenVertex(int v) {
 	ui->widget->vertex_chosen = true;
 	ui->widget->updateGL();
 
-//	ui->widget->primary_meshes[0].printSignatureHistogram(v); 
+	ui->widget->primary_meshes[0].printSignatureHistogram(v);
 }
 
 void MainWindow::on_StatOutFIlter_clicked() {
@@ -229,11 +230,11 @@ void MainWindow::onComputeDescriptors() {
 
 	if (!ui->widget->filtered_mesh.empty()) {
 		std::cout << "Using filtered mesh!\n";
-		ui->widget->filtered_mesh.process();
-		ui->widget->primary_meshes[0].process();
+		ui->widget->filtered_mesh.queryProcess();
+		ui->widget->primary_meshes[0].queryProcess();
 	} else {
 		std::cout << "Using primary mesh!\n";
-		ui->widget->primary_meshes[0].process();
+		ui->widget->primary_meshes[0].queryProcess();
 	}
 }
 
@@ -287,6 +288,10 @@ void MainWindow::onDeleteDB() {
 		ui->dbwidget->processed_database_meshes.shrink_to_fit();
 	}
 	ui->dbwidget->updateGL();
+}
+
+void MainWindow::onPartialView() {
+	takePartialView(ui->dbwidget->database_meshes, 0.33);
 }
 
 /*
@@ -407,7 +412,7 @@ void MainWindow::onActionLoadDatabase() {
   if (!directory_name.isEmpty()) {
     std::cout << "Loading for display database : " << directory_name.toStdString() << "\n";
 		loadDB(directory_name.toStdString(), ui->dbwidget->database_meshes);
-		ui->widget->updateGL();
+		ui->dbwidget->updateGL();
   }
 }
 
@@ -550,6 +555,8 @@ void MainWindow::setNormalsLighting(bool light) {
  * */
 
 void MainWindow::gridFilter() {
+  //ui->widget->filtered_mesh = ui->widget->primary_meshes[0].partialView(0.33);
+  //ui->widget->filtered_mesh.triangulate();
   ui->widget->filtered_mesh = ui->widget->primary_meshes[0].gridFilter();
 	ui->widget->updateGL();
 }
