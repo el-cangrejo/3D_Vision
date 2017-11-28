@@ -89,6 +89,7 @@ private slots:
 	void onComputeDescriptors();
 	void onRetrieve();
 	void onDeleteDB();
+	void onPartialView();
 	void onBilateralFilter();
 	void onMultilateralFilter();
 
