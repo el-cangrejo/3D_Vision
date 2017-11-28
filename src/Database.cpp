@@ -25,8 +25,8 @@ void loadDB(std::string db_path, std::vector<Mesh> &meshes) {
 		meshes.push_back(std::move(m));
   }
 
-	std::sort(meshes.begin(), meshes.end(), [] (const Mesh &a, const Mesh &b)
-			-> bool { return a.getID() < b.getID();});
+//	std::sort(meshes.begin(), meshes.end(), [] (const Mesh &a, const Mesh &b)
+//			-> bool { return a.getID() < b.getID();});
 
 //	for (auto &m : meshes)
 //		std::cout << m.getID() << "\n";
@@ -101,5 +101,14 @@ void printClassesHistogram(std::vector<Mesh> &meshes) {
 		for (auto j : std::vector<int>(i))
 			std::cout << " ";
 		std::cout << "\e[0m\n";
+	}
+}
+
+void takePartialView(std::vector<Mesh> &meshes, float percentage) {
+	Mesh partial_mesh;
+
+	for (int i = 0; i < meshes.size(); ++i) {
+		partial_mesh = meshes[i].partialView(percentage);
+		partial_mesh.exportOff(std::to_string(meshes[i].getID()));
 	}
 }
