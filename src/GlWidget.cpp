@@ -38,23 +38,19 @@ void GLWidget::paintGL() {
 		glScalef(scale_size, scale_size, scale_size);
 	}
 	if (!primary_meshes.empty()) {
-		//glTranslatef(primary_meshes[0].vertices[100].x, primary_meshes[0].vertices[100].y, primary_meshes[0].vertices[100].z);
-		//glutWireSphere(1, 15, 15);
-		glTranslatef(0, 0, 0);
 		draw_mesh(primary_meshes[0]);
 		//draw_mesh_test(primary_meshes[0]);
+		//*
+		if (vertex_chosen) {
+			drawSphereOnVertex(chosen, 0.05);
+			drawSphereOnVertex(chosen, 0.14);
+			drawSphereOnVertex(chosen, 0.22);
+		}
+		//*/
 	}
 	if (_showGrid)
 		draw_grid(primary_meshes[0]);
 	glPopMatrix();
-
-	//*
-	if (vertex_chosen) {
-		drawSphereOnVertex(chosen, 0.05);
-		drawSphereOnVertex(chosen, 0.14);
-		drawSphereOnVertex(chosen, 0.18);
-	}
-	//*/
 
   if (_showFilteredMesh && !filtered_mesh.empty()) {
     glPushMatrix();
