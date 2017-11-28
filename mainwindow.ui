@@ -151,8 +151,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>167</width>
-         <height>569</height>
+         <width>166</width>
+         <height>377</height>
         </rect>
        </property>
        <attribute name="label">
@@ -285,7 +285,7 @@
           <x>0</x>
           <y>9</y>
           <width>161</width>
-          <height>181</height>
+          <height>221</height>
          </rect>
         </property>
         <property name="focusPolicy">
@@ -329,6 +329,13 @@
            </property>
            <property name="text">
             <string>Delete DB</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="PartialViewButton">
+           <property name="text">
+            <string>Take partial view</string>
            </property>
           </widget>
          </item>
@@ -395,7 +402,7 @@
          <x>0</x>
          <y>0</y>
          <width>202</width>
-         <height>556</height>
+         <height>300</height>
         </rect>
        </property>
        <attribute name="label">
@@ -603,7 +610,7 @@
          <x>0</x>
          <y>0</y>
          <width>264</width>
-         <height>556</height>
+         <height>282</height>
         </rect>
        </property>
        <attribute name="label">
@@ -731,8 +738,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>167</width>
-         <height>569</height>
+         <width>100</width>
+         <height>30</height>
         </rect>
        </property>
        <attribute name="label">
