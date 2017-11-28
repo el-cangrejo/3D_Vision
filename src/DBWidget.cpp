@@ -30,29 +30,63 @@ void DBWidget::paintGL() {
             up_vector.x, up_vector.y, up_vector.z);
 
   float scale_size(1 / 1.5);
-
+	float grid_size = 1.;
+	/*
 	if (_showDatabase) {
 		int total_num = meshes_to_render->size();
-		int num_rows = std::ceil(total_num / 5.);
-		//std::cout << "Rows : " << num_rows << "\n";
-		for (int j = 0; j < 5; ++j) {
-			for (int i = 1; i < num_rows + 1; ++i) {
+		int num_rows = std::ceil(std::sqrt(total_num));
+		int num_cols = num_rows;
+		
+		std::cout << "Rows : " << num_rows << " Cols : " << num_cols << "\n";
+		for (int i = 0; i < num_rows; ++i) {
+			for (int j = 0; j < num_cols; ++j) {
 				glPushMatrix();
-				float trans_x = -3 + j * 1.5;
-				float trans_y = 3 - (i - 1) * 1.5;
+				float trans_x = -std::floor(num_cols / 2.)  * grid_size + i * grid_size;
+				float trans_y =  std::floor(num_rows / 2.) * grid_size - j * grid_size;
+
+				//float trans_x = -3 + j * 1.5;
+				//float trans_y = 3 - (i - 1) * 1.5;
+				
 				//std::cout << "X: " << trans_x << " Υ: " << trans_y << "\n";
 				glTranslatef(trans_x, trans_y, 0);
-				glScalef(0.6, 0.6, 0.6);
-				if ((i - 1) * 5 + j < total_num) {
-					//std::cout << "Idx : " << (i - 1) * 5 + j << "\n";
+				glScalef(0.5, 0.5, 0.5);
+				if (i * num_cols + j < total_num) {
+					std::cout << "Row : " << i << " Col : " << j << "\n";
+					std::cout << "Num : " << i * num_cols + j << "\n";
 					//std::cout << "Distance : " << meshes_to_render[(i - 1) * 5 + j].overall_distance << "\n";
 					//glutWireSphere(1.0, 20, 20);
-					draw_mesh((*meshes_to_render)[(i - 1) * 5 + j]);
+					draw_mesh((*meshes_to_render)[i * num_cols + j]);
 				}
 				glPopMatrix();
 			}
+			std::cout << "\n";
 		}
 		//std::cout << "\n";
+	}
+	//*/
+
+	if (_showDatabase) {
+			int total_num = meshes_to_render->size();
+			int num_rows = std::ceil(total_num / 5.);
+			//std::cout << "Rows : " << num_rows << "\n";
+			for (int j = 0; j < 5; ++j) {
+				for (int i = 1; i < num_rows + 1; ++i) {
+					glPushMatrix();
+					float trans_x = -3 + j * 1.5;
+					float trans_y = 3 - (i - 1) * 1.5;
+					//std::cout << "X: " << trans_x << " Υ: " << trans_y << "\n";
+					glTranslatef(trans_x, trans_y, 0);
+					glScalef(0.6, 0.6, 0.6);
+					if ((i - 1) * 5 + j < total_num) {
+						//std::cout << "Idx : " << (i - 1) * 5 + j << "\n";
+						//std::cout << "Distance : " << meshes_to_render[(i - 1) * 5 + j].overall_distance << "\n";
+						//glutWireSphere(1.0, 20, 20);
+						draw_mesh((*meshes_to_render)[(i - 1) * 5 + j]);
+					}
+					glPopMatrix();
+				}
+			}
+			//std::cout << "\n";
 	}
 
   if (_showAxis) {
