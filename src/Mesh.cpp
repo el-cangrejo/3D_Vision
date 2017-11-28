@@ -21,9 +21,11 @@ float l1(const dFPFHSignature66 first, const dFPFHSignature66 second) {
 Mesh::Mesh(void) : centroid(0.0, 0.0, 0.0), overall_distance(0) {}
 
 Mesh::~Mesh() { 
-	if (fisherVectors)
-		std::cout << "Deleting fisher vectors\n";
+	//if (fisherVectors)
+		//std::cout << "Deleting fisher vectors\n";
 		//delete[] fisherVectors;
+	//if (_gmm) 	
+		//vl_gmm_delete(_gmm);
 }
 
 int Mesh::getID() const {
@@ -67,6 +69,22 @@ int Mesh::load(const std::string file_path) {
   return success;
 }
 
+void Mesh::exportOff(std::string file_name) {
+	std::ofstream off_file;
+	
+	off_file.open(file_name + ".off");
+
+	off_file << "OFF\n";
+	off_file << vertices.size() << " " << triangles.size() << "\n";
+	for (auto v : vertices)
+		off_file << v.x << " " << v.y << " " << v.z << "\n";
+
+	for (auto t : triangles)
+		off_file << 3 << " " << t.v1 << " " << t.v2 << " " << t.v3 << "\n";
+
+	off_file.close();
+}
+
 bool Mesh::empty() { return vertices.empty(); }
 
 void Mesh::clear() {
@@ -105,10 +123,6 @@ void Mesh::passToPointCloud(
     std::cout << "Mesh with no vertices!\n";
     exit(0);
   }
-  if (normals.empty()) {
-    std::cout << "Mesh with no normals!\n";
-    exit(0);
-  }
 
   cloud->points.resize(vertices.size());
   for (size_t i = 0; i < cloud->points.size(); ++i) {
@@ -116,6 +130,10 @@ void Mesh::passToPointCloud(
         pcl::PointXYZ(vertices[i].x, vertices[i].y, vertices[i].z);
   }
 
+  if (normals.empty()) {
+    std::cout << "Mesh with no normals!\n";
+		return;
+  }
   normal_cloud->points.resize(normals.size());
   for (size_t i = 0; i < normal_cloud->points.size(); ++i) {
     normal_cloud->points[i] =
@@ -137,6 +155,7 @@ void Mesh::preprocess () {
   begin = clock();
 	this->moveToCenter ();
 	this->fitToUnitSphere ();
+	this->calculateMeanPointDistance();
   end = clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	std::cout << "Preprocessing took : " << elapsed_secs << "\n";
@@ -192,21 +211,33 @@ void Mesh::computeNormals(int method) {
 void Mesh::process() {
 	float radius = 0.05;
 	float inner_radius = 0.14;
-	float outer_radius = 0.18;
+	float outer_radius = 0.22;
 
   this->calculatedFPFHSignatures(radius, inner_radius, outer_radius);
   this->calculateFisherVectors();
 }
 
+void Mesh::queryProcess() {
+	float radius = 0.05;
+	float inner_radius = 0.14;
+	float outer_radius = 0.22;
+
+  this->calculatedFPFHSignatures(radius, inner_radius, outer_radius);
+}
+
 float Mesh::distanceTo(Mesh &other) {
   float globalDistance = 0.0;
   float localDistance = 0.0;
+	
+	std::cout << "Encode partial 3D query according to GMM visual codebook\n";
+	calculateFisherVectors(other._gmm);
 
   clock_t begin, end;
   double elapsed_secs, total_secs(0);
 
   begin = clock();
   localDistance = this->localDistanceToImproved(other);
+  //localDistance = this->localDistanceTo(other);
 	end =  clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 	std::cout << "Time for local distance: " << elapsed_secs << "\n";
@@ -221,6 +252,7 @@ float Mesh::distanceTo(Mesh &other) {
 
 	std::cout << "Total time: " << total_secs << "\n";
   float overallDistance = 0.4 * localDistance + globalDistance;
+  //float overallDistance = localDistance;
 
 	other.overall_distance = overallDistance;
   std::cout << "Overall distance :" << other.overall_distance << "\n";
@@ -536,6 +568,51 @@ Mesh Mesh::multilateralFilter(float r) {
 	return m;
 }
 
+Mesh Mesh::partialView(float percentage) {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>());
+
+  this->passToPointCloud(cloud, normal);
+
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  kdtree.setInputCloud (cloud);
+
+  int K = percentage * cloud->points.size();
+
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+	
+	Mesh m;
+	
+//	int random_number = std::experimental::randint(0, cloud->points.size() - 1);
+	int random_number = 10;
+
+	if ( kdtree.nearestKSearch (cloud->points[random_number], K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 ) {
+		std::cout << "Found " << pointIdxNKNSearch.size() << " points\n";
+		for (size_t j = 0; j < pointIdxNKNSearch.size (); ++j) {
+			m.vertices.push_back(vertices[pointIdxNKNSearch[j]]);
+			m.normals.push_back(normals[pointIdxNKNSearch[j]]);
+		}
+
+		for (size_t i = 0; i < triangles.size (); ++i) {
+			auto start = pointIdxNKNSearch.begin();
+			auto end = pointIdxNKNSearch.end();
+			auto v_1 = std::find(start, end, triangles[i].v1);
+			auto v_2 = std::find(start, end, triangles[i].v2);
+			auto v_3 = std::find(start, end, triangles[i].v3);
+
+			if (v_1 != end && v_2 != end && v_3 != end) {
+				m.triangles.push_back(Triangle(std::distance(start, v_1),
+																			 std::distance(start, v_2),
+																			 std::distance(start, v_3)));
+			}
+		}
+		
+	}
+	m.preprocess();
+	return m;
+}
+
 /**
  * Private
  */
@@ -734,6 +811,36 @@ void Mesh::calculateCentroid() {
 }
 
 // Computing
+void Mesh::calculateMeanPointDistance() {
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::Normal>::Ptr normal(new pcl::PointCloud<pcl::Normal>());
+
+  this->passToPointCloud(cloud, normal);
+
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  kdtree.setInputCloud (cloud);
+
+  int K = 10;
+
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+
+	float mean_point_distance = 0.0;
+
+	for (size_t i = 0; i < cloud->points.size(); ++i) {
+		float sum = 0;
+		if ( kdtree.nearestKSearch (cloud->points[i], K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 ) {
+			for (size_t j = 0; j < pointIdxNKNSearch.size (); ++j)
+				sum += pointNKNSquaredDistance[j];
+			sum /= pointIdxNKNSearch.size();
+		}
+		mean_point_distance += sum;
+	}
+	mean_point_distance /= cloud->points.size();
+
+	std::cout << "Mean point distance : " << mean_point_distance << "\n";
+}
+
 void Mesh::computeNormals_Tri() {
   std::vector<Vertex> norms(vertices.size());
   for (auto &t : triangles) {
@@ -930,6 +1037,8 @@ void Mesh::calculatedFPFHSignatures(float radius, float inner_radius,
   }
   std::cout << "Calculated dFPFHSignature : "
             << this->dFPFHSignatures->points.size() << "\n";
+	std::cout << " with radius:\n r = " << radius << "\n r_inner = " 
+						<< inner_radius << "\n r_outer = " << outer_radius << "\n";
 }
 
 void Mesh::calculateFisherVectors() {
@@ -937,12 +1046,12 @@ void Mesh::calculateFisherVectors() {
   vl_size numClusters = 10;
   vl_size numData = dFPFHSignatures->points.size();
 
-  VlGMM *gmm = vl_gmm_new(VL_TYPE_FLOAT, dataDim, numClusters);
+  _gmm = vl_gmm_new(VL_TYPE_FLOAT, dataDim, numClusters);
   // float * data = vl_malloc(sizeof(float) * numData * dataDim);
   float *data = new float[numData * dataDim];
   this->fisherVectors = new float[2 * dataDim * numClusters];
 
-  std::cout << "Data size: " << sizeof(float) * numData * dataDim << "\n";
+  std::cout << "Calculating fisher vectors by estimating a GMM\n";
 
   for (vl_size dataIdx = 0; dataIdx < numData; ++dataIdx) {
     for (vl_size d = 0; d < dataDim; ++d) {
@@ -963,29 +1072,53 @@ void Mesh::calculateFisherVectors() {
   vl_kmeans_set_num_trees(kmeans, ntrees);
   vl_kmeans_set_algorithm(kmeans, VlKMeansLloyd);
   vl_kmeans_set_initialization(kmeans, VlKMeansRandomSelection);
-  vl_gmm_set_initialization(gmm, VlGMMKMeans);
-  vl_gmm_set_kmeans_init_object(gmm, kmeans);
+  vl_gmm_set_initialization(_gmm, VlGMMKMeans);
+  vl_gmm_set_kmeans_init_object(_gmm, kmeans);
 
   // GMM set parameters"
   vl_size maxiter = 5;
   vl_size maxrep = 1;
 
-  vl_gmm_set_max_num_iterations(gmm, maxiter);
-  vl_gmm_set_num_repetitions(gmm, maxrep);
-  vl_gmm_set_verbosity(gmm, 0);
+  vl_gmm_set_max_num_iterations(_gmm, maxiter);
+  vl_gmm_set_num_repetitions(_gmm, maxrep);
+  vl_gmm_set_verbosity(_gmm, 0);
 
-  vl_gmm_cluster(gmm, data, numData);
+  vl_gmm_cluster(_gmm, data, numData);
+
+  vl_fisher_encode(fisherVectors, VL_TYPE_FLOAT, vl_gmm_get_means(_gmm), dataDim,
+                   numClusters, vl_gmm_get_covariances(_gmm),
+                   vl_gmm_get_priors(_gmm), data, numData,
+                   VL_FISHER_FLAG_IMPROVED);
+	
+//	postProcessFisherVectors();
+
+  delete[] data;
+  vl_kmeans_delete(kmeans);
+}
+
+void Mesh::calculateFisherVectors(VlGMM *gmm) {
+  vl_size dataDim = 66;
+  vl_size numClusters = 10;
+  vl_size numData = dFPFHSignatures->points.size();
+
+  float *data = new float[numData * dataDim];
+  this->fisherVectors = new float[2 * dataDim * numClusters];
+
+  std::cout << "Calculating fisher vectors by using an estimated GMM from the target object\n";
+
+  for (vl_size dataIdx = 0; dataIdx < numData; ++dataIdx) {
+    for (vl_size d = 0; d < dataDim; ++d) {
+      data[dataIdx * dataDim + d] =
+          (float)dFPFHSignatures->points[dataIdx].histogram[d];
+    }
+  }
 
   vl_fisher_encode(fisherVectors, VL_TYPE_FLOAT, vl_gmm_get_means(gmm), dataDim,
                    numClusters, vl_gmm_get_covariances(gmm),
                    vl_gmm_get_priors(gmm), data, numData,
                    VL_FISHER_FLAG_IMPROVED);
 	
-//	postProcessFisherVectors();
-
   delete[] data;
-  vl_gmm_delete(gmm);
-  vl_kmeans_delete(kmeans);
 }
 
 void Mesh::postProcessFisherVectors() {
@@ -1019,19 +1152,28 @@ float Mesh::localDistanceTo(const Mesh &other) {
   }
 
   float localDistance = 0.0;
-
+	std::set<int> min_dist_points_idx;
+	Mesh m;
   for (int i = 0; i < this->dFPFHSignatures->points.size(); ++i) {
     float minDist = 10000.0;
+		int idx = 0;
     for (int j = 0; j < other.dFPFHSignatures->points.size(); ++j) {
       float dist = l1(this->dFPFHSignatures->points[i],
                       other.dFPFHSignatures->points[j]);
       if (minDist > dist) {
         minDist = dist;
+				idx = j;
       }
     }
+		min_dist_points_idx.insert(idx);
     localDistance += minDist;
   }
 
+	for (auto i : min_dist_points_idx)
+		m.vertices.push_back(other.vertices[i]);
+
+	//localDistance /= min_dist_points_idx.size();
+	m.exportOff("Min_dist" + std::to_string(other.getID()));
   localDistance = localDistance / (float)this->dFPFHSignatures->points.size();
   std::cout << "Local similarity: " << localDistance << "\n";
   return localDistance;
@@ -1139,7 +1281,7 @@ int Mesh::getClass() {
 }
 
 void Mesh::printSignatureHistogram (int idx) {
-	if (dFPFHSignatures->empty()) {
+	if (!dFPFHSignatures) {
 		std::cout << "No dFPFHSignatures computed!\n";
 		return;
 	}
@@ -1150,6 +1292,7 @@ void Mesh::printSignatureHistogram (int idx) {
 		std::cout << i << ": ";
 		for (int j = 0; j < dFPFHSignatures->points[idx].histogram[i]; ++j)
 			std::cout << "*";
+		//std::cout << "   " << dFPFHSignatures->points[idx].histogram[i] << "\n";
 		std::cout << "\n";
 	}
 	std::cout << "\n";
@@ -1157,6 +1300,7 @@ void Mesh::printSignatureHistogram (int idx) {
 		std::cout << i << ": ";
 		for (int j = 0; j < dFPFHSignatures->points[idx].inner_histogram[i]; ++j)
 			std::cout << "*";
+		//std::cout << "   " << dFPFHSignatures->points[idx].inner_histogram[i] << "\n";
 		std::cout << "\n";
 	}
 	std::cout << "\n";
@@ -1164,6 +1308,7 @@ void Mesh::printSignatureHistogram (int idx) {
 		std::cout << i << ": ";
 		for (int j = 0; j < dFPFHSignatures->points[idx].outer_histogram[i]; ++j)
 			std::cout << "*";
+		//std::cout << "   " << dFPFHSignatures->points[idx].outer_histogram[i] << "\n";
 		std::cout << "\n";
 	}
 	std::cout << "\e[0m";

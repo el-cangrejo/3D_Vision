@@ -29,10 +29,10 @@ struct dFPFHSignature66 {
 	static int descriptorSize () { return 66; }
 	void populate (pcl::FPFHSignature33 p, pcl::FPFHSignature33 outer, pcl::FPFHSignature33 inner) {
 		for (int i = 0; i < 33; ++i) {
-			histogram[i] = p.histogram[i];
-			histogram[i + 33] = fabs(outer.histogram[i] - inner.histogram[i]);
-			outer_histogram[i] = outer.histogram[i];
-			inner_histogram[i] = inner.histogram[i];
+			histogram[i] = std::round(p.histogram[i]);
+			histogram[i + 33] = std::round(fabs(outer.histogram[i] - inner.histogram[i]));
+			outer_histogram[i] = std::round(outer.histogram[i]);
+			inner_histogram[i] = std::round(inner.histogram[i]);
 			}
 	}
 };
@@ -47,6 +47,7 @@ public:
 	// Helper functions
   Mesh();
 	int load (const std::string file_path);
+	void exportOff(std::string);
   bool empty();
   void clear();
   void printInfo();
@@ -59,6 +60,7 @@ public:
 	void computeNormals();
 	void computeNormals(int);
 	void process();
+	void queryProcess();
 	float distanceTo(Mesh &other);
 
   Mesh gridFilter();
@@ -66,6 +68,7 @@ public:
 	void triangulate();
 	Mesh bilateralFilter(float, float);
 	Mesh multilateralFilter(float);
+	Mesh partialView(float);
 
 	// Data members
   Vertex centroid = Vertex(0, 0, 0);
@@ -79,6 +82,8 @@ public:
   std::vector<cv::Vec3b> colors;
   float grid_size;
 	float overall_distance;
+
+	VlGMM *_gmm = nullptr;
 
 	float trianglesAreaStd();
 	std::vector<std::pair<float, int>> findMaxAreaTriangles();
@@ -102,11 +107,13 @@ private:
 	void calculateCentroid();
 
 	// Computing functions
+	void calculateMeanPointDistance();
   void computeNormals_Tri();
   void computeNormals_PCA();
   void computeFPFH();
 	void calculatedFPFHSignatures(float radius, float inner_radius, float outer_radius);
 	void calculateFisherVectors();
+	void calculateFisherVectors(VlGMM *);
 	void postProcessFisherVectors();
 
 	// Distance functions
