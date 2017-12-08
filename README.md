@@ -1,4 +1,6 @@
 ![alt tag](https://github.com/el-cangrejo/3D_Vision/blob/master/data/Open3DOR_004.png)
+
+![alt tag](https://github.com/el-cangrejo/3D_Vision/blob/master/data/demo0.gif)
 # 3D visualization GUI
 
 Loads triangulated .obj meshes and displays them using OpenGl and Qt
