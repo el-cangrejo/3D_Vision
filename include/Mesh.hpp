@@ -80,7 +80,7 @@ public:
   std::vector<std::vector<float>> fpfhist;
   std::vector<int> voxel_grid;
   std::vector<cv::Vec3b> colors;
-  float grid_size;
+  float grid_size = 0.05;
 	float overall_distance;
 
 	VlGMM *_gmm = nullptr;
@@ -90,7 +90,7 @@ public:
 	void resample();
 
 	void setClass(int );
-	int getClass();
+	int getClass() const;
 	int getID() const;
 	void setID(int);
 
