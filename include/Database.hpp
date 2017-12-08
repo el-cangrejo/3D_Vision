@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <functional>
 #include <boost/filesystem.hpp>
 
 #include "Mesh.hpp"
@@ -17,7 +19,13 @@ void readDBDescriptors(std::vector<Mesh> &meshes);
 
 void readObjectClasses(std::string path, std::vector<Mesh> &meshes);
 
-void printClassesHistogram(std::vector<Mesh> &);
+std::vector<int> printClassesHistogram(std::vector<Mesh> &);
 
 void takePartialView(std::vector<Mesh> &, float);
+
+std::vector<float> precisionRecall(Mesh &, std::vector<Mesh> &, int );
+
+void precisionRecall(std::vector<Mesh> &, std::vector<Mesh> &);
+
+void retrieve(Mesh &, std::vector<Mesh> &);
 #endif //DATABASE_HPP
