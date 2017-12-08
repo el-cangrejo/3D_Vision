@@ -479,6 +479,15 @@ void DBWidget::setShowFiltered(bool show) {
   updateGL();
 }
 
+void DBWidget::setShowQuery(bool show) {
+	if (show) {
+		meshes_to_render = &query_database_meshes;
+	} else {
+		meshes_to_render = &database_meshes;
+	}
+  updateGL();
+}
+
 void DBWidget::setModelLighting(bool light) {
   _modelLighting = light;
   updateGL();
