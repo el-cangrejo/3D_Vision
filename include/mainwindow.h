@@ -35,13 +35,17 @@ private slots:
 
   void onActionQuit();
   void onActionOpenMesh();
+	void onActionExportOFF();
   void onActionOpenImage8U();
   void onActionOpenImage16U();
   void onActionOpenKinect();
 
   void onActionLoadDatabase();
+  void onActionLoadQueryDatabase();
   void onActionPreprocessDatabase();
   void onActionLoadClasses();
+  void onActionLoadQueryClasses();
+  void onActionPRCurves();
 
 	void onActionTakeSnapshot();
 
@@ -79,6 +83,7 @@ private slots:
   void setShowDBVertices(bool);
   void setShowDBTriangles(bool);
   void setShowDBFiltered(bool);
+  void setShowDBQuery(bool);
 
   void onSegmentImg();
   void onGenerateMesh();
@@ -92,6 +97,7 @@ private slots:
 	void onPartialView();
 	void onBilateralFilter();
 	void onMultilateralFilter();
+	void onInvertNormals();
 
   /*
    * Segmentation Parameters
