@@ -144,15 +144,15 @@
        <enum>Qt::ClickFocus</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Model">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>166</width>
-         <height>377</height>
+         <width>167</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -224,6 +224,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="InvertNormalsButton">
+            <property name="text">
+             <string>Invert Normals</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -272,8 +279,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>167</width>
-         <height>569</height>
+         <width>98</width>
+         <height>28</height>
         </rect>
        </property>
        <attribute name="label">
@@ -285,7 +292,7 @@
           <x>0</x>
           <y>9</y>
           <width>161</width>
-          <height>221</height>
+          <height>301</height>
          </rect>
         </property>
         <property name="focusPolicy">
@@ -323,6 +330,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="ShowDBQuery">
+           <property name="text">
+            <string>Query</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="DeleteDB">
            <property name="focusPolicy">
             <enum>Qt::ClickFocus</enum>
@@ -345,9 +359,9 @@
         <property name="geometry">
          <rect>
           <x>2</x>
-          <y>200</y>
+          <y>320</y>
           <width>163</width>
-          <height>181</height>
+          <height>61</height>
          </rect>
         </property>
         <property name="focusPolicy">
@@ -738,8 +752,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>100</width>
-         <height>30</height>
+         <width>98</width>
+         <height>28</height>
         </rect>
        </property>
        <attribute name="label">
@@ -919,14 +933,18 @@
     <addaction name="action_OpenImage16U"/>
     <addaction name="action_Quit"/>
     <addaction name="action_TakeSnapshot"/>
+    <addaction name="action_ExportOFF"/>
    </widget>
    <widget class="QMenu" name="menu_Database">
     <property name="title">
      <string>&amp;Database</string>
     </property>
     <addaction name="action_Load_Database"/>
-    <addaction name="action_Preprocess_Database"/>
+    <addaction name="action_Load_Query_Database"/>
     <addaction name="action_Load_Classes"/>
+    <addaction name="action_Load_Query_Classes"/>
+    <addaction name="action_Preprocess_Database"/>
+    <addaction name="action_PR_Curves"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Database"/>
@@ -946,7 +964,7 @@
   </action>
   <action name="action_Load_Database">
    <property name="text">
-    <string>&amp;Load Database</string>
+    <string>&amp;Load Target Database</string>
    </property>
   </action>
   <action name="action_Preprocess_Database">
@@ -981,7 +999,27 @@
   </action>
   <action name="action_Load_Classes">
    <property name="text">
-    <string>Load Classes</string>
+    <string>Load Target Classes</string>
+   </property>
+  </action>
+  <action name="action_Load_Query_Database">
+   <property name="text">
+    <string>Load Query Database</string>
+   </property>
+  </action>
+  <action name="action_PR_Curves">
+   <property name="text">
+    <string>Precision-Recall Curves</string>
+   </property>
+  </action>
+  <action name="action_Load_Query_Classes">
+   <property name="text">
+    <string>Load Query Classes</string>
+   </property>
+  </action>
+  <action name="action_ExportOFF">
+   <property name="text">
+    <string>Export (.off)</string>
    </property>
   </action>
  </widget>
