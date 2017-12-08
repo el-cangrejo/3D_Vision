@@ -47,6 +47,7 @@ public:
   void setShowSolid(bool);
   void setShowAxis(bool);
   void setShowFiltered(bool);
+  void setShowQuery(bool);
   void setModelLighting(bool);
   void setNormalsLighting(bool);
 	void setShowDatabase(bool);
@@ -85,6 +86,8 @@ public:
 
   std::vector<Mesh> database_meshes;
   std::vector<Mesh> processed_database_meshes;
+  std::vector<Mesh> query_database_meshes;
+  std::vector<Mesh> processed_query_database_meshes;
 	std::vector<Mesh> *meshes_to_render = &database_meshes;
 private:
   // Camera Variables
