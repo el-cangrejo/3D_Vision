@@ -229,7 +229,7 @@ float Mesh::distanceTo(Mesh &other) {
   float globalDistance = 0.0;
   float localDistance = 0.0;
 	
-	std::cout << "Encode partial 3D query according to GMM visual codebook\n";
+	//std::cout << "Encode partial 3D query according to GMM visual codebook\n";
 	calculateFisherVectors(other._gmm);
 
   clock_t begin, end;
@@ -240,22 +240,22 @@ float Mesh::distanceTo(Mesh &other) {
   //localDistance = this->localDistanceTo(other);
 	end =  clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	std::cout << "Time for local distance: " << elapsed_secs << "\n";
+	//std::cout << "Time for local distance: " << elapsed_secs << "\n";
 	total_secs += elapsed_secs;
 
   begin = clock();
   globalDistance = this->globalDistanceTo(other);
 	end =  clock();
   elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	std::cout << "Time for global distance: " << elapsed_secs << "\n";
+	//std::cout << "Time for global distance: " << elapsed_secs << "\n";
 	total_secs += elapsed_secs;
 
-	std::cout << "Total time: " << total_secs << "\n";
+	//std::cout << "Total time: " << total_secs << "\n";
   float overallDistance = 0.4 * localDistance + globalDistance;
   //float overallDistance = localDistance;
 
 	other.overall_distance = overallDistance;
-  std::cout << "Overall distance :" << other.overall_distance << "\n";
+  //std::cout << "Overall distance :" << other.overall_distance << "\n";
 
   return overallDistance;
 }
@@ -1104,7 +1104,7 @@ void Mesh::calculateFisherVectors(VlGMM *gmm) {
   float *data = new float[numData * dataDim];
   this->fisherVectors = new float[2 * dataDim * numClusters];
 
-  std::cout << "Calculating fisher vectors by using an estimated GMM from the target object\n";
+  //std::cout << "Calculating fisher vectors by using an estimated GMM from the target object\n";
 
   for (vl_size dataIdx = 0; dataIdx < numData; ++dataIdx) {
     for (vl_size d = 0; d < dataDim; ++d) {
@@ -1203,7 +1203,7 @@ float Mesh::localDistanceToImproved(const Mesh &other) {
   }
 
   localDistance = localDistance / (float)this->dFPFHSignatures->points.size();
-  std::cout << "Local similarity: " << localDistance << "\n";
+  //std::cout << "Local similarity: " << localDistance << "\n";
   return localDistance;
 }
 
@@ -1215,7 +1215,7 @@ float Mesh::globalDistanceTo(const Mesh &other) {
   for (int i = 0; i < numClusters * dataDim * 2; ++i) {
     globalDistance += fabs(this->fisherVectors[i] - other.fisherVectors[i]);
   }
-  std::cout << "Global similarity: " << globalDistance << "\n";
+  //std::cout << "Global similarity: " << globalDistance << "\n";
   return globalDistance;
 }
 
@@ -1276,7 +1276,7 @@ void Mesh::setClass(int _class) {
 	this->obj_class = _class;
 }
 
-int Mesh::getClass() {
+int Mesh::getClass() const {
 	return this->obj_class;
 }
 
