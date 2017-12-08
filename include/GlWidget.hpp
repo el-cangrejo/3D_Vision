@@ -30,6 +30,7 @@ public:
   void draw_grid(Mesh &);
   void draw_axis();
 	void drawSphereOnVertex(int , float);
+	void drawTorus(float R, float r);
 
   // Color Setting Functions
   void setModelColorR(float);
