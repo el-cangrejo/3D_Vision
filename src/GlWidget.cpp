@@ -31,7 +31,6 @@ void GLWidget::paintGL() {
 
   float scale_size(1 / 1.5);
 
-
 	glPushMatrix();
 	if (_showFilteredMesh && !filtered_mesh.empty()) {
 		glTranslatef(0.6, 0, 0);
@@ -285,6 +284,24 @@ void GLWidget::draw_mesh_test(Mesh &mesh) {
 			glutSolidSphere(0.06, 15, 15);
 			glPopMatrix();
 	//glEnd();
+		}
+	}
+
+}
+
+void GLWidget::drawTorus(float R, float r) {
+	glColor3f(0.9, 0.1, 0.1);
+	float step = 0.1;
+
+	for (float v = 0; v < 2 * PI; v += step) {
+		//glColor3f(v * 0.1, 0.1, 0.1);
+		for (float u = 0; u < 2 * PI; u += step) {
+			float x = (R + r * cos(v)) * cos(u);
+			float y = (R + r * cos(v)) * sin(u);
+			float z = r * sin(v);
+			glBegin(GL_POINTS);
+			glVertex3f(x, y, z);
+			glEnd();
 		}
 	}
 
